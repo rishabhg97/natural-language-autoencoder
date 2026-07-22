@@ -1,0 +1,26 @@
+schema_version: nano_ar_hpo_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-hero-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  batch_size: 4
+  controls:
+    - teacher
+    - teacher_shuffled
+    - blank
+    - generic
+    - mean
+    - source_context
+    - source_raw
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/ar_hpo_queue/r33_independent_critic_trials.jsonl
+items:
+  - name: r33-component-full-independent-critic-seed314159
+    config: configs/nano_ar/hpo/r33_component_full_independent_critic_seed314159.yaml
+    run_id: nano-ar-r33-component-full-independent-seed314159-lr5e5-warmup25-gb192-mb96
+    status: pending
+    notes: >-
+      Independent reward-hacking audit critic. It preserves the selected
+      component split (dataset seed 42) while changing only the training row
+      shuffle seed to 314159. The checkpoint is model-only and is not a hero
+      resume artifact.

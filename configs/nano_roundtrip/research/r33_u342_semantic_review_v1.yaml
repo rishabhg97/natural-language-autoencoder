@@ -1,0 +1,25 @@
+schema_version: nano_semantic_meaning_review.v1
+
+paths:
+  sources:
+    sft:
+      generated_jsonl: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/eval384_matched_v122/sft_generated.jsonl
+      transforms:
+        light_paraphrase: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/transforms/sft/light_paraphrase.jsonl
+        aggressive_paraphrase: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/transforms/sft/aggressive_paraphrase.jsonl
+        french_roundtrip: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/transforms/sft/french_roundtrip.jsonl
+        two_sentence_summary: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/transforms/sft/two_sentence_summary.jsonl
+    rl:
+      generated_jsonl: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/eval384_matched_v122/rl_generated.jsonl
+      transforms:
+        light_paraphrase: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/transforms/rl/light_paraphrase.jsonl
+        aggressive_paraphrase: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/transforms/rl/aggressive_paraphrase.jsonl
+        french_roundtrip: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/transforms/rl/french_roundtrip.jsonl
+        two_sentence_summary: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/transforms/rl/two_sentence_summary.jsonl
+  output_dir: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/manual_semantic_review
+
+protocol:
+  sample_size: 50
+  length_bins: 3
+  reviewer_ids: [reviewer_1, reviewer_2]
+  seed: 20260722

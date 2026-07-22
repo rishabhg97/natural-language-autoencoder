@@ -1,0 +1,13 @@
+diff --git a/miles/utils/arguments.py b/miles/utils/arguments.py
+--- a/miles/utils/arguments.py
++++ b/miles/utils/arguments.py
+@@ -2028,6 +2028,8 @@ def validate_args(args):
+ 
+     if args.qkv_format == "bshd":
+-        assert args.train_backend == "megatron", "bshd format is only supported for megatron backend."
++        assert args.train_backend in (
++            "megatron", "fsdp"
++        ), "bshd format is only supported for megatron and FSDP backends."
+         assert (
+             args.use_dynamic_batch_size is False
+         ), "Dynamic batch size is not supported for bshd format. Please specify --micro-batch-size instead."

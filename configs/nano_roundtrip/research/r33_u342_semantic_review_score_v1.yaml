@@ -1,0 +1,17 @@
+schema_version: nano_semantic_meaning_review_score.v1
+
+paths:
+  answer_key: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/manual_semantic_review/answer_key.json
+  reviews:
+    reviewer_1: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/manual_semantic_review/review_packet_reviewer_1.csv
+    reviewer_2: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/manual_semantic_review/review_packet_reviewer_2.csv
+  output_json: artifacts/runai_eval/r33_u342_research_abc_v1_20260722/research_abc_v1/manual_semantic_review/review_score_report.json
+
+protocol:
+  minimum_reviewers: 2
+  gated_transforms: [light_paraphrase, aggressive_paraphrase, french_roundtrip]
+  thresholds:
+    minimum_meaning_preservation: 4.0
+    maximum_contradiction_fraction: 0.05
+    maximum_unsupported_addition_severity: 0.5
+    minimum_fluent_fraction: 0.90

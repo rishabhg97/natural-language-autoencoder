@@ -1,0 +1,26 @@
+schema_version: nano_ar_hpo_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-hero-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  batch_size: 4
+  controls:
+    - teacher
+    - teacher_shuffled
+    - blank
+    - generic
+    - mean
+    - source_context
+    - source_raw
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/ar_hpo_queue/r33_independent_critic_trials.jsonl
+items:
+  - name: r33-component-full-independent-critic-seed314159-4gpu-mb48-expertscan
+    config: configs/nano_ar/hpo/r33_component_full_independent_critic_seed314159_4gpu_mb48_expertscan.yaml
+    run_id: nano-ar-r33-component-full-independent-seed314159-lr5e5-warmup25-gb192-mb48-4gpu-expertscan
+    status: pending
+    notes: >-
+      Controlled retry after two exact failures at rollout 392. The second run
+      disabled router telemetry and surfaced the fault in segmented_moe's GPU
+      sort/bincount path. This preserves every scientific and batch parameter,
+      but selects the numerically equivalent stock-style per-expert scan.

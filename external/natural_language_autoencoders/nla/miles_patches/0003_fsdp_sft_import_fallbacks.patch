@@ -1,0 +1,298 @@
+diff --git a/miles/backends/fsdp_utils/actor.py b/miles/backends/fsdp_utils/actor.py
+--- a/miles/backends/fsdp_utils/actor.py
++++ b/miles/backends/fsdp_utils/actor.py
+@@ -6,6 +6,11 @@ from argparse import Namespace
+ import ray
+ import torch
+ import torch.distributed as dist
+-from ring_flash_attn import update_ring_flash_attn_params
++try:
++    from ring_flash_attn import update_ring_flash_attn_params
++except Exception:
++    def update_ring_flash_attn_params(*_args, **_kwargs):
++        return None
+ from tqdm import tqdm
+ from transformers import AutoConfig
++from nla.audit_runtime import keep_router_fp32
+@@ -109,9 +115,11 @@ class FSDPTrainRayActor:
+             model = self.get_model_cls().from_pretrained(
+                 args.hf_checkpoint,
+                 trust_remote_code=True,
+                 attn_implementation=self.args.attn_implementation,
+                 torch_dtype=torch.bfloat16,
+             )
++            model.to(dtype=torch.bfloat16)
++            keep_router_fp32(model)
+             # === end NLA patch ===
+ 
+         model.train()
+@@ -128,6 +133,7 @@ class FSDPTrainRayActor:
+                 betas=(args.adam_beta1, args.adam_beta2),
+                 eps=args.adam_eps,
+                 weight_decay=args.weight_decay,
++                foreach=getattr(args, "adam_foreach", False),
+             )
+         else:
+             raise ValueError(f"Unsupported optimizer: {args.optimizer}. Supported options: 'adam'")
+@@ -697,9 +701,9 @@ def apply_fsdp2(model, mesh=None, cpu_offload=False, args=None):
+ 
+     offload_policy = CPUOffloadPolicy() if cpu_offload else None
+ 
+-    layer_cls_to_wrap = model._no_split_modules
+-    assert len(layer_cls_to_wrap) > 0 and layer_cls_to_wrap[0] is not None
++    layer_cls_to_wrap = [cls for cls in model._no_split_modules if cls is not None]
++    assert len(layer_cls_to_wrap) > 0
+ 
+     modules = [
+         module
+ 
+diff --git a/miles/backends/fsdp_utils/arguments.py b/miles/backends/fsdp_utils/arguments.py
+--- a/miles/backends/fsdp_utils/arguments.py
++++ b/miles/backends/fsdp_utils/arguments.py
+@@ -24,6 +24,7 @@ class FSDPArgs:
+     adam_beta1: float = 0.9
+     adam_beta2: float = 0.95
+     adam_eps: float = 1e-8
++    adam_foreach: bool = False
+     warmup_ratio: float = 0.03
+ 
+     attn_implementation: str = "flash_attention_2"
+
+diff --git a/miles/backends/fsdp_utils/parallel.py b/miles/backends/fsdp_utils/parallel.py
+--- a/miles/backends/fsdp_utils/parallel.py
++++ b/miles/backends/fsdp_utils/parallel.py
+@@ -2,7 +2,11 @@ import logging
+ from argparse import Namespace
+ 
+ import torch.distributed as dist
+-from ring_flash_attn import substitute_hf_flash_attn
++try:
++    from ring_flash_attn import substitute_hf_flash_attn
++except Exception:
++    def substitute_hf_flash_attn(*_args, **_kwargs):
++        return None
+ from torch.distributed.device_mesh import init_device_mesh
+ 
+ from miles.utils.distributed_utils import get_gloo_group
+diff --git a/miles/backends/fsdp_utils/update_weight_utils.py b/miles/backends/fsdp_utils/update_weight_utils.py
+--- a/miles/backends/fsdp_utils/update_weight_utils.py
++++ b/miles/backends/fsdp_utils/update_weight_utils.py
+@@ -12,20 +12,34 @@ from torch.distributed.tensor import DTensor, Replicate
+ 
+ try:
+     from sglang.srt.utils.patch_torch import monkey_patch_torch_reductions  # type: ignore[import]
++    from sglang.srt.utils import MultiprocessingSerializer
++    try:
++        from sglang.srt.weight_sync.tensor_bucket import FlattenedTensorBucket  # type: ignore[import]
++    except ImportError:
++        from sglang.srt.model_executor.model_runner import FlattenedTensorBucket  # type: ignore[import]
+ except ImportError:
+-    from sglang.srt.patch_torch import monkey_patch_torch_reductions  # type: ignore[import]
+-
+-from sglang.srt.utils import MultiprocessingSerializer
++    try:
++        from sglang.srt.patch_torch import monkey_patch_torch_reductions  # type: ignore[import]
++        from sglang.srt.utils import MultiprocessingSerializer
++        try:
++            from sglang.srt.weight_sync.tensor_bucket import FlattenedTensorBucket  # type: ignore[import]
++        except ImportError:
++            from sglang.srt.model_executor.model_runner import FlattenedTensorBucket  # type: ignore[import]
++    except ImportError:
++        def monkey_patch_torch_reductions():
++            return None
++
++        class MultiprocessingSerializer:
++            def __init__(self, *args, **kwargs):
++                raise RuntimeError("SGLang is required for rollout weight sync")
++
++        class FlattenedTensorBucket:
++            def __init__(self, *args, **kwargs):
++                raise RuntimeError("SGLang is required for rollout weight sync")
+ 
+ from miles.utils.distributed_utils import init_process_group
+ 
+ 
+-try:
+-    from sglang.srt.weight_sync.tensor_bucket import FlattenedTensorBucket  # type: ignore[import]
+-except ImportError:
+-    from sglang.srt.model_executor.model_runner import FlattenedTensorBucket  # type: ignore[import]
+-
+-
+ logger = logging.getLogger(__name__)
+ 
+ 
+diff --git a/miles/backends/sglang_utils/arguments.py b/miles/backends/sglang_utils/arguments.py
+--- a/miles/backends/sglang_utils/arguments.py
++++ b/miles/backends/sglang_utils/arguments.py
+@@ -1,4 +1,7 @@
+-from sglang.srt.server_args import ServerArgs
++try:
++    from sglang.srt.server_args import ServerArgs
++except ImportError:
++    ServerArgs = None
+ from miles.utils.http_utils import _wrap_ipv6
+ 
+ 
+@@ -103,12 +106,22 @@ def add_sglang_arguments(parser):
+                 final_kwargs["dest"] = f"sglang_{original_dest}"
+         # If 'dest' is not explicitly provided (or is None/not a string),
+         # argparse will derive 'dest' from the (now prefixed) flag names.
+         # E.g., if the first flag is "--sglang-foo-bar", argparse sets dest to "sglang_foo_bar".
+ 
+         old_add_argument(*new_name_or_flags_list, **final_kwargs)
+ 
+     parser.add_argument = new_add_argument_wrapper
+-    ServerArgs.add_cli_args(parser)
++    if ServerArgs is None:
++        old_add_argument("--sglang-data-parallel-size", type=int, default=1)
++        old_add_argument("--sglang-pipeline-parallel-size", type=int, default=1)
++        old_add_argument("--sglang-expert-parallel-size", type=int, default=1)
++        old_add_argument("--sglang-enable-dp-attention", action="store_true")
++        old_add_argument("--sglang-enable-metrics", action="store_true")
++        old_add_argument("--sglang-enable-deterministic-inference", action="store_true")
++        old_add_argument("--sglang-speculative-algorithm", type=str, default=None)
++        old_add_argument("--sglang-disable-radix-cache", action="store_true")
++    else:
++        ServerArgs.add_cli_args(parser)
+     parser.add_argument = old_add_argument
+ 
+     return parser
+diff --git a/miles/utils/mask_utils.py b/miles/utils/mask_utils.py
+--- a/miles/utils/mask_utils.py
++++ b/miles/utils/mask_utils.py
+@@ -45,6 +45,19 @@ class MultiTurnLossMaskGenerator:
+         self._cached_turn_close_ids = full[lcp+len(body):]
+         return self._cached_turn_close_ids
+ 
++    def _token_ids(self, value):
++        """Normalize tokenized template outputs across tokenizer versions."""
++        if isinstance(value, dict):
++            value = value["input_ids"]
++        elif hasattr(value, "input_ids"):
++            value = value.input_ids
++        if hasattr(value, "tolist"):
++            value = value.tolist()
++        if value and isinstance(value[0], list):
++            assert len(value) == 1, f"expected one sequence, got {len(value)}"
++            value = value[0]
++        return list(value)
++
+     def get_response_lengths(self, loss_masks: list[list[int]]) -> list[int]:
+         return get_response_lengths(loss_masks)
+ 
+@@ -69,10 +81,10 @@ class MultiTurnLossMaskGenerator:
+         chat_template_token_ids = self.tokenizer(chat_template_token, add_special_tokens=False)["input_ids"]
+         idx_1, idx_2 = self.find_all_sublist_indices(chat_template_token_ids, raw_token_ids)
+         end_interval = len(chat_template_token_ids) - len(raw_token_ids) - idx_2
+-        gen_token_length = len(
++        gen_token_length = len(self._token_ids(
+             self.tokenizer.apply_chat_template(
+                 test_messages, add_special_tokens=False, tokenize=True, add_generation_prompt=True
+-            )
++            ))
+         ) - len(chat_template_token_ids)
+ 
+         system_message_length = idx_1 - ((idx_2 - idx_1) - end_interval - len(raw_token_ids))
+@@ -85,9 +97,9 @@ class MultiTurnLossMaskGenerator:
+ 
+         for i, message in enumerate(messages):
+             if i == 0:
+-                message_ids = self.tokenizer.apply_chat_template([message], tokenize=True, tools=tools)
++                message_ids = self._token_ids(self.tokenizer.apply_chat_template([message], tokenize=True, tools=tools))
+             else:
+-                message_ids = self.tokenizer.apply_chat_template([message], tokenize=True)
++                message_ids = self._token_ids(self.tokenizer.apply_chat_template([message], tokenize=True))
+ 
+             if message["role"] != "system" and i > 0:
+                 message_ids = message_ids[self.system_message_length :]
+@@ -116,16 +128,16 @@ class MultiTurnLossMaskGenerator:
+         all_token_ids = []
+ 
+         prefix_message = {"role": "user", "content": "FOR CALCULATING LOSS MASK ONLY"}
+-        prefix_token_ids = self.tokenizer.apply_chat_template([prefix_message], tokenize=True)
++        prefix_token_ids = self._token_ids(self.tokenizer.apply_chat_template([prefix_message], tokenize=True))
+ 
+         for i, message in enumerate(messages):
+             if i == 0:
+-                tailed_message_ids = self.tokenizer.apply_chat_template(
+-                    [message, prefix_message], tokenize=True, tools=tools
++                tailed_message_ids = self._token_ids(self.tokenizer.apply_chat_template(
++                    [message, prefix_message], tokenize=True, tools=tools)
+                 )
+                 message_ids = tailed_message_ids[: -len(prefix_token_ids)]
+             else:
+-                prefixed_message_ids = self.tokenizer.apply_chat_template([prefix_message, message], tokenize=True)
++                prefixed_message_ids = self._token_ids(self.tokenizer.apply_chat_template([prefix_message, message], tokenize=True))
+                 message_ids = prefixed_message_ids[len(prefix_token_ids) :]
+ 
+             if message["role"] != "system" and i > 0:
+diff --git a/miles/ray/rollout.py b/miles/ray/rollout.py
+--- a/miles/ray/rollout.py
++++ b/miles/ray/rollout.py
+@@ -11,8 +11,18 @@ import ray
+ import torch
+ from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
+-from sglang.srt.constants import GPU_MEMORY_TYPE_CUDA_GRAPH, GPU_MEMORY_TYPE_KV_CACHE, GPU_MEMORY_TYPE_WEIGHTS
++try:
++    from sglang.srt.constants import GPU_MEMORY_TYPE_CUDA_GRAPH, GPU_MEMORY_TYPE_KV_CACHE, GPU_MEMORY_TYPE_WEIGHTS
++except ImportError:
++    GPU_MEMORY_TYPE_CUDA_GRAPH = "cuda_graph"
++    GPU_MEMORY_TYPE_KV_CACHE = "kv_cache"
++    GPU_MEMORY_TYPE_WEIGHTS = "weights"
+ 
+-from miles.backends.sglang_utils.sglang_engine import SGLangEngine
++try:
++    from miles.backends.sglang_utils.sglang_engine import SGLangEngine
++except ImportError:
++    class SGLangEngine:
++        def __init__(self, *args, **kwargs):
++            raise RuntimeError("SGLang is required unless --debug-train-only is set")
+ from miles.rollout.base_types import (
+     RolloutFnConstructorInput,
+     RolloutFnEvalInput,
+diff --git a/train.py b/train.py
+--- a/train.py
++++ b/train.py
+@@ -1,5 +1,10 @@
+ import ray
+-from sglang.srt.constants import GPU_MEMORY_TYPE_CUDA_GRAPH, GPU_MEMORY_TYPE_KV_CACHE, GPU_MEMORY_TYPE_WEIGHTS
++try:
++    from sglang.srt.constants import GPU_MEMORY_TYPE_CUDA_GRAPH, GPU_MEMORY_TYPE_KV_CACHE, GPU_MEMORY_TYPE_WEIGHTS
++except ImportError:
++    GPU_MEMORY_TYPE_CUDA_GRAPH = "cuda_graph"
++    GPU_MEMORY_TYPE_KV_CACHE = "kv_cache"
++    GPU_MEMORY_TYPE_WEIGHTS = "weights"
+ 
+ from miles.ray.placement_group import create_placement_groups, create_rollout_manager, create_training_models
+ from nla.embed_store import get_embed_store
+diff --git a/miles/backends/fsdp_utils/checkpoint.py b/miles/backends/fsdp_utils/checkpoint.py
+--- a/miles/backends/fsdp_utils/checkpoint.py
++++ b/miles/backends/fsdp_utils/checkpoint.py
+@@ -118,8 +118,9 @@ def load(actor: Any) -> dict[str, Any] | None:
+ 
+     # Load optimizer state (optional). Same: if the dir exists but load fails,
+     # that's corruption — raise, don't warn.
+     load_optimizer = not getattr(actor.args, "no_load_optim", False) and hasattr(actor, "optimizer")
+-    if load_optimizer and optimizer_dir.exists():
++    optimizer_metadata = optimizer_dir / ".metadata"
++    if load_optimizer and optimizer_metadata.exists():
+         optimizer_state = OptimizerState(actor.model, actor.optimizer)
+         optim_state_dict = {"optim_state": optimizer_state}
+         dcp.load(state_dict=optim_state_dict, checkpoint_id=str(optimizer_dir))
+@@ -131,14 +132,15 @@ def load(actor: Any) -> dict[str, Any] | None:
+     # Load LR scheduler state (optional). Skip under --finetune: scheduler state
+     # carries base LR in param_groups — resuming it overrides args.lr even with
+     # constant schedule. Fresh phase-change runs use --no-load-optim as well.
++    lr_scheduler_metadata = lr_scheduler_dir / ".metadata"
+     load_lr_scheduler = (
+         not getattr(actor.args, "finetune", False)
+         and load_optimizer
+         and hasattr(actor, "lr_scheduler")
+-        and lr_scheduler_dir.exists()
++        and lr_scheduler_metadata.exists()
+     )
+     if load_lr_scheduler:
+         lr_scheduler_state = LRSchedulerState(actor.lr_scheduler)
+         lr_scheduler_state_dict = {"lr_scheduler_state": lr_scheduler_state}
+         dcp.load(state_dict=lr_scheduler_state_dict, checkpoint_id=str(lr_scheduler_dir))
+         logger.info(f"[FSDP] Loaded LR scheduler from {lr_scheduler_dir}")

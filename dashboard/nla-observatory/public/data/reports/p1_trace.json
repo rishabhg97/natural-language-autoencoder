@@ -1,0 +1,15 @@
+{
+  "closed_fraction": 1.0,
+  "config_sha256": "c7492fecc776f3991ac605a83c1f74c57eeabd5ed9f8cd4838676b164161b259",
+  "passed": true,
+  "phase": "p1_trace_descriptions",
+  "positions": 400,
+  "records": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p1_trace_descriptions/trace_descriptions.jsonl",
+    "sha256": "a7787fb83f3056cc01479d6be412e7bda88dbe109aba5b3e29cbf0932c79b134"
+  },
+  "rows": 10,
+  "schema_version": "nano_viz_model_batches.v1",
+  "split": "validation",
+  "usable_fraction": 1.0
+}

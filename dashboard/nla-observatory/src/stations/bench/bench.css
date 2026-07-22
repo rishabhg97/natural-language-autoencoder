@@ -1,0 +1,355 @@
+/* BENCH station — precomputed counterfactuals. All classes are bench- prefixed. */
+
+.bench-station {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ------------------------------ fixed banner ------------------------------ */
+
+.bench-banner {
+  position: sticky;
+  top: var(--bench-header-h, 44px);
+  z-index: 25;
+  background: var(--status-exploratory-wash);
+  border: 1px solid color-mix(in srgb, var(--status-exploratory) 38%, var(--border));
+  border-left: 3px solid var(--status-exploratory);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  box-shadow: 0 2px 10px rgba(20, 31, 43, 0.05);
+  margin-bottom: 16px;
+}
+
+.bench-banner-statement {
+  margin: 0;
+  font-weight: 650;
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+.bench-banner-statement span {
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.bench-banner-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.bench-banner-counts {
+  color: var(--ink-3);
+  font-size: 11.5px;
+}
+
+/* ------------------------------ shared bits ------------------------------- */
+
+.bench-link {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.bench-link:hover {
+  border-color: var(--selected);
+  color: var(--selected);
+}
+
+.bench-legend {
+  display: flex;
+  gap: 4px 12px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  margin: 4px 0 2px;
+}
+
+.bench-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bench-swatch {
+  width: 14px;
+  height: 4px;
+  border-radius: 2px;
+  display: inline-block;
+  flex: none;
+}
+
+.bench-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-width: 100%;
+}
+
+.bench-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.bench-note {
+  color: var(--ink-3);
+  font-size: 11.5px;
+  margin: 4px 0 0;
+}
+
+.bench-details summary {
+  cursor: pointer;
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+
+.bench-details[open] summary {
+  margin-bottom: 4px;
+}
+
+/* ------------------------------ control rack ------------------------------ */
+
+.bench-rack {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.bench-lane-card {
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  padding: 4px 12px 12px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bench-lane-card:first-child {
+  border-left: 0;
+}
+
+.bench-quickread {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  justify-content: space-between;
+  margin: 0 0 14px;
+  padding: 10px 0 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bench-quickread-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 620px;
+}
+
+.bench-quickread-copy strong {
+  font-size: 12.5px;
+}
+
+.bench-quickread-copy span {
+  color: var(--ink-3);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.bench-quickread-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(80px, 1fr));
+  min-width: min(520px, 50%);
+}
+
+.bench-quickread-metrics > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 12px;
+  border-left: 1px solid var(--border);
+}
+
+.bench-quickread-metrics b {
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bench-quickread-metrics small {
+  color: var(--ink-3);
+  font-size: 10.5px;
+}
+
+.bench-lane-key {
+  height: 3px;
+  border-radius: 2px;
+  margin: 6px -2px 0;
+}
+
+.bench-lane-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-weight: 650;
+  font-size: 12px;
+}
+
+.bench-lane-role {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: 11px;
+}
+
+.bench-cell-id {
+  color: var(--ink-3);
+  font-size: 10.5px;
+  overflow-wrap: anywhere;
+}
+
+.bench-lane-foot {
+  margin-top: auto;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+/* --------------------------------- top-k ---------------------------------- */
+
+.bench-topk-strip td,
+.bench-topk-strip th {
+  white-space: nowrap;
+}
+
+.bench-token {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 4px;
+  white-space: pre;
+}
+
+/* ------------------------------ continuations ----------------------------- */
+
+.bench-cont-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 680px) {
+  .bench-banner { position: static; }
+  .bench-banner-meta { margin-left: 0; }
+  .bench-quickread { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .bench-quickread-metrics { min-width: 0; width: 100%; grid-template-columns: repeat(2, 1fr); }
+  .bench-quickread-metrics > span { padding: 8px 10px; border-top: 1px solid var(--border); }
+  .bench-lane-card { border-left: 0; border-top: 1px solid var(--border); }
+  .bench-lane-card:first-child { border-top: 0; }
+  .bench-cont-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bench-cont-label {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin: 0 0 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bench-diff-added {
+  text-decoration: underline;
+  text-decoration-color: var(--selected);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  background: var(--selected-wash);
+  border-radius: 2px;
+}
+
+.bench-diff-removed {
+  text-decoration: line-through;
+  color: var(--ink-3);
+}
+
+/* --------------------------------- ledger --------------------------------- */
+
+.bench-ledger-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 0 8px;
+}
+
+.bench-ledger-cells {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  overflow-wrap: anywhere;
+  color: var(--ink-2);
+}
+
+/* -------------------------------- coverage -------------------------------- */
+
+.bench-coverage caption {
+  text-align: left;
+  color: var(--ink-3);
+  font-size: 11px;
+  padding-bottom: 3px;
+}
+
+.bench-variant-preview {
+  color: var(--ink-3);
+  font-size: 10.5px;
+  overflow-wrap: anywhere;
+}
+
+.bench-controls {
+  display: flex;
+  gap: 8px 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 0 10px;
+}
+
+.bench-kv-wrap {
+  margin-top: 6px;
+}
+
+/* ------------------- audit-pass additions (2026-07-18) -------------------- */
+
+.bench-note-strong {
+  color: var(--ink-2);
+  border-left: 3px solid var(--status-caveat);
+  padding-left: 10px;
+}
+
+.bench-rack-foot {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.bench-row-preview {
+  margin: 4px 0 10px;
+}

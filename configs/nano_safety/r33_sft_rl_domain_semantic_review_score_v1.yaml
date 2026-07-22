@@ -1,0 +1,7 @@
+schema_version: nano_domain_semantic_review_score.v1
+
+answer_key: artifacts/runai_eval/r33_sft_rl_domain_semantic_review_v1_20260722/answer_key.json
+review_packets:
+  reviewer_1: artifacts/runai_eval/r33_sft_rl_domain_semantic_review_v1_20260722/review_packet_reviewer_1.csv
+  reviewer_2: artifacts/runai_eval/r33_sft_rl_domain_semantic_review_v1_20260722/review_packet_reviewer_2.csv
+output_json: artifacts/runai_eval/r33_sft_rl_domain_semantic_review_v1_20260722/review_score_report.json

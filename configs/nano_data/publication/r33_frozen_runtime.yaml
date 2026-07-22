@@ -1,0 +1,19 @@
+schema_version: nano_publication_runtime.v1
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  miles_root: /workspace/interp/code/miles-051cd15
+  miles_patches_root: /workspace/interp/code/nano30b-nla-pilot-publication-current/external/natural_language_autoencoders/nla/miles_patches
+  model_root: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  model_fingerprint_source: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_activation_fidelity/base_model_fingerprint.json
+expected_model_sha256: abd6d1368f9d2baa1b6f5b4047916db780466193af85b4772bbf5dc64c218019
+container_image_digest: sha256:3c90e38f5ec51e51d1c73bd7eb3d83674a254f451147c5cadc4344314258a112
+critical_files:
+  source_snapshot_archive: /workspace/interp/code/nano30b-nla-pilot-publication-current/source.tgz
+  source_snapshot_manifest: /workspace/interp/outputs/nano30b-nla-pilot/publication/runtime/source_snapshot_manifest.json
+  extraction_config: /workspace/interp/code/nano30b-nla-pilot-publication-current/configs/nano_data/publication/r33_frozen_runtime_full275396.yaml
+  confirmatory_family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_confirmatory_families/r33_confirmatory_family_manifest.json
+  confirmatory_family_split_report: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_confirmatory_families/r33_confirmatory_family_split_report.json
+  teacher_contract: /workspace/interp/outputs/nano30b-nla-pilot/ar-r27-r30-fullscan-20260528T234403Z/R_27/ar_sft.parquet.nla_meta.yaml
+outputs:
+  model_fingerprint_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/runtime/base_model_fingerprint.json
+  runtime_provenance_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/runtime/extraction_runtime_provenance.json

@@ -1,0 +1,36 @@
+schema_version: nano_semantic_transform_job.v1
+paths:
+  sources:
+    sft: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/eval384_matched_v122/sft_generated.jsonl
+    rl: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/eval384_matched_v122/rl_generated.jsonl
+  output_dir: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms_canary
+
+selection:
+  limit_per_source: 2
+  seed: 20260722
+
+backend:
+  endpoint: http://127.0.0.1:30080/v1
+  model: local-independent-paraphraser
+  api_key_env: NANO_PARAPHRASER_API_KEY
+  max_workers: 4
+  timeout_seconds: 180
+  attempts: 3
+  temperature: 0.2
+  top_p: 0.95
+  max_tokens: 512
+  seed: 20260722
+
+transforms:
+  - name: light_paraphrase
+    instruction: Rephrase the text with different wording and syntax while preserving every substantive claim, level of detail, uncertainty, and emphasis.
+    temperature: 0.2
+  - name: aggressive_paraphrase
+    instruction: Rewrite the text substantially with a different structure and vocabulary while preserving all substantive meaning. Avoid copying phrases longer than four words where possible.
+    temperature: 0.5
+  - name: two_sentence_summary
+    instruction: Compress the content into at most two complete sentences while retaining the most important claims and relationships.
+    temperature: 0.2
+  - name: french_roundtrip
+    instruction: Translate the content into French internally and then translate it back into fluent English. Return only the final English text while preserving the original meaning.
+    temperature: 0.2

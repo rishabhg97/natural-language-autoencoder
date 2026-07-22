@@ -1,0 +1,244 @@
+schema_version: nano_rl_queue.v1
+
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-online-rl-current
+  python: /workspace/interp/.venvs/sglang-cu130/bin/python
+  post_eval_scoring_python: /workspace/interp/.venv/bin/python
+  miles_root: /workspace/interp/code/miles-051cd15
+  rl_script: external/natural_language_autoencoders/configs/rl.sh
+  workspace_gpus: 8
+
+  launch:
+    requires_approval: true
+    approved: false
+
+  source:
+    roots:
+      - scripts
+      - configs/nano_rl
+      - external/natural_language_autoencoders/nla
+      - external/natural_language_autoencoders/configs
+    capture: true
+    allow_missing_during_render: true
+
+  runtime_contracts:
+    - name: miles_configured_save_schedule
+      path: /workspace/interp/code/miles-051cd15/train.py
+      contains:
+        - from nla.save_schedule import should_save_rollout
+        - if should_save_rollout(
+      forbids:
+        - "if should_run_periodic_action(rollout_id, args.save_interval, num_rollout_per_epoch, args.num_rollout):"
+    - name: critic_equivalence_uses_training_kernel
+      path: /workspace/interp/code/nano30b-nla-pilot-online-rl-current/external/natural_language_autoencoders/nla/train_actor.py
+      contains:
+        - "with temporarily_select_mamba_training_kernel("
+        - "training_kernel_mode=self._nla_mamba_training_kernel_mode"
+
+  env:
+    WANDB_MODE: offline
+    PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+    NLA_EMBED_DUMP_DIR: /dev/shm/nla
+    NLA_BF16_B64_EMBEDS: "1"
+    NLA_ASSERT_PACKED_EQUIV: "1"
+    NLA_ASSERT_ACTOR_PACKED_EQUIV: "1"
+    NLA_TRAIN_MAMBA_KERNEL_MODE: unfused_torch_conv
+    NLA_CRITIC_FWD_DISABLE_MAMBA_FAST_PATH: "1"
+    NLA_FAILED_EXTRACTION_REWARD: "-2.0"
+    NLA_WEIGHT_UPDATE_LOG_EVERY: "1"
+    NLA_ROLLOUT_SUMMARY_STDOUT: "1"
+    NLA_ROUTER_METRICS: "1"
+    NLA_SYSTEM_METRICS: "1"
+    NLA_SYSTEM_METRICS_INTERVAL_STEPS: "1"
+    NLA_SYSTEM_METRICS_NVSMI_INTERVAL_STEPS: "1"
+    NLA_PHASE_METRICS: "1"
+    NLA_PHASE_METRICS_ALL_GPUS: "1"
+    NLA_PHASE_METRICS_WANDB: "1"
+    NLA_PREWARM_HF_MODULES: "1"
+    HF_MODULES_CACHE: /dev/shm/nano30b-nla-pilot/hf_modules_cache/r33_family_clean_online_joint_canary
+
+  wandb:
+    mode: offline
+    project: nano30b-nla-pilot
+    group: nano-rl-r33-family-clean-online-joint-canary
+
+  resources:
+    actor_nodes: 1
+    actor_gpus: 4
+    critic_nodes: 1
+    critic_gpus: 3
+    rollout_gpus: 1
+    min_actor_gpus: 4
+
+  training:
+    train_backend: fsdp
+    critic_update_mode: online
+    actor_lr: "1e-5"
+    critic_lr: "5e-6"
+    actor_micro_batch: 2
+    require_exact_actor_batch: true
+    attn_implementation: eager
+    gradient_checkpointing: true
+    kl_loss_type: k3
+    kl_loss_coef: 0.001
+    clip_grad: 1.0
+    loss_mask_type: qwen
+    lr_decay_style: constant
+    finetune: true
+    no_load_optim: true
+    fsdp_reduce_dtype: bfloat16
+    fsdp_disable_backward_prefetch: true
+    advantage_estimator: grpo
+    normalize_advantages: false
+    rewards_normalization: true
+    grpo_std_normalization: true
+    save_iterations: [2]
+
+  rollout:
+    rollout_batch_size: 3
+    global_batch_size: 24
+    n_samples_per_prompt: 8
+    require_global_batch_match: true
+    max_response_len: 256
+    max_context_len: 512
+    num_rollout: 2
+    shuffle: true
+    seed: 20260717
+
+  input_staging:
+    - name: actor_load
+      env_key: ACTOR_LOAD_CKPT
+      target_path: /dev/shm/nano30b-nla-pilot/trainer_inputs/r33_family_clean_actor_iter_0001291_checkpoints
+      reuse_existing: true
+      clean: true
+      copy_workers: 16
+      copy_chunk_bytes: 536870912
+    - name: critic_load
+      env_key: CRITIC_SL_CKPT
+      target_path: /dev/shm/nano30b-nla-pilot/trainer_inputs/r33_family_clean_critic_iter_0001291_hf
+      reuse_existing: true
+      clean: true
+      copy_workers: 16
+      copy_chunk_bytes: 536870912
+
+  sglang:
+    mode: external
+    python: /workspace/interp/.venvs/sglang-cu130/bin/python
+    managed: true
+    terminate_on_exit: true
+    tensor_parallel_size: 1
+    base_gpu_id: 4
+    rollout_num_gpus_per_engine: 1
+    env:
+      SGLANG_MIN_NEW_TOKEN_RATIO_FACTOR: "1"
+    engine_addrs:
+      - 127.0.0.1:31000
+    timeout_seconds: 1200
+    poll_seconds: 2
+    model_staging:
+      enabled: true
+      source_model_path: /workspace/models/nano30b-nla-pilot/publication/staging/r33_family_clean_av_sft_iter_0001291_hf
+      target_path: /dev/shm/nano30b-nla-pilot/sglang_models/r33_family_clean_av_sft_iter_0001291
+      reuse_existing: true
+      clean: true
+      copy_workers: 8
+      copy_chunk_bytes: 536870912
+    start_commands:
+      - - /workspace/interp/.venvs/sglang-cu130/bin/python
+        - -m
+        - sglang.launch_server
+        - --model-path
+        - /workspace/models/nano30b-nla-pilot/publication/staging/r33_family_clean_av_sft_iter_0001291_hf
+        - --host
+        - 127.0.0.1
+        - --port
+        - "31000"
+        - --tp-size
+        - "1"
+        - --base-gpu-id
+        - "4"
+        - --trust-remote-code
+        - --skip-server-warmup
+        - --disable-radix-cache
+        - --disable-custom-all-reduce
+        - --attention-backend
+        - fa3
+        - --schedule-conservativeness
+        - "1.5"
+    health_urls:
+      - http://127.0.0.1:31000/health_generate
+
+  post_eval:
+    roundtrip:
+      enabled: true
+      origin_hf_dir: /workspace/interp/models/nano-30b-a3b-bf16-hf
+      train_parquet: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/train.parquet
+      validation_parquet: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/validation.parquet
+      baseline_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/validation_roundtrip_report.json
+      content_family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_exact_prefix_refined_base_manifest.json
+      content_family_coverage: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_clean_sft_family_coverage.json
+      eval_splits: [validation]
+      validation_limit: 64
+      max_new_tokens: 256
+      generation_backend: legacy_batch
+      generation_workers: 8
+      generation_worker_devices: ["0", "1", "2", "3", "4", "5", "6", "7"]
+      generation_controls: [real, shuffled, zero, mean, none]
+      generated_text_fallback: raw
+      selection_strategy: family_stratified
+      selection_seed: 20260709
+      min_control_win_fraction: 0.8
+      min_closed_fraction: 0.95
+      min_usable_fraction: 0.99
+      require_baseline_dataset_match: true
+      require_generation_protocol_match: true
+      require_family_level_inference: true
+      min_independent_families: 32
+      bootstrap_samples: 2000
+      bootstrap_seed: 20260717
+      permutation_samples: 10000
+      permutation_seed: 20260717
+      scoring_python: /workspace/interp/.venv/bin/python
+      local_files_only: true
+      cleanup_hf: true
+      cleanup_critic_hf: false
+      cleanup_actor_checkpoint: false
+
+  extra_args:
+    - --no-save-optim
+    - --distributed-timeout-minutes
+    - "30"
+    - --sglang-attention-backend
+    - fa3
+
+items:
+  - name: r33-family-clean-online-joint-canary-update2-8h100-retry3
+    status: pending
+    launch:
+      requires_approval: true
+      approved: false
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/r33_family_clean_train.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/checkpoints
+    actor_ref_ckpt: /workspace/models/nano30b-nla-pilot/publication/staging/r33_family_clean_av_sft_iter_0001291_hf
+    actor_sidecar_source: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean/nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/checkpoints/iter_0001291/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/canary_update2_8h100_retry3
+    wandb:
+      run_id: r33-family-clean-online-joint-canary-update2-8h100-retry3-20260717
+    checkpoint_retention:
+      enabled: true
+      apply: true
+      max_transient_checkpoints: 1
+      keep_iterations: [2]
+    post_eval:
+      roundtrip:
+        critic_input_dir: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/canary_update2_8h100_retry3/critic/iter_0000002
+    notes: >-
+      Third retry of the preserved initialization-timeout attempt. Retry2 proved
+      one full actor update but exposed that the step-0 critic equivalence probe
+      was outside the configured unfused training-kernel context. This retry
+      requires both the save hook and corrected kernel-matched equivalence probe
+      at preflight. It remains a two-update joint AV GRPO plus online AR MSE
+      correctness canary; quality is not inferred from two updates.

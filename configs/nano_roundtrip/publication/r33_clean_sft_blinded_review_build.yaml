@@ -1,0 +1,8 @@
+schema_version: nano_blinded_qualitative_review.v1
+paths:
+  panel_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/teacher_grounded_qualitative_panel.json
+  output_dir: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/blinded_human_review
+protocol:
+  reviewer_ids: [reviewer_1, reviewer_2]
+  seed: 20260716
+  dimensions: [factuality, coverage, coherence]

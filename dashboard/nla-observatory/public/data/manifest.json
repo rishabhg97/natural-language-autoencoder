@@ -1,0 +1,384 @@
+{
+ "counts": {
+  "behavior": 888,
+  "court": 1200,
+  "explanations": 900,
+  "geometry": 8134,
+  "interventions": 7434,
+  "metrics": 8084,
+  "poetry_cases": 8,
+  "poetry_interventions": 30,
+  "poetry_positions": 104,
+  "poetry_samples": 624,
+  "retrieval": 100,
+  "rows": 50,
+  "shapley": 200,
+  "trajectories": 400
+ },
+ "files": [
+  {
+   "bytes": 155814,
+   "path": "audit.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "dcf17883cd2dca6c9bea883f205dfcedc82e0acedf48287268fd6e7b0d26b424"
+  },
+  {
+   "bytes": 220994,
+   "path": "bench/index.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "86ad2acc34a34986a9a3cb0cab79ceed33efc9a509bfa08187d022c1604673f1"
+  },
+  {
+   "bytes": 149908,
+   "path": "bench/row-validation-248348.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "b0a8891bcefc66462528fdd34f1dfb6ca64c2fcbdb3aec1b2a9e120f3ae5faa0"
+  },
+  {
+   "bytes": 151595,
+   "path": "bench/row-validation-249391.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "9bcfc5dabd6cfeb24b6b7eb6c361d13ee1157f9e314ca7f6362569de0aabf38f"
+  },
+  {
+   "bytes": 150763,
+   "path": "bench/row-validation-249526.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "9a93fb9772f1985ecfe65f4090fd76bb15146611a0dc8d2f7f8e4bf71cfa52f5"
+  },
+  {
+   "bytes": 153250,
+   "path": "bench/row-validation-250594.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "5be2deb59bcd4ec695962df406a648af33136e13e8966b3cc7b8a2b8e534b6ed"
+  },
+  {
+   "bytes": 149766,
+   "path": "bench/row-validation-251807.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "3329d957ba8a2624a2f1d0080484f2602e577cbb782cf329934709415ec8e9dc"
+  },
+  {
+   "bytes": 161263,
+   "path": "bench/row-validation-252265.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "4d22f909a12e555cdbc04a8230c130197e3e94b5d53ac1d89a330d739203018c"
+  },
+  {
+   "bytes": 149065,
+   "path": "bench/row-validation-252534.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "e6bfb96376ea3a1e9577ddf17eb42d379aa60d11c34d0e4b48297e8f9de225f3"
+  },
+  {
+   "bytes": 151586,
+   "path": "bench/row-validation-252642.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "527ebd10503d67f2e54ddf0f0c31d5e3138664c15a406d0d47bf92e5fed3e4de"
+  },
+  {
+   "bytes": 150198,
+   "path": "bench/row-validation-253172.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "11a9d4d73a002f0bece29f266c352dee0a805c778cc57e8be4244a7924f31b32"
+  },
+  {
+   "bytes": 152359,
+   "path": "bench/row-validation-253953.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "0ec8f95b4a88c2f434fe36308d55639a425b5b5c20f4b4e1d242c8b2d8b548ec"
+  },
+  {
+   "bytes": 152600,
+   "path": "bench/row-validation-254443.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "865f662804ce9ceb756a084bdd6d9b550a7e7f42b5061b230d0ee042de872e08"
+  },
+  {
+   "bytes": 147777,
+   "path": "bench/row-validation-255448.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "88bc314a11b26cd7ea8a05abfde437ec7e328d0d99679b2cfd83372338c8d0eb"
+  },
+  {
+   "bytes": 146676,
+   "path": "bench/row-validation-256088.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "e1ed2ff6fe6c959121a4af9ce0695ecf1d446bc14100907df8ed2b3586239666"
+  },
+  {
+   "bytes": 150983,
+   "path": "bench/row-validation-256711.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "67a9230e06bad830177c3c7dda37e8db063293cf31a1d2ebda8608cde134b5b0"
+  },
+  {
+   "bytes": 149141,
+   "path": "bench/row-validation-257634.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "4244fab724d7748fff714485d540c3e41566e2e8286b23d8ef712bdf9c5758fe"
+  },
+  {
+   "bytes": 148051,
+   "path": "bench/row-validation-258027.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "26275eddf44150f300313c9bc38c1522b1c0dd9811d6582689462df3f165c2c3"
+  },
+  {
+   "bytes": 147802,
+   "path": "bench/row-validation-258503.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "0a258a4d9947fc0d5e69b169639dc4b4ab2b887717cb49ed4fcb91cd05e7bb7b"
+  },
+  {
+   "bytes": 148160,
+   "path": "bench/row-validation-258731.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "30c993eb8020312a2282ee634a73a9ffdfc5c288e7e1d3a987ae1d241977dfa3"
+  },
+  {
+   "bytes": 154138,
+   "path": "bench/row-validation-258967.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "6913ec85d5ec033aa7c01dcd3848753ad537a7a01a272421cd1b1e0d710e2e7a"
+  },
+  {
+   "bytes": 150718,
+   "path": "bench/row-validation-259107.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "33be113eb4e2d5517a5bd673055983f6c78ca6c178cae54abf005dc6b7a8258e"
+  },
+  {
+   "bytes": 146570,
+   "path": "bench/row-validation-259972.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "84f0591e203fabcc6abfa2985daa826d983987603aa0d696adc0392aba3f18a4"
+  },
+  {
+   "bytes": 149809,
+   "path": "bench/row-validation-260621.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "9922a0534779de8b55ebfb36a08b39d741f10c08b17d7451edf85c9b8980298d"
+  },
+  {
+   "bytes": 151685,
+   "path": "bench/row-validation-261028.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "76662b2280ee0285ef289a028668d30ab95adea70c83f01a209c6ab18b3f1563"
+  },
+  {
+   "bytes": 148445,
+   "path": "bench/row-validation-261502.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "c8e2ecde3f288fb80aa6c13c81b77504304a999e2e5bb89c667305b00210ada4"
+  },
+  {
+   "bytes": 735448,
+   "path": "channel.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "1c9ce69164ab632479149da029fbb4be444d8970c80bdea7a6fefc79421b90d0"
+  },
+  {
+   "bytes": 590024,
+   "path": "poetry.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "b4ed3811f0e604402cd1a183f918eeefccf486e4b5fa6244dd6c36d872f27621"
+  },
+  {
+   "bytes": 75756,
+   "path": "reports/e0.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "40cedb261f07a6a0012447f63fcfe708f792490763a4d9560d434eb86b04389c"
+  },
+  {
+   "bytes": 20074,
+   "path": "reports/e1_ar.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "66302a6d05798904492513237b4225b01153525f56f5d9c250ac3965ef17a77f"
+  },
+  {
+   "bytes": 5739,
+   "path": "reports/e1_av.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "7163cc66ff31bbcd946924c1aa703ca33004de8fcc4e072f802dd94a26292e85"
+  },
+  {
+   "bytes": 1212,
+   "path": "reports/e2.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "f33bd321c2f15f6348d5c3cb322b4485d8fb718f20136612800656c03b1ceebc"
+  },
+  {
+   "bytes": 930,
+   "path": "reports/e3.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "a7a8630fd11c50e88fbe7ddbfb20e1269545b762deaf809fd20875f047c31590"
+  },
+  {
+   "bytes": 4979,
+   "path": "reports/e4.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "3b7ab07f090f817dd7b464ee0832763f198243f0952c85e5a28b25e29fb2a133"
+  },
+  {
+   "bytes": 3975,
+   "path": "reports/e5.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "97b2b6e888da0b730e8d8a73f876fd7b92d97d755ae6f3d3422d45b1da8bdb69"
+  },
+  {
+   "bytes": 1518,
+   "path": "reports/geometry.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "026b7823ca818e894b642f91b725cc3c8753a1b494849ddd19cbe6ee9781cc02"
+  },
+  {
+   "bytes": 1966,
+   "path": "reports/interventions.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "13c38f57052594b8b6c270e98f3cdbbfd9d67a7a27a6d724eba20a4a610bce2d"
+  },
+  {
+   "bytes": 668,
+   "path": "reports/p1_tellings.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "575bc2262f2b5906742b4328a7c30dfde04c2db7184a29c160d00b4f325f9cf4"
+  },
+  {
+   "bytes": 544,
+   "path": "reports/p1_trace.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "68ef116a4f02f8afff3ef479f228740d36652240638ac066dd3dc1b05cf9a949"
+  },
+  {
+   "bytes": 7702,
+   "path": "reports/p2.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "34198cb94bbb4f2b5fae3bb42b259339fa2d186f3ca0d5c8769188fb9bd7afed"
+  },
+  {
+   "bytes": 19548,
+   "path": "reports/p3.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "28d908543163cc65e8587e4f6143aa0a4473c2250192b3aae8848916fb78c533"
+  },
+  {
+   "bytes": 482,
+   "path": "reports/poetry_describe.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "3078c469c936d0209287f122ba23c330a8cd6810d5858c85ab73b10479234399"
+  },
+  {
+   "bytes": 703,
+   "path": "reports/poetry_extract.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "3cc0d5ed6d67afd63ee427a938a9c5e27e91c1e606fe7b2baf307031fd242d02"
+  },
+  {
+   "bytes": 583,
+   "path": "reports/poetry_intervene.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "32dae17d41ddb59c25f972360f48983f6c5c3b610f67bedff84454ebe6bc3012"
+  },
+  {
+   "bytes": 478,
+   "path": "reports/poetry_prepare.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "2ffd04b9f8fc52e0b3654e294604aafc385f1ecaf2185146cdd5936e13a2f686"
+  },
+  {
+   "bytes": 767,
+   "path": "reports/poetry_reconstruct.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "e19c8becabc28ad12391627afc299af87f0df4e84cb25dd22f5cc3e308a84822"
+  },
+  {
+   "bytes": 718,
+   "path": "reports/poetry_score.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "f403bc5b733135901243eb32705c579e6f9ebe4a1a0de75a774f08cc111446ad"
+  },
+  {
+   "bytes": 169103,
+   "path": "reports/roundtrip_rl_384.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "1ae7e18d832df876beb5454987453143c596d5cada74961a1181fe4d123358f5"
+  },
+  {
+   "bytes": 164771,
+   "path": "reports/roundtrip_sft_384.json",
+   "schema_version": "source_copy.v1",
+   "sha256": "34c82dc356f6cce1cb9461bab7361eaddd678ba24511a02a17894f26590bb9c9"
+  },
+  {
+   "bytes": 714222,
+   "path": "rewrites.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "66b686f15065050d59cfe75d18aeffc8c2015ca452757b8cc910812dc0a34ee5"
+  },
+  {
+   "bytes": 137164,
+   "path": "rows.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "6c3be3337cdd461fc9925de41f6625872631acc7c1199898378f49ad328da707"
+  },
+  {
+   "bytes": 543221,
+   "path": "trace.json",
+   "schema_version": "nla_observatory_dashboard.v2",
+   "sha256": "9a1f61295ab3656e75a5f96f700ec501989095ed551461b46f26932166afef2c"
+  }
+ ],
+ "generated_at": "2026-07-22T23:05:18.691304+00:00",
+ "online_rl": {
+  "generation_protocol_sha256": "fcc431ec4450adb8817cd946d6c194fa2a45b53b0c6c42c8682c1e9f12f94d4d",
+  "independent_family_count": 122,
+  "max_new_tokens": 384,
+  "report_sha256": {
+   "rl": "1ae7e18d832df876beb5454987453143c596d5cada74961a1181fe4d123358f5",
+   "sft": "34c82dc356f6cce1cb9461bab7361eaddd678ba24511a02a17894f26590bb9c9"
+  },
+  "row_count": 122,
+  "status": "validation_only_matched"
+ },
+ "poetry": {
+  "config_sha256": "87191f785c1f183edcc8d12317155ec0d1569848c7a9c637e2b4060fe44a41aa",
+  "phases_passed": [
+   "poetry_prepare",
+   "poetry_extract",
+   "poetry_describe",
+   "poetry_score",
+   "poetry_reconstruct",
+   "poetry_intervene"
+  ]
+ },
+ "schema_version": "nla_observatory_dashboard.v2",
+ "source": {
+  "bundle_config_sha256": "182e739fa79fa72d4d3e898f63f66f68ee5987b505c3605aa3c16b8b61a4fcd4",
+  "bundle_id": "d8372322d6031e53d0aeb328a39c234372ec9bdce118f5b3ebc57af3b66deba5",
+  "counts": {
+   "behavior": 888,
+   "interventions": 7434,
+   "rows": 50,
+   "trajectories": 400,
+   "vectors": 8534
+  },
+  "excluded_files": [
+   "geometry_basis.npz",
+   "vectors/all.f16.bin"
+  ],
+  "manifest_sha256": "ffeaea16c03df6164655ea6c82770f85f957af26b64a0189e0a833ddf745fdaf",
+  "population": "QUALIFIED",
+  "source_config_sha256": "c7492fecc776f3991ac605a83c1f74c57eeabd5ed9f8cd4838676b164161b259",
+  "split": "validation"
+ },
+ "tokenizer": {
+  "path": "/Users/rigarg/Desktop/agents/research-projects/nano30b-nla-pilot/runs/introspection/ar-r27-datagen-dryrun-20260528T230649Z/nano_tokenizer/tokenizer.json",
+  "sha256": "c6021eb6847e682f89aa52d5eb6e8c7d902a23acfc8137e25211cf84828f1592",
+  "spot_check": {
+   "mismatches": 0,
+   "tokens": 400
+  },
+  "vocab_size": 131072
+ }
+}

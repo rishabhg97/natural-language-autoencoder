@@ -1,0 +1,26 @@
+schema_version: nano_ar_hpo_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-hero-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  batch_size: 4
+  controls:
+    - teacher
+    - teacher_shuffled
+    - blank
+    - generic
+    - mean
+    - source_context
+    - source_raw
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/ar_hpo_queue/r33_independent_critic_trials.jsonl
+items:
+  - name: r33-component-full-independent-critic-seed314159-4gpu-mb48-cudablock-resume393
+    config: configs/nano_ar/hpo/r33_component_full_independent_critic_seed314159_4gpu_mb48_cudablock_resume393.yaml
+    run_id: nano-ar-r33-component-full-independent-seed314159-lr5e5-warmup25-gb192-mb48-4gpu-cudablock-resume393
+    status: pending
+    notes: >-
+      Continue the independently shuffled critic from the optimizer-bearing
+      iter_0000393 diagnostic checkpoint. Preserve the original 1289-update
+      cosine schedule and CUDA launch blocking that crossed the deterministic
+      rollout-392 illegal-access boundary; save only the final model checkpoint.

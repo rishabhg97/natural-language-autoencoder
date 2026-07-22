@@ -1,0 +1,34 @@
+Nano30B R33 Supervised Natural Language Autoencoder Pair
+
+STATUS: DRAFT FOR OWNER/LEGAL REVIEW. NOT A FINAL DISTRIBUTION NOTICE.
+
+Base model
+----------
+Built from NVIDIA-Nemotron-3-Nano-30B-A3B-BF16.
+Licensed by NVIDIA Corporation under the NVIDIA Open Model License.
+
+Include the complete governing NVIDIA license with any distribution when
+required. Confirm the exact license version before release.
+
+Source corpus
+-------------
+Training source provenance includes HuggingFaceFW FineWeb sample-10BT.
+FineWeb is published under ODC-By-1.0 and is also subject to Common Crawl's
+Terms of Use. Add the final attribution and citation approved for the release.
+
+Teacher outputs
+---------------
+Teacher explanations were produced by nvidia/nvidia/nemotron-3-super-v3
+through an NVIDIA inference API. Distribution and derivative-checkpoint rights
+remain pending confirmation of the governing service agreement.
+
+Third-party software
+--------------------
+The adapted Natural Language Autoencoders implementation includes software
+distributed under Apache License 2.0. Preserve its license and applicable
+copyright notices from external/natural_language_autoencoders/LICENSE.
+
+Project modifications
+---------------------
+Add the approved copyright holder, year, repository license, modification
+notice, contact, and any additional required third-party notices here.

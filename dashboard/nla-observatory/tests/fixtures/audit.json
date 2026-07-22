@@ -1,0 +1,376 @@
+{
+ "claim_ledger": {
+  "claims": {
+   "fresh_forward_trace": "Synthetic fixture claim: fresh-forward traces are exploratory.",
+   "functional_interventions": "Synthetic fixture claim: interventions are precomputed, validation-only exploratory.",
+   "matched_online_rl_roundtrip": "validation_only_confirmatory",
+   "stored_snapshot_channel": "Synthetic fixture claim: bounded stored-snapshot channel claim on the 2-row panel.",
+   "test_set": "Synthetic fixture claim: no test-set exposure in this fixture."
+  },
+  "limitations": [
+   "Synthetic fixture limitation: two rows only.",
+   "Synthetic fixture limitation: all numbers are made up."
+  ]
+ },
+ "court": {
+  "confound": "Synthetic fixture: court thresholds are fit on the same split they judge.",
+  "docket": [
+   {
+    "corruption_cells": [
+     {
+      "identity_cosine": 0.97,
+      "label": "context",
+      "variant": "delete_0.25",
+      "verdict": false
+     },
+     {
+      "identity_cosine": 0.92,
+      "label": "negative",
+      "variant": "shuffle_0.5",
+      "verdict": false
+     }
+    ],
+    "critic": "primary",
+    "paraphrase_cells": [
+     {
+      "identity_cosine": 0.995,
+      "label": "positive",
+      "variant": "shuffled_sections",
+      "verdict": true
+     },
+     {
+      "identity_cosine": 0.985,
+      "label": "positive",
+      "variant": "formal_tone",
+      "verdict": true
+     }
+    ],
+    "paraphrase_mean_identity_cosine": 0.99,
+    "paraphrase_min_identity_cosine": 0.985,
+    "paraphrase_verdicts_true": 2,
+    "row_id": "validation-1",
+    "row_verdict": "honest"
+   },
+   {
+    "corruption_cells": [
+     {
+      "identity_cosine": 0.97,
+      "label": "context",
+      "variant": "delete_0.25",
+      "verdict": false
+     },
+     {
+      "identity_cosine": 0.92,
+      "label": "negative",
+      "variant": "shuffle_0.5",
+      "verdict": false
+     }
+    ],
+    "critic": "independent",
+    "paraphrase_cells": [
+     {
+      "identity_cosine": 0.995,
+      "label": "positive",
+      "variant": "shuffled_sections",
+      "verdict": true
+     },
+     {
+      "identity_cosine": 0.985,
+      "label": "positive",
+      "variant": "formal_tone",
+      "verdict": true
+     }
+    ],
+    "paraphrase_mean_identity_cosine": 0.99,
+    "paraphrase_min_identity_cosine": 0.985,
+    "paraphrase_verdicts_true": 2,
+    "row_id": "validation-1",
+    "row_verdict": "mixed"
+   }
+  ],
+  "fit_split": "validation",
+  "thresholds": {
+   "independent": {
+    "balanced_accuracy": 0.94,
+    "negative_recall": 1.0,
+    "positive_recall": 0.88,
+    "threshold": 0.984
+   },
+   "primary": {
+    "balanced_accuracy": 0.95,
+    "negative_recall": 1.0,
+    "positive_recall": 0.9,
+    "threshold": 0.981
+   }
+  }
+ },
+ "drift": {
+  "card": {
+   "activation_fidelity": {
+    "cosine_agreement_mean": 0.999,
+    "cosine_agreement_min": 0.98,
+    "relative_l2_max": 0.07
+   }
+  },
+  "e5_per_doc": [
+   {
+    "one_minus_cos": 0.002,
+    "relative_l2": 0.05,
+    "row_id": "validation-1"
+   },
+   {
+    "one_minus_cos": 0.003,
+    "relative_l2": 0.06,
+    "row_id": "validation-2"
+   }
+  ]
+ },
+ "evidence_status_legend": {
+  "exploratory": "Fresh-forward or validation-fitted views outside the qualified claim.",
+  "negative": "Outcomes where the measured effect is absent or contradicts the hypothesis.",
+  "qualified": "Bounded stored-snapshot channel claim on the fixture panel.",
+  "unavailable": "Evidence the bundle does not contain; absence is shown, never silent."
+ },
+ "kind": "audit",
+ "magnitude": {
+  "claim_boundary": "Synthetic fixture: post-hoc magnitude calibration fit on validation only.",
+  "fit": {
+   "candidate_metrics": {
+    "identity": {
+     "centered_r2": -0.29,
+     "raw_mse": 9.2
+    }
+   }
+  },
+  "publication_status": "internal_only"
+ },
+ "negative_results": [
+  {
+   "id": "poetry_anchor_lift",
+   "source": "data/poetry.json",
+   "statement": "Synthetic fixture: mean anchor lift is 0.125 across 2 cases; 1 of 2 shows no lift.",
+   "status": "weak"
+  },
+  {
+   "id": "fixture_steering_null",
+   "source": "data/poetry.json",
+   "statement": "Synthetic fixture: no causal edit produced an alternate-family hit at any dose.",
+   "status": "negative"
+  }
+ ],
+ "null_text": {
+  "backfill_note": "Synthetic fixture backfill note.",
+  "e1_av_losses": {
+   "mean": 1.22,
+   "none": 1.16,
+   "real": 0.74,
+   "shuffled": 1.29,
+   "zero": 1.14
+  },
+  "e2_mean_loss": {
+   "mean": 1.25,
+   "none": 1.23,
+   "real": 0.8,
+   "shuffled": 1.3,
+   "zero": 1.18
+  },
+  "e2_paired": {
+   "mean": {
+    "mean_real_minus_control": -0.46,
+    "real_win_fraction": 1.0
+   },
+   "none": {
+    "mean_real_minus_control": -0.44,
+    "real_win_fraction": 1.0
+   },
+   "shuffled": {
+    "mean_real_minus_control": -0.4,
+    "real_win_fraction": 1.0
+   },
+   "zero": {
+    "mean_real_minus_control": -0.42,
+    "real_win_fraction": 1.0
+   }
+  },
+  "real_enriched_words": [
+   {
+    "log_odds_real_vs_zero": 5.3,
+    "token": "fixture"
+   },
+   {
+    "log_odds_real_vs_zero": 4.1,
+    "token": "synthetic"
+   }
+  ],
+  "row_count": 2,
+  "scope": "Synthetic fixture: real-vs-null enrichment on 2 rows.",
+  "zero_enriched_words": [
+   {
+    "log_odds_real_vs_zero": -4.8,
+    "token": "empty"
+   },
+   {
+    "log_odds_real_vs_zero": -3.9,
+    "token": "null"
+   }
+  ]
+ },
+ "parse_health": {
+  "almanac_parse_health": {
+   "none": {
+    "closed_fraction": 1.0,
+    "usable_fraction": 1.0
+   },
+   "real": {
+    "closed_fraction": 1.0,
+    "usable_fraction": 1.0
+   },
+   "zero": {
+    "closed_fraction": 1.0,
+    "usable_fraction": 1.0
+   }
+  },
+  "e1_av_parse": {
+   "mean": {
+    "closed_fraction": 1.0,
+    "usable_fraction": 1.0
+   },
+   "none": {
+    "closed_fraction": 1.0,
+    "usable_fraction": 1.0
+   },
+   "real": {
+    "closed_fraction": 1.0,
+    "usable_fraction": 1.0
+   },
+   "shuffled": {
+    "closed_fraction": 1.0,
+    "usable_fraction": 1.0
+   },
+   "zero": {
+    "closed_fraction": 1.0,
+    "usable_fraction": 1.0
+   }
+  },
+  "explanations_by_kind": {
+   "alternate_telling": {
+    "usable_closed": 4
+   },
+   "qualified_av": {
+    "usable_closed": 4
+   }
+  },
+  "poetry_usable_fraction": 0.75,
+  "trace_descriptions_usable": true
+ },
+ "poetry_status": {
+  "claim_scope": "fresh_forward_exploratory",
+  "config_sha256": "a0b0b7d82a94dbe23b2c791cb62135829c1b3ed7363c62c3aefd1ed5544be8ef",
+  "pipeline_note": "Pipeline `passed` means phase completeness gates only; it is not evidence that a scientific planning hypothesis passed.",
+  "pipeline_passed": true
+ },
+ "provenance": {
+  "bundle_config_sha256": "c4fac82e76f39c5abc52898960a0bc962ae94c70a5855e87d57c9448cc83a97a",
+  "bundle_id": "0699d2eee7f15b366d156f259f4d986ad9812b05be93687c9adc3c8a536ff17c",
+  "code_bindings": {
+   "configs/fixture.yaml": "3c30b25be5950db45e29e87838b4da2fdfc75b760aa91812a5cb597a77545091"
+  },
+  "counts": {
+   "behavior": 4,
+   "interventions": 8,
+   "rows": 2,
+   "trajectories": 6,
+   "vectors": 12
+  },
+  "excluded_files": [
+   "vectors/all.f16.bin"
+  ],
+  "files": [
+   {
+    "bytes": 1000,
+    "path": "audit.json",
+    "schema_version": "nla_observatory_dashboard.v2",
+    "sha256": "c336a160c4fa5bc741f5fcd79a0d211fe88ca98f6803fcef6b0b1bdac77f5b4b"
+   },
+   {
+    "bytes": 1007,
+    "path": "bench/index.json",
+    "schema_version": "nla_observatory_dashboard.v2",
+    "sha256": "63bb4b7462261f2c7bc8f55cd762b7686119f8e39f108f2f800579fe4c050aa6"
+   },
+   {
+    "bytes": 1014,
+    "path": "bench/row-validation-1.json",
+    "schema_version": "nla_observatory_dashboard.v2",
+    "sha256": "3b41bfffb6d774c248c0d342d1a20f64bca61e8dfbe7c63722d589346fe69328"
+   },
+   {
+    "bytes": 1021,
+    "path": "channel.json",
+    "schema_version": "nla_observatory_dashboard.v2",
+    "sha256": "a81e013d9e6bd1d10fcc649140dc4651281e4ee480cf3beedfc8c5bd68bc509e"
+   },
+   {
+    "bytes": 1028,
+    "path": "poetry.json",
+    "schema_version": "nla_observatory_dashboard.v2",
+    "sha256": "417c0f23335e9f15c75b6f4c542b7c55c6e1b91521151d8f1930bc8bc5b580a9"
+   },
+   {
+    "bytes": 1035,
+    "path": "rewrites.json",
+    "schema_version": "nla_observatory_dashboard.v2",
+    "sha256": "1b63eebf687f6b29bacf8a542bc59e2f2b1d955ba0ad089eac439343f4c9d9fe"
+   },
+   {
+    "bytes": 1042,
+    "path": "rows.json",
+    "schema_version": "nla_observatory_dashboard.v2",
+    "sha256": "ce517c7ce3c8cf8f5d2c24d73cb0ad64b3eb57f46230032bcee319dae070f7a0"
+   },
+   {
+    "bytes": 1049,
+    "path": "trace.json",
+    "schema_version": "nla_observatory_dashboard.v2",
+    "sha256": "89144b15c25797f9e754a72c7feacf4b78ffaf2b671da7a7beff886d306bc608"
+   }
+  ],
+  "population": "QUALIFIED",
+  "privacy_card": {
+   "automatic_gate_passed": true,
+   "claim_boundary": "Synthetic fixture: automatic triage only.",
+   "human_review_required": true
+  },
+  "report_bindings": {
+   "e0": {
+    "sha256": "bdc898b0c700d76c6c745826abc71868e46d97274b3642c895f501ccdf224600",
+    "source_path": "/synthetic/model_outputs/e0/report.json"
+   },
+   "e2": {
+    "sha256": "b9a6742788d6c440094e0d68b2878b97a047df8c3d2f2cb1df45d8501a35765a",
+    "source_path": "/synthetic/model_outputs/e2/report.json"
+   }
+  },
+  "runtime": {
+   "numpy": "2.0.0",
+   "python": "3.12.0",
+   "torch": "2.0.0"
+  },
+  "source_config_sha256": "9249ea197708dcb52eeb865e0664695593607b207d908b39306fb2e7c6a6f229",
+  "source_provenance": {
+   "independent_cache_sha256": "e09a10796e33f12ec664aecb232e83c29d4a670365ed083f996ee1d5d339e26d",
+   "primary_cache_sha256": "f3550e5ca807edec9876240123f0ab961450be908e360307c1ff25f0f076a6a4"
+  },
+  "split": "validation",
+  "tokenizer": {
+   "path": "fixtures/tokenizer.json",
+   "sha256": "249226d474bc9ee6068b50b8683c57eb63b8779c08ee8fea3aec80cefce3e44f",
+   "spot_check": {
+    "mismatches": 0,
+    "tokens": 8
+   },
+   "vocab_size": 1024
+  }
+ },
+ "schema_version": "nla_observatory_dashboard.v2"
+}

@@ -1,0 +1,45 @@
+diff --git a/miles/backends/fsdp_utils/actor.py b/miles/backends/fsdp_utils/actor.py
+--- a/miles/backends/fsdp_utils/actor.py
++++ b/miles/backends/fsdp_utils/actor.py
+@@ -923,6 +923,30 @@ def apply_fsdp2(model, mesh=None, cpu_offload=False, args=None):
+     for module in modules:
+         fully_shard(module, **fsdp_kwargs)
+ 
+     # Apply FSDP to the top-level model
+     fully_shard(model, **fsdp_kwargs)
++ 
++    if getattr(args, "fsdp_disable_backward_prefetch", False):
++        patched = 0
++        for module in [*modules, model]:
++            get_state = getattr(module, "_get_fsdp_state", None)
++            if get_state is None:
++                continue
++            fsdp_state = get_state()
++            param_group = getattr(fsdp_state, "_fsdp_param_group", None)
++            if param_group is None or getattr(param_group, "_nla_backward_prefetch_disabled", False):
++                continue
++            original_pre_backward = param_group.pre_backward
++
++            def pre_backward_no_default_prefetch(default_prefetch, *unused, _original=original_pre_backward):
++                return _original(False, *unused)
++
++            param_group.pre_backward = pre_backward_no_default_prefetch
++            param_group._nla_backward_prefetch_disabled = True
++            patched += 1
++        logger.info(
++            "[NLA] Disabled FSDP2 default backward prefetch for %d param groups "
++            "(current-layer unshard still runs).",
++            patched,
++        )
+     return model
+diff --git a/miles/backends/fsdp_utils/arguments.py b/miles/backends/fsdp_utils/arguments.py
+--- a/miles/backends/fsdp_utils/arguments.py
++++ b/miles/backends/fsdp_utils/arguments.py
+@@ -41,6 +41,7 @@ class FSDPArgs:
+     # Precision
+     gradient_checkpointing: bool = False
+     fsdp_reduce_dtype: str = "float32"
++    fsdp_disable_backward_prefetch: bool = False
+     fp16: bool = False
+ 
+     # FSDP configuration

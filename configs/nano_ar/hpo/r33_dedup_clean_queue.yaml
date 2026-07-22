@@ -1,0 +1,53 @@
+schema_version: nano_ar_hpo_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  batch_size: 4
+  controls:
+  - teacher
+  - teacher_shuffled
+  - blank
+  - generic
+  - mean
+  - source_context
+  - source_raw
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/ar_hpo_queue/r33_dedup_clean_trials.jsonl
+items:
+- name: r33-dedup-smoke-20k-lr2e5-warmup20-gb192-mb96
+  config: configs/nano_ar/hpo/r33_dedup_smoke_20k_lr2e5_cosine_warmup20_gb192_mb96.yaml
+  run_id: nano-ar-r33-dedup-smoke-20k-lr2e5-cosine-warmup20-gb192-mb96
+  status: failed
+  failed_at: '2026-06-11T11:00:34Z'
+  failure: step-0 reward-path and training-path MSE diverged by 17.9% under packed mb96 on real rollout data
+  notes: Clean content-dedup R33 AR smoke. Dataset/verifier reports passed for r33_prefix_dedup_content_fullscan; this is a leak-free smoke/gate input, not a hero-scale claim.
+- name: r33-dedup-smoke-20k-lr2e5-warmup20-gb192-mb1-2gpu
+  config: configs/nano_ar/hpo/r33_dedup_smoke_20k_lr2e5_cosine_warmup20_gb192_mb1_2gpu.yaml
+  run_id: nano-ar-r33-dedup-smoke-20k-lr2e5-cosine-warmup20-gb192-mb1-2gpu
+  status: failed
+  failed_at: '2026-06-11T18:34:12Z'
+  failure: 'LR decay canary failed: flat or under-decayed LR: final_lr=2e-05 >= 1.8e-05'
+  notes: Clean AR smoke fallback after packed mb96 failed the live reward/train equivalence guard. Uses mb1 across 2 GPUs to avoid packed sample contamination.
+- name: r33-dedup-smoke-20k-lr2e5-warmup20-gb192-mb1-2gpu-lrfix
+  config: configs/nano_ar/hpo/r33_dedup_smoke_20k_lr2e5_cosine_warmup20_gb192_mb1_2gpu_lrfix.yaml
+  run_id: nano-ar-r33-dedup-smoke-20k-lr2e5-cosine-warmup20-gb192-mb1-2gpu-lrfix
+  status: cancelled
+  started_at: '2026-06-12T16:05:31Z'
+  cancelled_at: '2026-06-12T16:28:05Z'
+  cancellation_reason: Operator stopped this mb1 correctness run after LR fix was confirmed because the 96-step smoke ETA was too slow for iteration. Use the dedicated throughput ladder queue instead.
+  notes: Clean AR smoke after preserving requested cosine LR schedules for fresh SFT; same mb1 fallback shape, new run id to avoid mixing with the failed-LR diagnostic.
+- name: r33-dedup-full-lr5e5-warmup25-gb192-mb96
+  config: configs/nano_ar/hpo/r33_dedup_full_lr5e5_cosine_warmup25_gb192_mb96.yaml
+  run_id: nano-ar-r33-dedup-full-lr5e5-cosine-warmup25-gb192-mb1-2gpu
+  status: cancelled
+  cancelled_at: '2026-06-22T15:26:15Z'
+  cancellation_reason: Superseded by the selected component-full R33 hero AR/AV path; keep this queue item as history only.
+  notes: Strict content-dedup clean56k follow-up, not a complete-performance hero run. Uses mb1 because packed mb96 failed the live equivalence guard. Launch only after the dedup AR smoke and R27 dedup-heldout re-eval establish an honest comparison target.
+- name: r33-dedup-clean56k-lr5e5-warmup25-gb192-mb96-128step-padded
+  config: configs/nano_ar/hpo/r33_dedup_clean56k_lr5e5_cosine_warmup25_gb192_mb96_128steps.yaml
+  run_id: nano-ar-r33-dedup-clean56k-lr5e5-cosine-warmup25-gb192-mb96-128step-padded
+  status: cancelled
+  cancelled_at: '2026-06-22T15:26:15Z'
+  cancellation_reason: Superseded by the selected component-full R33 hero AR/AV path; the completed clean56k run is retained only as intermediate evidence.
+  notes: Clean content-dedup R33 AR quality smoke after the padded masked critic path fixed the packed mb>1 reward/train mismatch. Uses the fastest passing throughput shape from the no-save ladder.

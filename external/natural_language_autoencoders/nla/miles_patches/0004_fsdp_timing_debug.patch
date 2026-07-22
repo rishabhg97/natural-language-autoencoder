@@ -1,0 +1,299 @@
+diff --git a/miles/backends/fsdp_utils/actor.py b/miles/backends/fsdp_utils/actor.py
+--- a/miles/backends/fsdp_utils/actor.py
++++ b/miles/backends/fsdp_utils/actor.py
+@@ -1,6 +1,7 @@
+ import logging
+ import os
+ import random
++import time
+ from argparse import Namespace
+ 
+ import ray
+@@ -54,6 +55,38 @@ class FSDPTrainRayActor(TrainRayActor):
+       * For small models this is fine; for larger models consider sharded state_dict type.
+     """
+ 
++    def _nla_timing_enabled(self) -> bool:
++        return bool(getattr(self.args, "nla_timing_debug", False))
++
++    def _nla_timing_start(self):
++        if not self._nla_timing_enabled():
++            return None
++        if torch.cuda.is_available():
++            torch.cuda.synchronize()
++        return time.perf_counter()
++
++    def _nla_timing_log(self, label: str, start=None, **fields) -> None:
++        if not self._nla_timing_enabled():
++            return
++        if torch.cuda.is_available():
++            torch.cuda.synchronize()
++        elapsed = None if start is None else time.perf_counter() - start
++        rank = dist.get_rank() if dist.is_initialized() else -1
++        mem_fields = {}
++        if torch.cuda.is_available():
++            device = torch.cuda.current_device()
++            gib = 1024 ** 3
++            mem_fields = {
++                "cuda_device": device,
++                "cuda_allocated_gib": round(torch.cuda.memory_allocated(device) / gib, 3),
++                "cuda_reserved_gib": round(torch.cuda.memory_reserved(device) / gib, 3),
++                "cuda_max_allocated_gib": round(torch.cuda.max_memory_allocated(device) / gib, 3),
++            }
++        payload = {"rank": rank, "label": label, **fields, **mem_fields}
++        if elapsed is not None:
++            payload["elapsed_s"] = round(elapsed, 6)
++        logger.info("[NLA TIMING] " + " ".join(f"{k}={v}" for k, v in payload.items()))
++
+     @with_defer(lambda: Timer().start("train_wait"))
+     def init(self, args: Namespace, role: str, with_ref: bool = False) -> int:  # type: ignore[override]
+         super().init(args, role, with_ref)
+@@ -441,27 +474,59 @@ class FSDPTrainRayActor(TrainRayActor):
+         ), f"Invalid num_microbatches {num_microbatches} for micro_batch_size {self.args.micro_batch_size} and global_batch_size {self.args.global_batch_size}"
+ 
+         if self.ref_model is not None:
++            nla_timing_ref_start = self._nla_timing_start()
+             ref_results = self._compute_log_prob("ref", data_iterator, num_microbatches, store_prefix="ref_")
++            self._nla_timing_log("nla_timing_ref_log_prob", nla_timing_ref_start, rollout_id=rollout_id)
+             rollout_data.update(ref_results)
+ 
++        nla_timing_actor_log_prob_start = self._nla_timing_start()
+         actor_results = self._compute_log_prob("actor", data_iterator, num_microbatches)
++        self._nla_timing_log("nla_timing_actor_log_prob", nla_timing_actor_log_prob_start, rollout_id=rollout_id)
+         rollout_data.update(actor_results)
+ 
++        nla_timing_advantages_start = self._nla_timing_start()
+         compute_advantages_and_returns(self.args, self.parallel_state, rollout_data)
++        self._nla_timing_log("nla_timing_compute_advantages", nla_timing_advantages_start, rollout_id=rollout_id)
++        if not dist.is_initialized() or dist.get_rank() == 0:
++            try:
++                from nla.rollout.rl_metrics import advantage_stats_from_rollout_data
++
++                nla_adv_metrics = advantage_stats_from_rollout_data(rollout_data)
++                if nla_adv_metrics:
++                    logger.info(
++                        "[NLA ADVANTAGE] scope=rank0_shard "
++                        + " ".join(f"{k}={v}" for k, v in sorted(nla_adv_metrics.items()))
++                    )
++            except Exception as exc:
++                logger.warning("[NLA ADVANTAGE] failed to collect advantage stats: %s", exc)
+ 
++        nla_timing_log_rollout_start = self._nla_timing_start()
+         log_rollout_data(rollout_id, self.args, rollout_data, self.parallel_state)
++        self._nla_timing_log("nla_timing_log_rollout_data", nla_timing_log_rollout_start, rollout_id=rollout_id)
+ 
+         with timer("actor_train"):
++            if self._nla_timing_enabled() and torch.cuda.is_available():
++                torch.cuda.reset_peak_memory_stats(torch.cuda.current_device())
+             data_iterator.reset()
+             num_steps_per_rollout = len(num_microbatches)
+ 
+             for step_id in range(num_steps_per_rollout):
++                nla_timing_step_start = self._nla_timing_start()
++                nla_timing_zero_grad_start = self._nla_timing_start()
+                 self.optimizer.zero_grad(set_to_none=True)
++                self._nla_timing_log(
++                    "nla_timing_zero_grad",
++                    nla_timing_zero_grad_start,
++                    rollout_id=rollout_id,
++                    step_id=step_id,
++                    num_microbatches=num_microbatches[step_id],
++                )
+ 
+                 losses_reduced = []
+-                for _ in self.prof.iterate_train_actor(
++                for microbatch_id, _ in enumerate(self.prof.iterate_train_actor(
+                     tqdm(range(num_microbatches[step_id]), desc="actor_train", disable=dist.get_rank() != 0)
+-                ):
++                )):
++                    nla_timing_get_batch_start = self._nla_timing_start()
+                     batch = get_batch(
+                         data_iterator,
+                         [
+@@ -482,45 +533,104 @@ class FSDPTrainRayActor(TrainRayActor):
+                         self.args.qkv_format,
+                         get_position_ids=True,
+                     )
++                    tokens = batch.get("tokens")
++                    token_shape = tuple(tokens.shape) if hasattr(tokens, "shape") else None
++                    token_count = int(tokens.numel()) if hasattr(tokens, "numel") else None
++                    self._nla_timing_log(
++                        "nla_timing_get_batch",
++                        nla_timing_get_batch_start,
++                        rollout_id=rollout_id,
++                        step_id=step_id,
++                        microbatch_id=microbatch_id,
++                        token_shape=token_shape,
++                        token_count=token_count,
++                    )
+ 
++                    self._nla_timing_context = {
++                        "rollout_id": rollout_id,
++                        "step_id": step_id,
++                        "microbatch_id": microbatch_id,
++                    }
++                    nla_timing_microbatch_start = self._nla_timing_start()
++                    try:
+-                    log_dict = self._train_step(
+-                        batch=batch,
+-                        step_id=step_id,
+-                        num_microbatches=num_microbatches[step_id],
+-                    )
++                        log_dict = self._train_step(
++                            batch=batch,
++                            step_id=step_id,
++                            num_microbatches=num_microbatches[step_id],
++                        )
++                    finally:
++                        self._nla_timing_context = {}
++                    self._nla_timing_log(
++                        "nla_timing_microbatch_total",
++                        nla_timing_microbatch_start,
++                        rollout_id=rollout_id,
++                        step_id=step_id,
++                        microbatch_id=microbatch_id,
++                    )
+                     losses_reduced.append(log_dict)
+ 
++                nla_timing_clip_start = self._nla_timing_start()
+                 grad_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.args.clip_grad)
++                self._nla_timing_log("nla_timing_clip_grad_norm_raw", nla_timing_clip_start, rollout_id=rollout_id, step_id=step_id)
++
++                nla_timing_full_tensor_start = self._nla_timing_start()
+                 grad_norm = grad_norm.full_tensor().item()
++                self._nla_timing_log(
++                    "nla_timing_clip_grad_norm_full_tensor",
++                    nla_timing_full_tensor_start,
++                    rollout_id=rollout_id,
++                    step_id=step_id,
++                    grad_norm=grad_norm,
++                )
+ 
++                nla_timing_optimizer_start = self._nla_timing_start()
+                 self.optimizer.step()
++                self._nla_timing_log("nla_timing_optimizer_step", nla_timing_optimizer_start, rollout_id=rollout_id, step_id=step_id)
++
++                nla_timing_scheduler_start = self._nla_timing_start()
+                 self.lr_scheduler.step()
++                self._nla_timing_log("nla_timing_lr_scheduler_step", nla_timing_scheduler_start, rollout_id=rollout_id, step_id=step_id)
+ 
+                 if self.args.ci_test:
++                    nla_timing_ci_start = self._nla_timing_start()
+                     check_grad_norm(
+                         args=self.args,
+                         grad_norm=grad_norm,
+                         rollout_id=rollout_id,
+                         step_id=step_id,
+                         role="actor",
+                         rank=self.parallel_state.dp_cp_rank,
+                     )
++                    self._nla_timing_log("nla_timing_ci_check_grad_norm", nla_timing_ci_start, rollout_id=rollout_id, step_id=step_id)
+ 
++                nla_timing_aggregate_start = self._nla_timing_start()
+                 loss_dict = aggregate_train_losses(losses_reduced, self.parallel_state)
++                self._nla_timing_log("nla_timing_aggregate_train_losses", nla_timing_aggregate_start, rollout_id=rollout_id, step_id=step_id)
+ 
++                nla_timing_extra_metrics_start = self._nla_timing_start()
+                 extra_metrics = {}
+                 for param_group_id, param_group in enumerate(self.optimizer.param_groups):
+                     extra_metrics[f"lr-pg_{param_group_id}"] = param_group["lr"]
++                self._nla_timing_log("nla_timing_extra_metrics", nla_timing_extra_metrics_start, rollout_id=rollout_id, step_id=step_id)
+ 
++                nla_timing_log_step_start = self._nla_timing_start()
+                 log_train_step(
+                     args=self.args,
+                     loss_dict=loss_dict,
+                     grad_norm=grad_norm,
+                     rollout_id=rollout_id,
+                     step_id=step_id,
+                     num_steps_per_rollout=num_steps_per_rollout,
+                     role="actor",
+                     extra_metrics=extra_metrics,
+                 )
++                self._nla_timing_log("nla_timing_log_train_step", nla_timing_log_step_start, rollout_id=rollout_id, step_id=step_id)
++                self._nla_timing_log(
++                    "nla_timing_optimizer_step_total",
++                    nla_timing_step_start,
++                    rollout_id=rollout_id,
++                    step_id=step_id,
++                    num_microbatches=num_microbatches[step_id],
++                )
+ 
+         self.prof.step(rollout_id=rollout_id)
+@@ -542,17 +683,64 @@ class FSDPTrainRayActor(TrainRayActor):
+-    def _train_step(self, batch, step_id, num_microbatches):
++    def _train_step(self, batch, step_id, num_microbatches, rollout_id=None, microbatch_id=None):
++        timing_context = getattr(self, "_nla_timing_context", {})
++        if rollout_id is None:
++            rollout_id = timing_context.get("rollout_id")
++        if microbatch_id is None:
++            microbatch_id = timing_context.get("microbatch_id")
+         # Prepare model inputs
++        nla_timing_prepare_start = self._nla_timing_start()
+         model_args = self._get_model_inputs_args(batch)
++        input_ids = model_args.get("input_ids")
++        input_shape = tuple(input_ids.shape) if hasattr(input_ids, "shape") else None
++        self._nla_timing_log(
++            "nla_timing_train_step_prepare_inputs",
++            nla_timing_prepare_start,
++            rollout_id=rollout_id,
++            step_id=step_id,
++            microbatch_id=microbatch_id,
++            input_shape=input_shape,
++            num_microbatches=num_microbatches,
++        )
++
++        nla_timing_forward_start = self._nla_timing_start()
+         logits = self.model(**model_args).logits.float()
++        self._nla_timing_log(
++            "nla_timing_train_step_forward",
++            nla_timing_forward_start,
++            rollout_id=rollout_id,
++            step_id=step_id,
++            microbatch_id=microbatch_id,
++            logits_shape=tuple(logits.shape),
++        )
+ 
++        nla_timing_loss_start = self._nla_timing_start()
+         loss, normalizer, log_dict = loss_function(
+             args=self.args,
+             parallel_state=self.parallel_state,
+             batch=batch,
+             num_microbatches=num_microbatches,
+             logits=logits,
+             apply_megatron_loss_scaling=False,
+         )
++        loss_value = float(loss.detach().float().item()) if hasattr(loss, "detach") else None
++        normalizer_value = float(normalizer.detach().float().item()) if hasattr(normalizer, "detach") else normalizer
++        self._nla_timing_log(
++            "nla_timing_train_step_loss",
++            nla_timing_loss_start,
++            rollout_id=rollout_id,
++            step_id=step_id,
++            microbatch_id=microbatch_id,
++            loss=loss_value,
++            normalizer=normalizer_value,
++        )
+ 
++        nla_timing_backward_start = self._nla_timing_start()
+         loss.backward()
++        self._nla_timing_log(
++            "nla_timing_train_step_backward",
++            nla_timing_backward_start,
++            rollout_id=rollout_id,
++            step_id=step_id,
++            microbatch_id=microbatch_id,
++        )
+ 
+         return log_dict
+diff --git a/miles/backends/fsdp_utils/arguments.py b/miles/backends/fsdp_utils/arguments.py
+--- a/miles/backends/fsdp_utils/arguments.py
++++ b/miles/backends/fsdp_utils/arguments.py
+@@ -25,6 +25,7 @@ class FSDPArgs:
+     adam_beta2: float = 0.95
+     adam_eps: float = 1e-8
+     adam_foreach: bool = False
++    nla_timing_debug: bool = False
+     warmup_ratio: float = 0.03
+ 
+     attn_implementation: str = "flash_attention_2"

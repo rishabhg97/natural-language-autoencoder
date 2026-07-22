@@ -1,0 +1,22 @@
+diff --git a/train.py b/train.py
+--- a/train.py
++++ b/train.py
+@@ -11,3 +11,4 @@ from sglang.srt.constants import GPU_MEMORY_TYPE_CUDA_GRAPH, GPU_MEMORY_TYPE_KV_
+ from miles.ray.placement_group import create_placement_groups, create_rollout_manager, create_training_models
++from nla.save_schedule import should_save_rollout
+ from nla.embed_store import get_embed_store
+ from miles.utils.arguments import parse_args
+@@ -140,7 +141,12 @@ def train(args):
+         # NFS-touching work in update_weights should complete before save's
+         # async bg-write saturates the server.
+         sync_weights()
+-        if should_run_periodic_action(rollout_id, args.save_interval, num_rollout_per_epoch, args.num_rollout):
++        if should_save_rollout(
++            rollout_id,
++            args.save_interval,
++            num_rollout_per_epoch,
++            args.num_rollout,
++        ):
+             save(rollout_id)
+         if args.offload_rollout:
+             ray.get(rollout_manager.onload_kv.remote())

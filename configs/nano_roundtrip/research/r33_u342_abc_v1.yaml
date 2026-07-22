@@ -1,0 +1,104 @@
+schema_version: nano_roundtrip_research_study.v1
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  render_dir: /workspace/interp/code/nano30b-nla-pilot-publication-current/configs/nano_roundtrip/generated/r33_u342_abc_v1
+  output_root: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1
+  train_parquet: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/train_padded.parquet
+  thin_validation_parquet: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/actor_hpo_dev/v2/r33_hpo_dev_validation.parquet
+  control_source_parquet: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/base_R33_r33_deterministic_full275396.parquet
+  control_join_columns: [doc_id, n_raw_tokens]
+  validation_parquet: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/actor_hpo_dev/v2/r33_hpo_dev_validation.parquet
+  validation_control_parquet: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/data/r33_hpo_dev_validation_with_exact_source_controls.parquet
+  content_family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_exact_prefix_refined_base_manifest.json
+  content_family_coverage: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_clean_sft_family_coverage.json
+
+texts:
+  sft:
+    generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/eval384_matched_v122/sft_generated.jsonl
+    av_hf_checkpoint: /dev/shm/nano30b-nla-pilot/post_eval_hf/r33_internal_hero_eval384_sft
+    av_model_fingerprint: dcp_model_sha256:43346232d2fc043260ee903191e20cce07801903e1e7b7956f16022eb463386a
+    av_tokenizer_fingerprint: tokenizer_files_sha256:924108201acc4872dca41bbd39caad108038634a428c2bb26fee7516d424ad0f
+  rl:
+    generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/eval384_matched_v122/rl_generated.jsonl
+    av_hf_checkpoint: /dev/shm/nano30b-nla-pilot/post_eval_hf/r33_internal_hero_eval384_rl
+    av_model_fingerprint: dcp_model_sha256:bfb130bbb6f0007f9c3a9d0098139c33df11dc1c402c8cbd0e5f8e317403065e
+    av_tokenizer_fingerprint: tokenizer_files_sha256:924108201acc4872dca41bbd39caad108038634a428c2bb26fee7516d424ad0f
+
+critics:
+  sft:
+    checkpoint: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean/nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/checkpoints/iter_0001291/hf
+    stage_s3_uri: publication/checkpoints/r33_deterministic_family_clean_ar_sft/iter_0001291/hf/
+    stage_model_size_bytes: 38430586144
+    stage_model_multipart_etag: bbc1666ab1cd5095f729ba743fc186f6-287
+    stage_multipart_part_size_bytes: 134217728
+    stage_s3_max_concurrent_requests: 8
+    stage_s3_multipart_chunksize_mb: 128
+    runtime_checkpoint: /dev/shm/nano30b-nla-pilot/research/r33_u342_abc_v1/critics/sft_s3tmp
+  rl:
+    checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/critic/iter_0000342
+  independent:
+    checkpoint: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean-independent/nano-ar-r33-publication-deterministic-family-clean-independent-seed314159-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/checkpoints/iter_0001291
+    stage_s3_uri: publication/checkpoints/r33_deterministic_family_clean_independent_ar_sft_seed314159/iter_0001291/hf/
+    stage_model_size_bytes: 38430586144
+    stage_model_multipart_etag: 85f04c44625b6affc6daa22cd1ac511b-573
+    stage_multipart_part_size_bytes: 67108864
+    stage_s3_max_concurrent_requests: 8
+    stage_s3_multipart_chunksize_mb: 128
+    runtime_checkpoint: /dev/shm/nano30b-nla-pilot/research/r33_u342_abc_v1/critics/independent_s3tmp
+
+evaluation:
+  validation_limit: 122
+  max_new_tokens: 384
+  seed: 20260718
+  selection_seed: 20260718
+  min_independent_families: 122
+  injection_scale: "75"
+  ar_batch_size: 4
+  ar_max_length: 1152
+  torch_dtype: bfloat16
+  control_margin: 0.000001
+  min_closed_fraction: 0.95
+  min_usable_fraction: 0.99
+  bootstrap_samples: 10000
+  permutation_samples: 100000
+
+execution:
+  python: /workspace/interp/.venv/bin/python
+  gpu_devices: ["0", "1", "2", "3", "4", "5"]
+  max_parallel: 6
+  resume_completed: true
+
+semantic_stress:
+  cross_source_contrasts:
+    - name: rl_first_75pct_vs_sft_original
+      left: {source: sft, transform: real}
+      right: {source: rl, transform: truncate_words_75}
+      positive_interpretation: compressed RL text has lower loss than original SFT text
+    - name: rl_first_50pct_vs_sft_original
+      left: {source: sft, transform: real}
+      right: {source: rl, transform: truncate_words_50}
+      positive_interpretation: compressed RL text has lower loss than original SFT text
+    - name: rl_two_sentence_summary_vs_sft_original
+      left: {source: sft, transform: real}
+      right: {source: rl, transform: two_sentence_summary}
+      positive_interpretation: summarized RL text has lower loss than original SFT text
+  deterministic_transforms:
+    - format_normalized
+    - surface_canonicalized
+    - unit_reordered
+    - truncate_words_25
+    - truncate_words_50
+    - truncate_words_75
+    - drop_first_unit
+    - drop_last_unit
+  external_transforms:
+    sft:
+      light_paraphrase: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms/sft/light_paraphrase.jsonl
+      aggressive_paraphrase: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms/sft/aggressive_paraphrase.jsonl
+      two_sentence_summary: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms/sft/two_sentence_summary.jsonl
+      french_roundtrip: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms/sft/french_roundtrip.jsonl
+    rl:
+      light_paraphrase: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms/rl/light_paraphrase.jsonl
+      aggressive_paraphrase: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms/rl/aggressive_paraphrase.jsonl
+      two_sentence_summary: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms/rl/two_sentence_summary.jsonl
+      french_roundtrip: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms/rl/french_roundtrip.jsonl

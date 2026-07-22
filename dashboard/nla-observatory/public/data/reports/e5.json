@@ -1,0 +1,147 @@
+{
+  "boundary": 33,
+  "claim_scope": "fresh_forward_exploratory",
+  "config_sha256": "c7492fecc776f3991ac605a83c1f74c57eeabd5ed9f8cd4838676b164161b259",
+  "documents": 10,
+  "passed": true,
+  "phase": "e5_trace_extract",
+  "schema_version": "nano_viz_model_batches.v1",
+  "split": "validation",
+  "stored_final_position_drift": [
+    {
+      "lhs_dtype": "torch.float32",
+      "max_abs": 0.875,
+      "one_minus_cos": 0.002374410629272461,
+      "relative_l2": 0.06918545812368393,
+      "rhs_dtype": "torch.float32",
+      "rms_ratio": 1.0042015314102173,
+      "row_id": "validation-248219",
+      "row_index": 248219,
+      "shape": [
+        2688
+      ]
+    },
+    {
+      "lhs_dtype": "torch.float32",
+      "max_abs": 1.0,
+      "one_minus_cos": 0.00021791458129882812,
+      "relative_l2": 0.02171551249921322,
+      "rhs_dtype": "torch.float32",
+      "rms_ratio": 1.0056583881378174,
+      "row_id": "validation-248348",
+      "row_index": 248348,
+      "shape": [
+        2688
+      ]
+    },
+    {
+      "lhs_dtype": "torch.float32",
+      "max_abs": 2.0,
+      "one_minus_cos": 0.00045680999755859375,
+      "relative_l2": 0.03026433102786541,
+      "rhs_dtype": "torch.float32",
+      "rms_ratio": 0.9983122944831848,
+      "row_id": "validation-248474",
+      "row_index": 248474,
+      "shape": [
+        2688
+      ]
+    },
+    {
+      "lhs_dtype": "torch.float32",
+      "max_abs": 0.75,
+      "one_minus_cos": 0.0002651810646057129,
+      "relative_l2": 0.023069502785801888,
+      "rhs_dtype": "torch.float32",
+      "rms_ratio": 1.000556230545044,
+      "row_id": "validation-249039",
+      "row_index": 249039,
+      "shape": [
+        2688
+      ]
+    },
+    {
+      "lhs_dtype": "torch.float32",
+      "max_abs": 1.0,
+      "one_minus_cos": 0.0008938312530517578,
+      "relative_l2": 0.04351193085312843,
+      "rhs_dtype": "torch.float32",
+      "rms_ratio": 1.0093759298324585,
+      "row_id": "validation-253172",
+      "row_index": 253172,
+      "shape": [
+        2688
+      ]
+    },
+    {
+      "lhs_dtype": "torch.float32",
+      "max_abs": 2.0,
+      "one_minus_cos": 0.0009849071502685547,
+      "relative_l2": 0.04832151159644127,
+      "rhs_dtype": "torch.float32",
+      "rms_ratio": 1.0181176662445068,
+      "row_id": "validation-254443",
+      "row_index": 254443,
+      "shape": [
+        2688
+      ]
+    },
+    {
+      "lhs_dtype": "torch.float32",
+      "max_abs": 1.0078125,
+      "one_minus_cos": 0.0032822489738464355,
+      "relative_l2": 0.08098860830068588,
+      "rhs_dtype": "torch.float32",
+      "rms_ratio": 0.9988569617271423,
+      "row_id": "validation-255668",
+      "row_index": 255668,
+      "shape": [
+        2688
+      ]
+    },
+    {
+      "lhs_dtype": "torch.float32",
+      "max_abs": 2.0,
+      "one_minus_cos": 0.00011211633682250977,
+      "relative_l2": 0.017694322392344475,
+      "rhs_dtype": "torch.float32",
+      "rms_ratio": 0.9904688000679016,
+      "row_id": "validation-257634",
+      "row_index": 257634,
+      "shape": [
+        2688
+      ]
+    },
+    {
+      "lhs_dtype": "torch.float32",
+      "max_abs": 2.0,
+      "one_minus_cos": 0.0009908080101013184,
+      "relative_l2": 0.044982533901929855,
+      "rhs_dtype": "torch.float32",
+      "rms_ratio": 0.9925433993339539,
+      "row_id": "validation-258027",
+      "row_index": 258027,
+      "shape": [
+        2688
+      ]
+    },
+    {
+      "lhs_dtype": "torch.float32",
+      "max_abs": 1.5,
+      "one_minus_cos": 0.0002792477607727051,
+      "relative_l2": 0.024011801928281784,
+      "rhs_dtype": "torch.float32",
+      "rms_ratio": 0.9955732226371765,
+      "row_id": "validation-261028",
+      "row_index": 261028,
+      "shape": [
+        2688
+      ]
+    }
+  ],
+  "trajectories": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/e5_trace_pilot/fresh_trajectories.parquet",
+    "sha256": "4866d6f40dae54061d3b4243b8c4d412b1af7abd922692d933cd10093b6414f4"
+  },
+  "trajectory_rows": 400
+}

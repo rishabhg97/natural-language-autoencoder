@@ -1,0 +1,461 @@
+{
+ "cells": [
+  {
+   "baseline_continuation": "Synthetic baseline continuation for the teacher cell.",
+   "behavior": {
+    "js_divergence": 0.3,
+    "kl_original_to_patched": 1.5,
+    "logit_pearson": 0.9,
+    "original_top1_rank": 1,
+    "top_10_overlap": 0.7,
+    "top_50_overlap": 0.8,
+    "vocab_size": 1024
+   },
+   "cell_id": "cell-b-teacher",
+   "control_group_id": null,
+   "depth": "BEHAVIOR",
+   "family": "identity",
+   "generation_protocol": {
+    "backend": "full_prefix",
+    "boundary_replacement": "each_full_prefix_forward",
+    "do_sample": false,
+    "eos_stopping": false,
+    "max_new_tokens": 8,
+    "use_cache": true
+   },
+   "geometry": {
+    "x": 9.5,
+    "y": -4.5,
+    "z": 0.9
+   },
+   "metrics": {
+    "independent": {
+     "cosine": 0.94,
+     "dmse": 0.11,
+     "norm_ratio": 1.1,
+     "raw_mse": 4.01
+    },
+    "primary": {
+     "cosine": 0.95,
+     "dmse": 0.1,
+     "norm_ratio": 1.1,
+     "raw_mse": 4.0
+    }
+   },
+   "patched_continuation": "Synthetic patched continuation for the teacher cell.",
+   "spec": {
+    "kind": "teacher"
+   },
+   "text": "Synthetic teacher encoding 1 of a stored activation.",
+   "topk": {
+    "original": [
+     {
+      "id": 100,
+      "p": 0.6,
+      "text": " tk100"
+     },
+     {
+      "id": 101,
+      "p": 0.4,
+      "text": " tk101"
+     },
+     {
+      "id": 102,
+      "p": 0.2,
+      "text": " tk102"
+     }
+    ],
+    "patched": [
+     {
+      "id": 110,
+      "p": 0.6,
+      "text": " tk110"
+     },
+     {
+      "id": 111,
+      "p": 0.4,
+      "text": " tk111"
+     },
+     {
+      "id": 112,
+      "p": 0.2,
+      "text": " tk112"
+     }
+    ]
+   },
+   "variant": "teacher",
+   "wake": [
+    {
+     "js": 0.5,
+     "kl": 2.0,
+     "offset": 1,
+     "top_10_overlap": 0.4,
+     "top_50_overlap": 0.5
+    },
+    {
+     "js": 0.25,
+     "kl": 1.0,
+     "offset": 2,
+     "top_10_overlap": 0.55,
+     "top_50_overlap": 0.6
+    },
+    {
+     "js": 0.166667,
+     "kl": 0.666667,
+     "offset": 3,
+     "top_10_overlap": 0.7,
+     "top_50_overlap": 0.7
+    },
+    {
+     "js": 0.125,
+     "kl": 0.5,
+     "offset": 4,
+     "top_10_overlap": 0.85,
+     "top_50_overlap": 0.8
+    }
+   ]
+  },
+  {
+   "baseline_continuation": "Synthetic baseline continuation for the edit lane.",
+   "behavior": {
+    "js_divergence": 0.35,
+    "kl_original_to_patched": 1.7,
+    "logit_pearson": 0.87,
+    "original_top1_rank": 2,
+    "top_10_overlap": 0.65,
+    "top_50_overlap": 0.75,
+    "vocab_size": 1024
+   },
+   "cell_id": "cell-b-edit",
+   "control_group_id": "cg-1",
+   "depth": "BEHAVIOR",
+   "family": "clause_swap",
+   "generation_protocol": {
+    "backend": "full_prefix",
+    "boundary_replacement": "each_full_prefix_forward",
+    "do_sample": false,
+    "eos_stopping": false,
+    "max_new_tokens": 8,
+    "use_cache": true
+   },
+   "geometry": {
+    "x": 10.0,
+    "y": -5.0,
+    "z": 0.5
+   },
+   "metrics": {
+    "primary": {
+     "cosine": 0.94,
+     "dmse": 0.12,
+     "norm_ratio": 1.15,
+     "raw_mse": 4.5
+    }
+   },
+   "patched_continuation": "Synthetic patched continuation for the edit lane.",
+   "spec": {
+    "chip": "syntax",
+    "dose": 1.0,
+    "lane": "edit"
+   },
+   "text": "Synthetic clause-swap text for the edit lane.",
+   "topk": {
+    "original": [
+     {
+      "id": 110,
+      "p": 0.6,
+      "text": " tk110"
+     },
+     {
+      "id": 111,
+      "p": 0.4,
+      "text": " tk111"
+     },
+     {
+      "id": 112,
+      "p": 0.2,
+      "text": " tk112"
+     }
+    ],
+    "patched": [
+     {
+      "id": 115,
+      "p": 0.6,
+      "text": " tk115"
+     },
+     {
+      "id": 116,
+      "p": 0.4,
+      "text": " tk116"
+     },
+     {
+      "id": 117,
+      "p": 0.2,
+      "text": " tk117"
+     }
+    ]
+   },
+   "variant": "syntax:edit:a1",
+   "wake": [
+    {
+     "js": 0.51,
+     "kl": 2.01,
+     "offset": 1,
+     "top_10_overlap": 0.4,
+     "top_50_overlap": 0.5
+    },
+    {
+     "js": 0.26,
+     "kl": 1.01,
+     "offset": 2,
+     "top_10_overlap": 0.55,
+     "top_50_overlap": 0.6
+    },
+    {
+     "js": 0.176667,
+     "kl": 0.676667,
+     "offset": 3,
+     "top_10_overlap": 0.7,
+     "top_50_overlap": 0.7
+    },
+    {
+     "js": 0.135,
+     "kl": 0.51,
+     "offset": 4,
+     "top_10_overlap": 0.85,
+     "top_50_overlap": 0.8
+    }
+   ]
+  },
+  {
+   "baseline_continuation": "Synthetic baseline continuation for the paraphrase_placebo lane.",
+   "behavior": {
+    "js_divergence": 0.4,
+    "kl_original_to_patched": 1.9,
+    "logit_pearson": 0.84,
+    "original_top1_rank": 3,
+    "top_10_overlap": 0.6,
+    "top_50_overlap": 0.7,
+    "vocab_size": 1024
+   },
+   "cell_id": "cell-b-para",
+   "control_group_id": "cg-1",
+   "depth": "BEHAVIOR",
+   "family": "clause_swap",
+   "generation_protocol": {
+    "backend": "full_prefix",
+    "boundary_replacement": "each_full_prefix_forward",
+    "do_sample": false,
+    "eos_stopping": false,
+    "max_new_tokens": 8,
+    "use_cache": true
+   },
+   "geometry": {
+    "x": 11.0,
+    "y": -6.0,
+    "z": 1.0
+   },
+   "metrics": {
+    "primary": {
+     "cosine": 0.93,
+     "dmse": 0.14,
+     "norm_ratio": 1.2,
+     "raw_mse": 5.0
+    }
+   },
+   "patched_continuation": "Synthetic patched continuation for the paraphrase_placebo lane.",
+   "spec": {
+    "chip": "syntax",
+    "dose": 1.0,
+    "lane": "paraphrase_placebo"
+   },
+   "text": "Synthetic clause-swap text for the paraphrase_placebo lane.",
+   "topk": {
+    "original": [
+     {
+      "id": 120,
+      "p": 0.6,
+      "text": " tk120"
+     },
+     {
+      "id": 121,
+      "p": 0.4,
+      "text": " tk121"
+     },
+     {
+      "id": 122,
+      "p": 0.2,
+      "text": " tk122"
+     }
+    ],
+    "patched": [
+     {
+      "id": 125,
+      "p": 0.6,
+      "text": " tk125"
+     },
+     {
+      "id": 126,
+      "p": 0.4,
+      "text": " tk126"
+     },
+     {
+      "id": 127,
+      "p": 0.2,
+      "text": " tk127"
+     }
+    ]
+   },
+   "variant": "syntax:paraphrase_placebo:a1",
+   "wake": [
+    {
+     "js": 0.52,
+     "kl": 2.02,
+     "offset": 1,
+     "top_10_overlap": 0.4,
+     "top_50_overlap": 0.5
+    },
+    {
+     "js": 0.27,
+     "kl": 1.02,
+     "offset": 2,
+     "top_10_overlap": 0.55,
+     "top_50_overlap": 0.6
+    },
+    {
+     "js": 0.186667,
+     "kl": 0.686667,
+     "offset": 3,
+     "top_10_overlap": 0.7,
+     "top_50_overlap": 0.7
+    },
+    {
+     "js": 0.145,
+     "kl": 0.52,
+     "offset": 4,
+     "top_10_overlap": 0.85,
+     "top_50_overlap": 0.8
+    }
+   ]
+  },
+  {
+   "baseline_continuation": "Synthetic baseline continuation for the random_edit lane.",
+   "behavior": {
+    "js_divergence": 0.45,
+    "kl_original_to_patched": 2.1,
+    "logit_pearson": 0.81,
+    "original_top1_rank": 4,
+    "top_10_overlap": 0.55,
+    "top_50_overlap": 0.65,
+    "vocab_size": 1024
+   },
+   "cell_id": "cell-b-rand",
+   "control_group_id": "cg-1",
+   "depth": "BEHAVIOR",
+   "family": "clause_swap",
+   "generation_protocol": {
+    "backend": "full_prefix",
+    "boundary_replacement": "each_full_prefix_forward",
+    "do_sample": false,
+    "eos_stopping": false,
+    "max_new_tokens": 8,
+    "use_cache": true
+   },
+   "geometry": {
+    "x": 12.0,
+    "y": -7.0,
+    "z": 1.5
+   },
+   "metrics": {
+    "primary": {
+     "cosine": 0.92,
+     "dmse": 0.16,
+     "norm_ratio": 1.25,
+     "raw_mse": 5.5
+    }
+   },
+   "patched_continuation": "Synthetic patched continuation for the random_edit lane.",
+   "spec": {
+    "chip": "syntax",
+    "dose": 1.0,
+    "lane": "random_edit"
+   },
+   "text": "Synthetic clause-swap text for the random_edit lane.",
+   "topk": {
+    "original": [
+     {
+      "id": 130,
+      "p": 0.6,
+      "text": " tk130"
+     },
+     {
+      "id": 131,
+      "p": 0.4,
+      "text": " tk131"
+     },
+     {
+      "id": 132,
+      "p": 0.2,
+      "text": " tk132"
+     }
+    ],
+    "patched": [
+     {
+      "id": 135,
+      "p": 0.6,
+      "text": " tk135"
+     },
+     {
+      "id": 136,
+      "p": 0.4,
+      "text": " tk136"
+     },
+     {
+      "id": 137,
+      "p": 0.2,
+      "text": " tk137"
+     }
+    ]
+   },
+   "variant": "syntax:random_edit:a1",
+   "wake": [
+    {
+     "js": 0.53,
+     "kl": 2.03,
+     "offset": 1,
+     "top_10_overlap": 0.4,
+     "top_50_overlap": 0.5
+    },
+    {
+     "js": 0.28,
+     "kl": 1.03,
+     "offset": 2,
+     "top_10_overlap": 0.55,
+     "top_50_overlap": 0.6
+    },
+    {
+     "js": 0.196667,
+     "kl": 0.696667,
+     "offset": 3,
+     "top_10_overlap": 0.7,
+     "top_50_overlap": 0.7
+    },
+    {
+     "js": 0.155,
+     "kl": 0.53,
+     "offset": 4,
+     "top_10_overlap": 0.85,
+     "top_50_overlap": 0.8
+    }
+   ]
+  }
+ ],
+ "claim_scope": "stored_snapshot",
+ "kind": "bench_row",
+ "row_id": "validation-1",
+ "schema_version": "nla_observatory_dashboard.v2",
+ "target_geometry": {
+  "x": 10.0,
+  "y": -5.0,
+  "z": 1.0
+ }
+}

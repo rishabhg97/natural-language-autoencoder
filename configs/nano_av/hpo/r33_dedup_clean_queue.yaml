@@ -1,0 +1,122 @@
+schema_version: nano_av_probe_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  generation_examples: 4
+  cleanup_converted_hf_after_eval: true
+  converted_hf_dtype: bfloat16
+  cleanup_dcp_model_after_eval: false
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/av_hpo_queue/r33_dedup_clean_trials.jsonl
+items:
+- name: r33-dedup-av-20k-lr1e4-warmup5-gb192-mb1-dyn1152
+  config: configs/nano_av/hpo/r33_dedup_av_20k_lr1e4_cosine_warmup5_gb192_mb1_seq1152_dyn1152.yaml
+  run_id: nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb1-seq1152-dyn1152
+  status: failed
+  failed_at: '2026-06-12T22:08:14Z'
+  failure: Single-GPU dyn1152 smoke OOMed after rollout 0 actor_train; use the 2-GPU dyn512 follow-up below.
+  study_task: av_roundtrip
+  roundtrip_enabled: true
+  roundtrip:
+    ar_checkpoint_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-dedup-clean56k/nano-ar-r33-dedup-clean56k-lr5e5-cosine-warmup25-gb192-mb96-128step-padded/checkpoints/iter_0000128
+    baseline_report_json: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/r27_roundtrip_v256_t256_full_controls_prefix256_report.json
+    validation_limit: 64
+    test_limit: 64
+    generation_controls:
+    - real
+    - shuffled
+    - zero
+    - mean
+    - none
+    max_new_tokens: 256
+    generation_prefix: "<explanation>\n"
+    stop_text: </explanation>
+    generated_text_fallback: empty
+    generation_backend: cache
+    generation_workers: 2
+    generation_worker_devices:
+    - "0"
+    - "1"
+    stream_generated: true
+    resume_generated: true
+    progress_every: 8
+    min_closed_fraction: 0.8
+    min_usable_fraction: 0.95
+    injection_scale: "75"
+    ar_batch_size: 4
+    torch_dtype: bfloat16
+    control_margin: 5.0e-5
+    min_control_win_fraction: 0.9
+    av_device_map: auto
+    ar_device_map: auto
+  notes: First clean R33 AV round-trip smoke. Uses clean R33 AR padded mb96 checkpoint iter_0000128 plus the R27 256/256 full-controls round-trip baseline. mb1/dyn1152 avoids AV co-packing exposure.
+- name: r33-dedup-av-20k-lr1e4-warmup5-gb192-mb2-dyn512-32-roundtrip
+  config: configs/nano_av/hpo/r33_dedup_av_20k_lr1e4_cosine_warmup5_gb192_mb2_seq1152_dyn512_32steps.yaml
+  run_id: nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps
+  status: complete
+  study_task: av_roundtrip
+  roundtrip_enabled: true
+  roundtrip:
+    ar_checkpoint_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-dedup-clean56k/nano-ar-r33-dedup-clean56k-lr5e5-cosine-warmup25-gb192-mb96-128step-padded/checkpoints/iter_0000128
+    baseline_report_json: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/r27_roundtrip_v256_t256_full_controls_prefix256_report.json
+    validation_limit: 64
+    test_limit: 64
+    generation_controls:
+    - real
+    - shuffled
+    - zero
+    - mean
+    - none
+    max_new_tokens: 256
+    generation_prefix: "<explanation>\n"
+    stop_text: </explanation>
+    generated_text_fallback: empty
+    generation_backend: cache
+    generation_workers: 2
+    generation_worker_devices:
+    - "0"
+    - "1"
+    stream_generated: true
+    resume_generated: true
+    progress_every: 8
+    min_closed_fraction: 0.8
+    min_usable_fraction: 0.95
+    injection_scale: "75"
+    ar_batch_size: 4
+    torch_dtype: bfloat16
+    control_margin: 5.0e-5
+    min_control_win_fraction: 0.9
+    av_device_map: auto
+    ar_device_map: auto
+  notes: Post-fix clean dedup confirmation of the best pre-fix AV LR. Uses proven two-GPU mb2/dyn512 shape to avoid one-GPU dyn1152 OOM, then runs the clean round-trip gate.
+  started_at: '2026-06-12T22:13:27Z'
+  run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-dedup-smoke/nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps
+  expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-dedup-smoke/nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/checkpoints/iter_0000032
+  train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-dedup-smoke/nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/train.log
+  hf_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-dedup-smoke/nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/hf_iter_0000032
+  convert_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-dedup-smoke/nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/hf_iter_0000032.convert.log
+  eval_started_at: '2026-06-13T00:07:24Z'
+  eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-dedup-smoke/nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/eval_iter_0000032_v512_t512_gen4_report.json
+  eval_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-dedup-smoke/nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/eval_iter_0000032_v512_t512_gen4_report.log
+  roundtrip_status: complete
+  roundtrip_started_at: '2026-06-13T00:44:27Z'
+  roundtrip_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-dedup-smoke/nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/roundtrip_iter_0000032_v64_t64_report.json
+  roundtrip_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-dedup-smoke/nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/roundtrip_iter_0000032_v64_t64_report.log
+  roundtrip_completed_at: '2026-06-13T01:26:11Z'
+  roundtrip_generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-dedup-smoke/nano-av-r33-dedup-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/roundtrip_iter_0000032_v64_t64_report_generated.jsonl
+  completed_at: '2026-06-13T01:26:18Z'
+- name: r33-dedup-av-20k-lr5e5-warmup5-gb192-mb1-dyn1152
+  config: configs/nano_av/hpo/r33_dedup_av_20k_lr5e5_cosine_warmup5_gb192_mb1_seq1152_dyn1152.yaml
+  run_id: nano-av-r33-dedup-20k-lr5e5-cosine-warmup5-gb192-mb1-seq1152-dyn1152
+  status: cancelled
+  cancelled_at: '2026-06-15T15:00:00Z'
+  cancellation_reason: Operator selected the lr1e-4 mb2/dyn512 round-trip checkpoint as the current R33 AV+AR final candidate; do not run more AV HPO before cleanup and hero review.
+  notes: Deferred clean AV LR confirmation. Original one-GPU dyn1152 shape is also expected to be unsafe after the lr1e-4 mb1/dyn1152 OOM; recreate as two-GPU dyn512 only if HPO is reopened.
+- name: r33-dedup-av-full-lr1e4-warmup5-gb192-mb1-dyn1152
+  config: configs/nano_av/hpo/r33_dedup_av_full_lr1e4_cosine_warmup5_gb192_mb1_seq1152_dyn1152.yaml
+  run_id: nano-av-r33-dedup-full-lr1e4-cosine-warmup5-gb192-mb1-seq1152-dyn1152
+  status: cancelled
+  cancelled_at: '2026-06-15T15:00:00Z'
+  cancellation_reason: Operator selected the clean R33 AV+AR smoke pair as final candidate and requested cleanup before any hero run.
+  notes: Strict content-dedup clean56k follow-up, not a complete-performance hero run. Re-plan hero scale from the selected candidate instead of unblocking this stale one-GPU dyn1152 draft.

@@ -1,0 +1,16 @@
+{
+  "output_root": "/workspace/interp/outputs/nano30b-nla-pilot",
+  "protected": [
+    "/workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291",
+    "/workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291",
+    "/workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289",
+    "/workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-independent-critic/nano-ar-r33-component-full-independent-seed314159-lr5e5-warmup25-gb192-mb48-4gpu-cudablock-resume393/checkpoints/iter_0001289",
+    "/workspace/interp/outputs/nano30b-nla-pilot/rl_corrected/r33_corrected_k3_confirm_lr1e5_update32_runtimefix_retry4_keyedloss_mem768/actor/iter_0000016/model"
+  ],
+  "current_best": "/workspace/interp/outputs/nano30b-nla-pilot/rl_corrected/r33_corrected_k3_confirm_lr1e5_update32_runtimefix_retry4_keyedloss_mem768/actor/iter_0000016/model",
+  "candidates": [
+    "/workspace/interp/outputs/nano30b-nla-pilot/rl_corrected/r33_corrected_k3_probe_lr1e5_update8_unifiedenv_retry1/actor/iter_0000008/model",
+    "/workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_confirm_lr2e5_kl1e3_rb30_n16_gb480_mb32_rollout16_v256t256/actor/iter_0000016/model",
+    "/workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_medium_lr2e5_kl1e3_rb30_n16_gb480_mb32_rollout32_v512t512/actor/iter_0000032/model"
+  ]
+}

@@ -1,0 +1,46 @@
+schema_version: nano_av_probe_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  generation_examples: 4
+  cleanup_converted_hf_after_eval: true
+  cleanup_dcp_model_after_eval: true
+items:
+- name: r33-av-20k-lr1e6-cos-warmup5-32
+  config: configs/nano_av/hpo/r33_20k_lr1e6_cosine_warmup5_gb192_mb2_seq1152_dyn512_32steps.yaml
+  run_id: nano-av-r33-20k-lr1e6-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps
+  status: complete
+  notes: Pre-fix scouting smoke completed; real NLL val/test 2.576588/2.562618. Use as low-LR undertraining signal only.
+  completed_at: '2026-06-10T08:26:11Z'
+  run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-lr-smoke/nano-av-r33-20k-lr1e6-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps
+  eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-lr-smoke/nano-av-r33-20k-lr1e6-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/eval_iter_0000032_v512_t512_gen4_report.json
+  caveat: pre_fix_scouting_only_packed_boundary_and_lr_schedule_audit
+- name: r33-av-20k-lr5e6-cos-warmup5-32
+  config: configs/nano_av/hpo/r33_20k_lr5e6_cosine_warmup5_gb192_mb2_seq1152_dyn512_32steps.yaml
+  run_id: nano-av-r33-20k-lr5e6-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps
+  status: complete
+  notes: Pre-fix scouting smoke completed; real NLL val/test 1.547347/1.531454. Use as low-mid LR signal only.
+  completed_at: '2026-06-10T16:33:04Z'
+  run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-lr-smoke/nano-av-r33-20k-lr5e6-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps
+  eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-lr-smoke/nano-av-r33-20k-lr5e6-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/eval_iter_0000032_v512_t512_gen4_report.json
+  caveat: pre_fix_scouting_only_packed_boundary_and_lr_schedule_audit
+- name: r33-av-20k-lr2e5-cos-warmup5-32
+  config: configs/nano_av/hpo/r33_20k_lr2e5_cosine_warmup5_gb192_mb2_seq1152_dyn512_32steps.yaml
+  run_id: nano-av-r33-20k-lr2e5-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps
+  status: complete
+  notes: Pre-fix scouting smoke completed; real NLL val/test 1.069623/1.044394. Use as directional LR signal only.
+  completed_at: '2026-06-10T19:46:03Z'
+  run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-lr-smoke/nano-av-r33-20k-lr2e5-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps
+  eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-lr-smoke/nano-av-r33-20k-lr2e5-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/eval_iter_0000032_v512_t512_gen4_report.json
+  caveat: pre_fix_scouting_only_packed_boundary_and_lr_schedule_audit
+- name: r33-av-20k-lr1e4-cos-warmup5-32
+  config: configs/nano_av/hpo/r33_20k_lr1e4_cosine_warmup5_gb192_mb2_seq1152_dyn512_32steps.yaml
+  run_id: nano-av-r33-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps
+  status: complete
+  notes: Pre-fix scouting smoke completed; best short-run LR signal with real NLL val/test 0.992138/0.971248. Requires post-fix confirmation.
+  completed_at: '2026-06-10T22:41:20Z'
+  run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-lr-smoke/nano-av-r33-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps
+  eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-lr-smoke/nano-av-r33-20k-lr1e4-cosine-warmup5-gb192-mb2-seq1152-dyn512-32steps/eval_iter_0000032_v512_t512_gen4_report.json
+  caveat: pre_fix_scouting_only_packed_boundary_and_lr_schedule_audit

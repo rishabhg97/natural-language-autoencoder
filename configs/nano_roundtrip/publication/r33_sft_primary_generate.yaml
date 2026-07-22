@@ -1,0 +1,46 @@
+schema_version: nano_roundtrip_eval.v1
+python: /workspace/interp/.venvs/sglang-cu130/bin/python
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  av_hf_checkpoint: /dev/shm/nano30b-nla-pilot/publication/r33-protocol-matched/sft_hf
+  ar_checkpoint_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289
+  train_parquet: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+  validation_parquet: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+  test_parquet: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+  content_family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_content_families/r33_content_family_manifest.json
+  content_family_coverage: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_content_families/r33_content_family_coverage.json
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_protocol_matched_salvage/sft_generation_report.json
+  generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_protocol_matched_salvage/sft_generated.jsonl
+eval:
+  validation_limit: 512
+  test_limit: 512
+  generation_controls: [real, shuffled, zero, mean, none]
+  max_new_tokens: 256
+  seed: 20260708
+  generation_prefix: ""
+  stop_text: "</explanation>"
+  generated_text_fallback: raw
+  generation_backend: legacy_batch
+  generation_workers: 8
+  generation_worker_devices: ["0", "1", "2", "3", "4", "5", "6", "7"]
+  stream_generated: true
+  resume_generated: true
+  generation_only: true
+  progress_every: 16
+  injection_scale: "75"
+  ar_batch_size: 4
+  ar_max_length: 1152
+  torch_dtype: bfloat16
+  control_margin: 0.1344
+  min_control_win_fraction: 0.9
+  min_closed_fraction: 0.95
+  min_usable_fraction: 0.99
+  selection_strategy: family_stratified
+  selection_seed: 20260708
+  require_family_level_inference: true
+  min_independent_families: 100
+  av_model_fingerprint: dcp_model_sha256:d34ccab7fe0dacddcd067d4b4f7e23ac74a5aff2824b097fa0466dad6019617e
+  av_tokenizer_fingerprint: tokenizer_files_sha256:c43613f5f8785c8b7ac3ae3add34c0c14bc86c9cf011e74c0d9251b860bd7c7d
+  require_generation_protocol_match: true
+  av_device_map: auto
+  ar_device_map: auto

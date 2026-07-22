@@ -1,0 +1,60 @@
+--- a/miles/rollout/sglang_rollout.py
++++ b/miles/rollout/sglang_rollout.py
+@@ -29,6 +29,35 @@
+ __all__ = ["generate_rollout"]
+ 
+ logger = logging.getLogger(__name__)
++
++
++def _normalise_external_sglang_url(addr: str) -> str:
++    url = str(addr).strip()
++    if not url:
++        return ""
++    if "://" not in url:
++        url = f"http://{url}"
++    return url.rstrip("/")
++
++
++def _external_sglang_engine_urls(args: Namespace) -> list[str]:
++    raw_addrs = None
++    for attr in (
++        "rollout_external_engine_addrs",
++        "sglang_external_engine_addrs",
++        "external_engine_addrs",
++    ):
++        value = getattr(args, attr, None)
++        if value:
++            raw_addrs = value
++            break
++    if raw_addrs is None:
++        return []
++    if isinstance(raw_addrs, str):
++        raw = [part.strip() for part in raw_addrs.split(",")]
++    else:
++        raw = list(raw_addrs)
++    return [url for url in (_normalise_external_sglang_url(addr) for addr in raw) if url]
+ 
+ 
+ class GenerateState(metaclass=SingletonMeta):
+@@ -293,14 +322,18 @@
+     assert not state.aborted
+     state.aborted = True
+ 
+-    if parse(sglang_router.__version__) <= parse("0.2.1") or args.use_miles_router:
++    urls = _external_sglang_engine_urls(args)
++    if urls:
++        logger.info(f"[NLA] Abort request using external engine args: {urls}")
++    elif parse(sglang_router.__version__) <= parse("0.2.1") or args.use_miles_router:
+         response = await get(f"http://{args.sglang_router_ip}:{args.sglang_router_port}/list_workers")
+         urls = response["urls"]
++        logger.info(f"Abort request for {urls}")
+     else:
+         response = await get(f"http://{args.sglang_router_ip}:{args.sglang_router_port}/workers")
+         urls = [worker["url"] for worker in response["workers"]]
+-
+-    logger.info(f"Abort request for {urls}")
++        logger.info(f"Abort request for {urls}")
++
+     await asyncio.gather(*[post(f"{url}/abort_request", {"abort_all": True}) for url in urls])
+ 
+     # make sure all the pending tasks are finished

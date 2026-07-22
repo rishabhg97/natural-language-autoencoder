@@ -1,0 +1,179 @@
+schema_version: nano_ar_layer_sweep_queue.v1
+created_at: "2026-06-30T22:39:00Z"
+notes: >-
+  Evaluation-only continuation after the Stage 1 generation queue. Produces
+  semantic-invariance, functional-recovery, pending qualitative-review, and
+  response-closure reports. It never launches training. Qualitative reports
+  remain promotion-blocking until every selected row has an explicit review.
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  logs_dir: /workspace/interp/outputs/nano30b-nla-pilot/validity/stage1_analysis_logs
+  environment:
+    WANDB_MODE: offline
+    HF_HUB_OFFLINE: "1"
+    TRANSFORMERS_OFFLINE: "1"
+    TOKENIZERS_PARALLELISM: "false"
+    PYTHONUNBUFFERED: "1"
+items:
+- name: update16-invariance-v512
+  status: pending
+  kind: invariance
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/eval_nano_roundtrip_invariance.py
+  - --generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/roundtrip_v512_t512_generated_enriched.jsonl
+  - --ar-checkpoint-dir
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289
+  - --train-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+  - --validation-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+  - --test-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+  - --validation-limit
+  - "512"
+  - --test-limit
+  - "512"
+  - --deterministic-transforms
+  - format_normalized
+  - unit_reordered
+  - --seed
+  - "17"
+  - --torch-dtype
+  - bfloat16
+  - --ar-device-map
+  - cuda:0
+  - --ar-batch-size
+  - "4"
+  - --ar-max-length
+  - "1152"
+  - --generated-text-fallback
+  - raw
+  - --report-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/invariance_v512_t512_report.json
+- name: update16-functional-batch8-canary
+  status: pending
+  kind: functional_canary
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/nano_functional_eval_config.py
+  - configs/nano_functional/r33_stage1_update16_v16_batch8_canary.yaml
+  - --run
+- name: update16-functional-v512
+  status: pending
+  kind: functional
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/nano_functional_eval_config.py
+  - configs/nano_functional/r33_stage1_update16_v512.yaml
+  - --run
+- name: update16-qualitative-panel-pending
+  status: pending
+  kind: qualitative
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/build_nano_qualitative_panel.py
+  - --candidate-generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/roundtrip_v512_t512_generated_enriched.jsonl
+  - --sft-generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_generated_enriched.jsonl
+  - --source-base-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/ar_sft_R33_r33_prefix_fullscan275396.parquet
+  - --panel-size
+  - "50"
+  - --seed
+  - "17"
+  - --report-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/qualitative_panel_report.json
+- name: update32-invariance-v512
+  status: pending
+  kind: invariance
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/eval_nano_roundtrip_invariance.py
+  - --generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/roundtrip_v512_t512_generated_enriched.jsonl
+  - --ar-checkpoint-dir
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289
+  - --train-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+  - --validation-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+  - --test-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+  - --validation-limit
+  - "512"
+  - --test-limit
+  - "512"
+  - --deterministic-transforms
+  - format_normalized
+  - unit_reordered
+  - --seed
+  - "17"
+  - --torch-dtype
+  - bfloat16
+  - --ar-device-map
+  - cuda:0
+  - --ar-batch-size
+  - "4"
+  - --ar-max-length
+  - "1152"
+  - --generated-text-fallback
+  - raw
+  - --report-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/invariance_v512_t512_report.json
+- name: update32-functional-v512
+  status: pending
+  kind: functional
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/nano_functional_eval_config.py
+  - configs/nano_functional/r33_stage1_update32_v512.yaml
+  - --run
+- name: update32-qualitative-panel-reviewed
+  status: pending
+  kind: qualitative
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/build_nano_qualitative_panel.py
+  - --candidate-generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/roundtrip_v512_t512_generated_enriched.jsonl
+  - --sft-generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_generated_enriched.jsonl
+  - --source-base-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/ar_sft_R33_r33_prefix_fullscan275396.parquet
+  - --panel-size
+  - "50"
+  - --seed
+  - "17"
+  - --reviews-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/qualitative_review_decisions.json
+  - --report-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/qualitative_panel_report.json
+- name: update32-response-closure-audit
+  status: pending
+  kind: closure_audit
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/audit_nano_response_closure.py
+  - --generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/roundtrip_v512_t512_generated_enriched.jsonl
+  - --tokenizer
+  - /workspace/interp/models/nano-30b-a3b-bf16-hf
+  - --validation-limit
+  - "512"
+  - --test-limit
+  - "512"
+  - --candidate-cap
+  - "150"
+  - --candidate-cap
+  - "192"
+  - --candidate-cap
+  - "224"
+  - --candidate-cap
+  - "256"
+  - --required-fraction
+  - "0.95"
+  - --report-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/response_closure_audit.json

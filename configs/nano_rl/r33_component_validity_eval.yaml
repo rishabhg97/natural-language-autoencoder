@@ -1,0 +1,52 @@
+schema_version: nano_r33_validity_eval.v1
+notes: >-
+  Independent 512/512 validity evidence for clean R33 AV-SFT, update-16,
+  and update-32 fixed-AR checkpoints. This config evaluates evidence only;
+  it never launches training.
+
+runtime:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  temporary_hf_root: /dev/shm/nano30b-nla-pilot/r33-validity
+  target_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  source_base_parquet: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/ar_sft_R33_r33_prefix_fullscan275396.parquet
+  mean_activation_parquet: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/splits/train.parquet
+  ar_checkpoint_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289
+
+required_controls: [mean, none, shuffled, zero]
+eval_splits: [validation]
+injection_markers: [NLA_ACTIVATION_MARKER, "<concept>", "</concept>"]
+
+thresholds:
+  required_rows: 512
+  roundtrip_relative_improvement: 0.05
+  functional_topk_max_regression: 0.01
+  invariance_fve_retention: 0.90
+  control_win_fraction: 0.90
+  usable_fraction: 0.99
+  closed_fraction: 0.95
+  qualitative_flag_fraction: 0.05
+  bootstrap_resamples: 10000
+  bootstrap_seed: 17
+  min_independent_families: 100
+
+evaluations:
+  sft:
+    generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_generated_enriched.jsonl
+    roundtrip_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_report.json
+    temporary_hf_dir: /dev/shm/nano30b-nla-pilot/r33-validity/sft
+  candidates:
+    update16:
+      generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/roundtrip_v512_t512_generated_enriched.jsonl
+      roundtrip_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/roundtrip_v512_t512_report.json
+      invariance_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/invariance_v512_t512_report.json
+      functional_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/functional_v512_t512_report.json
+      qualitative_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/qualitative_panel_report.json
+      temporary_hf_dir: /dev/shm/nano30b-nla-pilot/r33-validity/update16
+    update32:
+      generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/roundtrip_v512_t512_generated_enriched.jsonl
+      roundtrip_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/roundtrip_v512_t512_report.json
+      invariance_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/invariance_v512_t512_report.json
+      functional_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/functional_v512_t512_report.json
+      qualitative_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/qualitative_panel_report.json
+      temporary_hf_dir: /dev/shm/nano30b-nla-pilot/r33-validity/update32

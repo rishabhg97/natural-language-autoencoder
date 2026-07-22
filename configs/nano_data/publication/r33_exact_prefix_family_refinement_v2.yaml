@@ -1,0 +1,9 @@
+schema_version: nano_content_family_refinement.v1
+base_manifest: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_content_family_base_manifest.json
+exact_content_sources:
+  - /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/base_R33_r33_deterministic_full275396.parquet
+requirements:
+  exact_document_coverage: true
+outputs:
+  manifest_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_exact_prefix_refined_base_manifest.json
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_exact_prefix_refinement_report.json

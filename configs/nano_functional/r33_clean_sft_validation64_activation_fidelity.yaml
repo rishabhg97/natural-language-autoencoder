@@ -1,0 +1,41 @@
+schema_version: nano_activation_fidelity_eval.v1
+python: /workspace/interp/.venv/bin/python
+
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/validation_generated.jsonl
+  source_base_parquet: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/base_R33_r33_deterministic_full275396.parquet
+  mean_activation_parquet: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean/nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/splits/train.parquet
+  content_family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_exact_prefix_refined_base_manifest.json
+  target_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/activation_fidelity_validation64_mb8.json
+  log_file: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/activation_fidelity_validation64_mb8.log
+  runner_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/activation_fidelity_validation64_mb8_runner.json
+
+eval:
+  boundary: 33
+  eval_splits: [validation]
+  validation_limit: 64
+  test_limit: 1
+  source_batch_size: 4096
+  batch_size: 8
+  extraction_batch_size: 2
+  selection_strategy: family_stratified
+  selection_seed: 20260715
+  publication_mode: true
+  target_model_fingerprint: abd6d1368f9d2baa1b6f5b4047916db780466193af85b4772bbf5dc64c218019
+  fidelity_max_relative_l2: 0.01
+  fidelity_max_abs: 0.01
+  fidelity_max_one_minus_cos: 0.0001
+  target_torch_dtype: bfloat16
+  target_device_map: cuda:0
+  target_local_files_only: true
+  target_trust_remote_code: true
+  model_loader: extraction
+  repeat_full_forward: true
+  deterministic_algorithms: true
+  allow_tf32: false
+  cudnn_benchmark: false
+  float32_matmul_precision: highest
+  cublas_workspace_config: ":4096:8"
+  seed: 20260715

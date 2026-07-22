@@ -1,0 +1,214 @@
+{
+  "boundary": 33,
+  "cells": 28,
+  "config_sha256": "c7492fecc776f3991ac605a83c1f74c57eeabd5ed9f8cd4838676b164161b259",
+  "continuation_tokens": 32,
+  "functional_rows": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/e4_functional_pilot/functional_pilot_rows.jsonl",
+    "sha256": "0cc15324ef9a41309bc64fb10db03022517f7ba52f9e2726f62eaa4402fe2ee8"
+  },
+  "generation_equivalence": [
+    {
+      "cached_token_ids": [
+        11727,
+        4043,
+        4268,
+        2534
+      ],
+      "cell_id": "cell-c5622e1e22ed648096ad",
+      "exact_match": true,
+      "reference_token_ids": [
+        11727,
+        4043,
+        4268,
+        2534
+      ]
+    },
+    {
+      "cached_token_ids": [
+        4410,
+        4268,
+        2534,
+        1317
+      ],
+      "cell_id": "cell-d0c2a3e076762f935b7c",
+      "exact_match": true,
+      "reference_token_ids": [
+        4410,
+        4268,
+        2534,
+        1317
+      ]
+    },
+    {
+      "cached_token_ids": [
+        1044,
+        1278,
+        63482,
+        122792
+      ],
+      "cell_id": "cell-26548d6a46e4564b3e01",
+      "exact_match": true,
+      "reference_token_ids": [
+        1044,
+        1278,
+        63482,
+        122792
+      ]
+    },
+    {
+      "cached_token_ids": [
+        1486,
+        1261,
+        33193,
+        8444
+      ],
+      "cell_id": "cell-413d8fe4ac877c7ddb01",
+      "exact_match": true,
+      "reference_token_ids": [
+        1486,
+        1261,
+        33193,
+        8444
+      ]
+    }
+  ],
+  "identity_failures": 0,
+  "identity_rows": [
+    {
+      "logit_identity": {
+        "lhs_dtype": "torch.float32",
+        "max_abs": 0.0,
+        "one_minus_cos": 1.1920928955078125e-07,
+        "relative_l2": 0.0,
+        "rhs_dtype": "torch.float32",
+        "rms_ratio": 1.0,
+        "shape": [
+          131072
+        ]
+      },
+      "provenance_key": [
+        "position",
+        "HuggingFaceFW/fineweb:train:13538",
+        56
+      ],
+      "row_index": 249391,
+      "split": "validation",
+      "stored_activation_drift": {
+        "lhs_dtype": "torch.bfloat16",
+        "max_abs": 0.9375,
+        "one_minus_cos": 0.0024111270904541016,
+        "relative_l2": 0.06945157796144485,
+        "rhs_dtype": "torch.float32",
+        "rms_ratio": 0.9949501156806946,
+        "shape": [
+          2688
+        ]
+      }
+    },
+    {
+      "logit_identity": {
+        "lhs_dtype": "torch.float32",
+        "max_abs": 0.0,
+        "one_minus_cos": 1.1920928955078125e-07,
+        "relative_l2": 0.0,
+        "rhs_dtype": "torch.float32",
+        "rms_ratio": 1.0,
+        "shape": [
+          131072
+        ]
+      },
+      "provenance_key": [
+        "position",
+        "HuggingFaceFW/fineweb:train:21052",
+        94
+      ],
+      "row_index": 253172,
+      "split": "validation",
+      "stored_activation_drift": {
+        "lhs_dtype": "torch.bfloat16",
+        "max_abs": 1.0,
+        "one_minus_cos": 0.0008943080902099609,
+        "relative_l2": 0.04351191595196724,
+        "rhs_dtype": "torch.float32",
+        "rms_ratio": 1.009375810623169,
+        "shape": [
+          2688
+        ]
+      }
+    },
+    {
+      "logit_identity": {
+        "lhs_dtype": "torch.float32",
+        "max_abs": 0.0,
+        "one_minus_cos": 0.0,
+        "relative_l2": 0.0,
+        "rhs_dtype": "torch.float32",
+        "rms_ratio": 1.0,
+        "shape": [
+          131072
+        ]
+      },
+      "provenance_key": [
+        "position",
+        "HuggingFaceFW/fineweb:train:22816",
+        167
+      ],
+      "row_index": 253953,
+      "split": "validation",
+      "stored_activation_drift": {
+        "lhs_dtype": "torch.bfloat16",
+        "max_abs": 1.0,
+        "one_minus_cos": 0.0002626776695251465,
+        "relative_l2": 0.023821020498871803,
+        "rhs_dtype": "torch.float32",
+        "rms_ratio": 0.9932595491409302,
+        "shape": [
+          2688
+        ]
+      }
+    },
+    {
+      "logit_identity": {
+        "lhs_dtype": "torch.float32",
+        "max_abs": 0.0,
+        "one_minus_cos": 2.384185791015625e-07,
+        "relative_l2": 0.0,
+        "rhs_dtype": "torch.float32",
+        "rms_ratio": 1.0,
+        "shape": [
+          131072
+        ]
+      },
+      "provenance_key": [
+        "position",
+        "HuggingFaceFW/fineweb:train:32928",
+        203
+      ],
+      "row_index": 258967,
+      "split": "validation",
+      "stored_activation_drift": {
+        "lhs_dtype": "torch.bfloat16",
+        "max_abs": 3.0,
+        "one_minus_cos": 0.00020951032638549805,
+        "relative_l2": 0.022829538211226463,
+        "rhs_dtype": "torch.float32",
+        "rms_ratio": 0.989680290222168,
+        "shape": [
+          2688
+        ]
+      }
+    }
+  ],
+  "identity_tolerances": {
+    "max_abs": 0.01,
+    "one_minus_cos": 0.0001,
+    "relative_l2": 0.01
+  },
+  "passed": true,
+  "phase": "e4_functional_pilot",
+  "rows": 4,
+  "schema_version": "nano_viz_model_batches.v1",
+  "split": "validation",
+  "wake_positions": 16
+}

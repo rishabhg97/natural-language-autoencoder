@@ -1,0 +1,53 @@
+schema_version: nano_content_family_build.v1
+batch_size: 8192
+
+family_sources:
+  - name: r33_av_train
+    path: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train.parquet
+    split: train
+    text_field: detokenized_text_truncated
+  - name: r33_av_validation
+    path: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+    split: validation
+    text_field: detokenized_text_truncated
+  - name: r33_av_test
+    path: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+    split: test
+    text_field: detokenized_text_truncated
+
+exposure_sources:
+  - name: r33_av_sft_train
+    path: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train.parquet
+  - name: r33_ar_sft_train
+    path: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/splits/train.parquet
+  - name: r33_rl_train
+    path: /workspace/interp/outputs/nano30b-nla-pilot/r33_rl_train_only/rl_r33_train_only.parquet
+
+candidate_sources:
+  - name: r33_av_validation
+    split: validation
+    path: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+  - name: r33_av_test
+    split: test
+    path: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+
+algorithm:
+  shingle_width: 5
+  similarity_threshold: 0.80
+  signature_size: 32
+  candidate_min_shared: 4
+  max_signature_bucket_size: 256
+
+split_assignment:
+  seed: 20260708
+  weights:
+    train: 0.90
+    validation: 0.05
+    test: 0.05
+
+holdout:
+  minimum_rows_per_split: 512
+
+outputs:
+  manifest_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_content_families/r33_content_family_manifest.json
+  coverage_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_content_families/r33_content_family_coverage.json

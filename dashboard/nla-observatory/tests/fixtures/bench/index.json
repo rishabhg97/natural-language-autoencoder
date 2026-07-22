@@ -1,0 +1,73 @@
+{
+ "banner": {
+  "behavior_cells": 4,
+  "behavior_rows": 1,
+  "claim_scope": "stored_snapshot",
+  "functional_claim_status": "validation_only_exploratory",
+  "grid_spec_sha256": "d44f6ad15c3aff6f0cac7db42b7c28ac547cc40c9429f9b7ae57308990207e8e",
+  "statement": "Synthetic fixture: you are choosing among 4 precomputed experiments, not editing a live model.",
+  "total_cells": 4
+ },
+ "behavior_rows": [
+  "validation-1"
+ ],
+ "control_groups": {
+  "cg-1": {
+   "cells": {
+    "edit": {
+     "1": "cell-b-edit"
+    },
+    "paraphrase_placebo": {
+     "1": "cell-b-para"
+    },
+    "random_edit": {
+     "1": "cell-b-rand"
+    }
+   },
+   "chip": "syntax",
+   "row_id": "validation-1"
+  }
+ },
+ "kind": "bench_index",
+ "rows": [
+  {
+   "families": {
+    "clause_swap": {
+     "depths": [
+      "BEHAVIOR"
+     ],
+     "variants": [
+      "syntax:edit:a1",
+      "syntax:paraphrase_placebo:a1",
+      "syntax:random_edit:a1"
+     ]
+    },
+    "identity": {
+     "depths": [
+      "BEHAVIOR"
+     ],
+     "variants": [
+      "teacher"
+     ]
+    }
+   },
+   "has_behavior": true,
+   "row_id": "validation-1"
+  },
+  {
+   "families": {
+    "identity": {
+     "depths": [
+      "METRIC"
+     ],
+     "variants": [
+      "teacher"
+     ]
+    }
+   },
+   "has_behavior": false,
+   "row_id": "validation-2"
+  }
+ ],
+ "schema_version": "nla_observatory_dashboard.v2"
+}

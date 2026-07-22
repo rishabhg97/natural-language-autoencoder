@@ -1,0 +1,25 @@
+schema_version: nano_ar_hpo_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-hero-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 64
+  test_limit: 64
+  batch_size: 4
+  controls:
+    - teacher
+    - teacher_shuffled
+    - blank
+    - generic
+    - mean
+    - source_context
+    - source_raw
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/ar_hpo_queue/r33_independent_critic_trials.jsonl
+items:
+  - name: r33-component-full-independent-critic-seed314159-4gpu-mb48-cudablock-diag393
+    config: configs/nano_ar/hpo/r33_component_full_independent_critic_seed314159_4gpu_mb48_cudablock_diag393.yaml
+    run_id: nano-ar-r33-component-full-independent-seed314159-lr5e5-warmup25-gb192-mb48-4gpu-cudablock-diag393
+    status: pending
+    notes: >-
+      Diagnostic reproduction only. CUDA launch blocking makes the true failing
+      kernel synchronous; an optimizer-bearing checkpoint at update 384 keeps
+      later experiments close to the deterministic rollout-392 boundary.

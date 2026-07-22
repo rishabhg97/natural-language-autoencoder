@@ -1,0 +1,25 @@
+schema_version: nano_prefix_dataset_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  python: /workspace/interp/.venv/bin/python
+  environment:
+    WANDB_MODE: offline
+
+items:
+  - name: r33-publication-rebuild-independent-critic-seed314159
+    config: configs/nano_data/publication/r33_deterministic_independent_critic_init.yaml
+    status: pending
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/publication/independent_critic_rebuild
+    expected_artifacts:
+      - /workspace/models/nano30b-nla-pilot/publication/r33_deterministic_independent_critic_init_seed314159/nla_meta.yaml
+      - path: /workspace/models/nano30b-nla-pilot/publication/r33_deterministic_independent_critic_init_seed314159/critic_initialization.json
+        canonical_json_sha256: 34e863f756e0749ca19fc8c138b7bd71b5da69c907ee42ad021517542e5c8941
+        ignore_json_paths: [value_head.before_sha256]
+      - /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/verify_ar_R33_r33_deterministic_full275396.json
+    notes: >-
+      Rebuilds only the deterministic seed-314159 independent critic from the
+      already verified R33 base/AR dataset. The canonical manifest fingerprint
+      excludes only the overwritten random value-head preimage; all final-state
+      initialization fields remain hash-bound. The pipeline reuses existing
+      extraction and teacher artifacts and fails if its declared outputs are
+      absent. No teacher generation or training is performed in this stage.

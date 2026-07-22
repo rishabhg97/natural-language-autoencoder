@@ -1,0 +1,13 @@
+{
+  "cases": 8,
+  "cases_artifact": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/poetry_corpus/cases.jsonl",
+    "sha256": "180fd3df149309344cbb075a7031e84d67f3c305f03afe84743de77013d90043"
+  },
+  "config_sha256": "87191f785c1f183edcc8d12317155ec0d1569848c7a9c637e2b4060fe44a41aa",
+  "future_leakage_cases": 0,
+  "passed": true,
+  "phase": "poetry_prepare",
+  "positions": 104,
+  "schema_version": "nano_viz_poetry_planning_report.v1"
+}

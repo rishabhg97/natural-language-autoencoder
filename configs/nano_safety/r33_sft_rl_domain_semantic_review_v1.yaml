@@ -1,0 +1,9 @@
+schema_version: nano_domain_semantic_review.v1
+seed: 20260722
+samples_per_stratum: 4
+
+inputs:
+  sft: artifacts/runai_eval/r33_sft_domain_canary_v1_20260722/model_outputs/nla_descriptions.jsonl
+  rl: artifacts/runai_eval/r33_u342_domain_canary_v1_20260722/model_outputs/nla_descriptions.jsonl
+
+output_dir: artifacts/runai_eval/r33_sft_rl_domain_semantic_review_v1_20260722

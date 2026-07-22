@@ -1,0 +1,49 @@
+{
+  "artifacts": {
+    "aggregates": {
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/derived/aggregates.parquet",
+      "sha256": "41db98c9dc566ce7bcec5ba830acbf5d06bd67d0f8126b9920bd70945d87e7f0"
+    },
+    "aggregates_json": {
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/derived/aggregates.json",
+      "sha256": "7163a4e3e7fd362bffd23dfc14bbe5b71cf69fbedaedb01f94df8d7d24bb92f4"
+    },
+    "court": {
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/derived/court.parquet",
+      "sha256": "6b33a6c7609965d665fd06b9c36fd89495e9caa02d7e4829f535731ee8418445"
+    },
+    "intervention_metrics": {
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/derived/intervention_metrics.parquet",
+      "sha256": "f0f85573e4845196f9c662be4e5d94c54e5cf795ddcd81c36bff2b923c57c470"
+    },
+    "shapley": {
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/derived/shapley.parquet",
+      "sha256": "54cd6184db3601236c8c07e3cd53fa45644503f1bb70e70c248705a42df1e570"
+    }
+  },
+  "bundle_config_sha256": "182e739fa79fa72d4d3e898f63f66f68ee5987b505c3605aa3c16b8b61a4fcd4",
+  "control_groups": 300,
+  "court_rows": 1200,
+  "court_thresholds": {
+    "independent": {
+      "balanced_accuracy": 0.9966666666666666,
+      "negative_recall": 1.0,
+      "positive_recall": 0.9933333333333333,
+      "threshold": 0.9848712682723999
+    },
+    "primary": {
+      "balanced_accuracy": 0.9966666666666666,
+      "negative_recall": 1.0,
+      "positive_recall": 0.9933333333333333,
+      "threshold": 0.9817122519016266
+    }
+  },
+  "fit_split": "validation",
+  "incomplete_control_groups": [],
+  "passed": true,
+  "prediction_rows": 8084,
+  "primary_cells": 7434,
+  "schema_version": "nano_viz_intervention_derivation.v1",
+  "shapley_rows": 200,
+  "source_config_sha256": "c7492fecc776f3991ac605a83c1f74c57eeabd5ed9f8cd4838676b164161b259"
+}

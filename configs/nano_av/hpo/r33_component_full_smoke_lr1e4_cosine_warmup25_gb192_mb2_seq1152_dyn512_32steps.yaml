@@ -1,0 +1,95 @@
+run:
+  name: nano-av-r33-component-full-smoke-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512-32steps
+  experiment_class: tuning-probe
+  output_root: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full
+  wandb_mode: offline
+  wandb_project: nano30b-nla-pilot
+  wandb_group: nano-av-r33-component-full-hero
+
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  miles_root: /workspace/interp/code/miles-051cd15
+  model_id: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  input_av_source: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396
+  input_av_sft: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/av_sft_R33_r33_prefix_fullscan275396.parquet
+
+dataset:
+  row_limit: 275396
+  split_mode: content_component
+  fractions: {train: 0.9, validation: 0.05, test: 0.05}
+  materialize_splits: true
+  cache_materialized_splits: true
+  split_cache_dir: /workspace/interp/outputs/nano30b-nla-pilot/split_cache
+  verify_materialized_splits: true
+  final_batch_policy: pad_with_train_duplicates
+  expected_d_model: 2688
+  seed: 42
+  verified_source_av_report: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_component_fullscan275396/verify_av_R33_component_fullscan275396.json
+
+training:
+  objective: av_sft
+  backend: miles_fsdp2
+  epochs: 1
+  num_rollout: 32
+  num_gpus: 2
+  global_batch_size: 192
+  micro_batch_size: 2
+  rollout_batch_size: 192
+  lr: 1e-4
+  min_lr: 1e-5
+  lr_decay_style: cosine
+  lr_warmup_iters: 25
+  lr_warmup_init: 0.0
+  injection_scale: 75
+  grad_norm_policy: clip
+  timing_debug: false
+  gradient_checkpointing: true
+  use_dynamic_batch_size: true
+  max_tokens_per_gpu: 512
+  allow_oversized_dynamic_batch: true
+  pytorch_cuda_alloc_conf: expandable_segments:True
+  max_sequence_tokens: 1152
+  max_response_tokens: 1024
+  system_metrics:
+    enabled: true
+    interval_steps: 5
+    nvidia_smi_interval_steps: 10
+    router_entropy: true
+
+checkpoint:
+  save_interval: 32
+  keep_last: 1
+  save_enabled: true
+  no_save_optim: true
+  require_optimizer_state_for_hero: false
+
+eval:
+  interval: 32
+  controls: [real, shuffled, zero, mean, none]
+  validation_limit: 512
+  test_limit: 512
+  generation_examples: 8
+  roundtrip:
+    enabled: true
+    validation_limit: 64
+    test_limit: 64
+    generation_controls: [real, shuffled, zero, mean, none]
+    max_new_tokens: 256
+    generation_prefix: "<explanation>\n"
+    stop_text: </explanation>
+    generated_text_fallback: empty
+    generation_backend: cache
+    generation_workers: 2
+    generation_worker_devices: ["0", "1"]
+    stream_generated: true
+    resume_generated: true
+    progress_every: 8
+    min_closed_fraction: 0.8
+    min_usable_fraction: 0.95
+    injection_scale: "75"
+    ar_batch_size: 4
+    torch_dtype: bfloat16
+    control_margin: 5.0e-5
+    min_control_win_fraction: 0.9
+    av_device_map: auto
+    ar_device_map: auto

@@ -1,0 +1,56 @@
+run:
+  name: nano-av-r30-medium-probe-20k-lr1e5-128steps-seq1152-dyn512
+  experiment_class: geometry-probe
+  output_root: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-layer-probes
+  wandb_mode: offline
+  wandb_project: nano30b-nla-pilot
+  wandb_group: nano-av-layer-probes
+
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  miles_root: /workspace/interp/code/miles-051cd15
+  model_id: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  input_av_sft: /workspace/interp/outputs/nano30b-nla-pilot/layer_probe_r30/av_sft_r30_start10500_len2048.parquet
+
+dataset:
+  row_limit: 20416
+  split_mode: doc
+  fractions: {train: 0.9, validation: 0.05, test: 0.05}
+  materialize_splits: true
+  final_batch_policy: pad_with_train_duplicates
+  expected_d_model: 2688
+  seed: 42
+
+training:
+  objective: av_sft
+  backend: miles_fsdp2
+  epochs: 1
+  num_rollout: 128
+  global_batch_size: 192
+  micro_batch_size: 2
+  rollout_batch_size: 192
+  lr: 1e-5
+  injection_scale: 75
+  grad_norm_policy: clip
+  timing_debug: true
+  gradient_checkpointing: true
+  use_dynamic_batch_size: true
+  max_tokens_per_gpu: 512
+  allow_oversized_dynamic_batch: true
+  pytorch_cuda_alloc_conf: expandable_segments:True
+  max_sequence_tokens: 1152
+  max_response_tokens: 1024
+
+checkpoint:
+  save_interval: 128
+  keep_last: 1
+  save_enabled: true
+  no_save_optim: true
+  require_optimizer_state_for_hero: false
+
+eval:
+  interval: 128
+  controls: [real, shuffled, zero, mean, none]
+  validation_limit: 512
+  test_limit: 512
+  generation_examples: 4

@@ -1,0 +1,54 @@
+# Local environments and caches
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Runtime outputs and large ML artifacts
+artifacts/
+outputs/
+tmp/
+wandb/
+offline-run-*/
+runs/*
+!runs/registry/
+!runs/registry/**
+*.log
+*.pid
+*.tmp
+*.synced
+*.yaml.lock
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.parquet
+*.arrow
+*.npy
+*.npz
+core
+core.*
+
+# Dashboard build and test products. The verified public/data bundle is
+# intentionally committed so GitHub Pages can run without private artifacts.
+dashboard/nla-observatory/node_modules/
+dashboard/nla-observatory/.venv/
+dashboard/nla-observatory/dist/
+dashboard/nla-observatory/playwright-report/
+dashboard/nla-observatory/test-results/
+dashboard/nla-observatory/screenshots/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+

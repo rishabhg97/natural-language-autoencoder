@@ -1,0 +1,42 @@
+schema_version: nano_publication_family_split.v1
+base_manifest: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_exact_prefix_refined_base_manifest.json
+
+# This is the publication boundary audit. It includes the exact train splits
+# consumed by both selected checkpoints plus every materialized historical
+# validation/test split. A passing test split must therefore be disjoint from
+# model fitting, model selection, and prior evaluation.
+prior_exposure_globs:
+  - /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/train.parquet
+  - /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean/nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/splits/train.parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/**/splits/validation.parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/**/splits/test.parquet
+
+joint_family_resolution:
+  enabled: true
+  require_exact_base_document_coverage: true
+  base_content_sources:
+    - path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/base_R33_r33_deterministic_full275396.parquet
+      doc_id_column: doc_id
+      text_column: detokenized_text_truncated
+  algorithm:
+    shingle_width: 5
+    similarity_threshold: 0.80
+    signature_size: 32
+    candidate_min_shared: 4
+    max_signature_bucket_size: 256
+
+split_assignment:
+  seed: 20260715
+  weights:
+    train: 0.90
+    validation: 0.05
+    test: 0.05
+requirements:
+  min_test_rows: 512
+  min_test_families: 100
+  max_unmapped_prior_documents: 0
+outputs:
+  manifest_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v5_full_exposure/r33_confirmatory_family_manifest.json
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v5_full_exposure/r33_confirmatory_family_split_report.json
+  exposure_inventory_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v5_full_exposure/r33_prior_exposure_inventory.json
+  joint_family_manifest_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v5_full_exposure/r33_joint_exposure_candidate_family_manifest.json

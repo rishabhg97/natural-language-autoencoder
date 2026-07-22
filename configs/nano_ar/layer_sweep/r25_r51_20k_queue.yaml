@@ -1,0 +1,74 @@
+schema_version: nano_ar_layer_sweep_queue.v1
+created_at: '2026-06-05T00:00:00Z'
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  output_root: /workspace/interp/outputs/nano30b-nla-pilot/layer_sweeps/r25_r51_20k_start10500_len2048
+  teacher_table: /workspace/interp/outputs/nano30b-nla-pilot/r34_probe/teacher_keys_api_explanation_start10500_len2048.parquet
+  logs_dir: /workspace/interp/outputs/nano30b-nla-pilot/layer_sweeps/r25_r51_20k_start10500_len2048/queue_logs
+  environment:
+    WANDB_MODE: offline
+items:
+- name: extract-r25-r51
+  status: cancelled
+  kind: extract
+  layers: R25-R51
+  log: /workspace/interp/outputs/nano30b-nla-pilot/layer_sweeps/r25_r51_20k_start10500_len2048/queue_logs/extract-r25-r51.log
+  command:
+  - /workspace/interp/.venv/bin/python
+  - /workspace/interp/code/nano30b-nla-pilot-current/scripts/nano_ar_layer_sweep.py
+  - extract
+  - --layers
+  - R25-R51
+  - --output-root
+  - /workspace/interp/outputs/nano30b-nla-pilot/layer_sweeps/r25_r51_20k_start10500_len2048
+  - --model-id
+  - /workspace/interp/models/nano-30b-a3b-bf16-hf
+  - --corpus-start
+  - '10500'
+  - --corpus-length
+  - '2048'
+  - --positions-per-doc
+  - '10'
+  - --chunk-size
+  - '8'
+  - --batch-size
+  - '2'
+  - --max-length
+  - '1024'
+  - --seed
+  - '42'
+  - --local-files-only
+  - --overwrite
+  cancelled_at: '2026-06-10T23:29:32Z'
+  cancellation_reason: operator requested removal of pending jobs after packed-boundary contamination and LR-schedule audit; clean reruns must be explicitly queued
+- name: score-r25-r51
+  status: cancelled
+  kind: score
+  layers: R25-R51
+  log: /workspace/interp/outputs/nano30b-nla-pilot/layer_sweeps/r25_r51_20k_start10500_len2048/queue_logs/score-r25-r51.log
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/layer_sweeps/r25_r51_20k_start10500_len2048/score_r25-r51_teacher_knn_report.json
+  command:
+  - /workspace/interp/.venv/bin/python
+  - /workspace/interp/code/nano30b-nla-pilot-current/scripts/nano_ar_layer_sweep.py
+  - score
+  - --layers
+  - R25-R51
+  - --output-root
+  - /workspace/interp/outputs/nano30b-nla-pilot/layer_sweeps/r25_r51_20k_start10500_len2048
+  - --teacher-table
+  - /workspace/interp/outputs/nano30b-nla-pilot/r34_probe/teacher_keys_api_explanation_start10500_len2048.parquet
+  - --report-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/layer_sweeps/r25_r51_20k_start10500_len2048/score_r25-r51_teacher_knn_report.json
+  - --validation-limit
+  - '512'
+  - --test-limit
+  - '512'
+  - --hash-dim
+  - '512'
+  - --knn-k
+  - '5'
+  - --seed
+  - '42'
+  cancelled_at: '2026-06-10T23:29:32Z'
+  cancellation_reason: operator requested removal of pending jobs after packed-boundary contamination and LR-schedule audit; clean reruns must be explicitly queued

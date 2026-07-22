@@ -1,0 +1,36 @@
+schema_version: nano_compute_accounting.v1
+output_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/compute_accounting.json
+runs:
+  - name: r33-family-clean-primary-ar-sft
+    component: AR
+    train_log: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean/nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/train.log
+    gpu_type: NVIDIA H100 NVL
+    gpu_count: 4
+    expected_updates: 1291
+    checkpoint_identity: 5e792120ec1a00ebb4cf4abca50d2a6a962421ac4f45423479ae5061f4d2d760
+  - name: r33-family-clean-primary-av-sft
+    component: AV
+    train_log: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/train.log
+    gpu_type: NVIDIA H100 NVL
+    gpu_count: 8
+    expected_updates: 1291
+    checkpoint_identity: dcp_model_sha256:43346232d2fc043260ee903191e20cce07801903e1e7b7956f16022eb463386a
+  - name: r33-family-clean-independent-ar-sft-seed314159
+    component: AR-independent
+    train_log: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean-independent/nano-ar-r33-publication-deterministic-family-clean-independent-seed314159-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/train.log
+    gpu_type: NVIDIA H100 NVL
+    gpu_count: 4
+    expected_updates: 1291
+    checkpoint_identity: c2eea74f5baccee97128617b05636187804c7e59aedc560d088dbf65d52f1925
+failed_attempts:
+  - name: independent-critic-rebuild-byte-hash-gate-attempt1
+    training_started: false
+    optimizer_updates: 0
+    gpu_hours: 0
+    accounting_quality: exact_from_preserved_queue_log
+known_exclusions:
+  - Deterministic activation extraction and replay compute.
+  - Dataset preparation, DCP-to-HF conversion, and S3 transfer time.
+  - Component, round-trip, functional, subgroup, and privacy evaluation compute.
+  - Superseded publication-readiness kernel/equivalence diagnostics whose exact GPU-seconds are not recoverable from retained logs.
+  - All historical HPO and publication-invalidated RL compute.

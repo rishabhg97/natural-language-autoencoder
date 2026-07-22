@@ -1,0 +1,11 @@
+schema_version: nano_av_eval_verifier.v1
+report_json: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/eval_iter_0001291_v512_t512_gen8_report.json
+output_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260715_r33_clean_av/eval_verifier.json
+
+expected:
+  eval_splits: [validation]
+  counts:
+    validation: 512
+  controls: [real, shuffled, zero, mean, none]
+  min_real_control_gap: 0.0
+  forbid_unrequested_rows: true

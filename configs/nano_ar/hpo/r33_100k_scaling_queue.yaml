@@ -1,0 +1,242 @@
+schema_version: nano_ar_hpo_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  batch_size: 4
+  controls: [teacher, teacher_shuffled, blank, generic, mean, source_context, source_raw]
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/ar_hpo_queue/r33_prefix275k_hpo100k_trials.jsonl
+
+items:
+  - name: r33-100k-lr2e5-cos-gb192-mb8
+    config: configs/nano_ar/hpo/r33_100k_lr2e5_cosine_gb192_mb8.yaml
+    run_id: nano-ar-r33-100k-lr2e5-cosine-gb192-mb8
+    status: complete
+    notes: Baseline R33 100k HPO slice from verified 275,396-row prefix dataset; one train split epoch, model-only save, 512/512 teacher/control eval.
+    started_at: '2026-06-08T14:28:28Z'
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr2e5-cosine-gb192-mb8
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr2e5-cosine-gb192-mb8/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr2e5-cosine-gb192-mb8/train.log
+    eval_started_at: '2026-06-08T19:54:06Z'
+    eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr2e5-cosine-gb192-mb8/eval_iter_0000467_v512_t512_winrates_report.json
+    eval_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr2e5-cosine-gb192-mb8/eval_iter_0000467_v512_t512_winrates_report.log
+    completed_at: '2026-06-08T20:03:07Z'
+  - name: r33-100k-lr1e5-cos-gb192-mb8
+    config: configs/nano_ar/hpo/r33_100k_lr1e5_cosine_gb192_mb8.yaml
+    run_id: nano-ar-r33-100k-lr1e5-cosine-gb192-mb8
+    status: failed
+    notes: Stability R33 100k HPO slice from verified 275,396-row prefix dataset; operator stopped early to rerun the same lr with micro_batch_size=16 for throughput.
+    started_at: '2026-06-08T20:28:38Z'
+    failed_at: '2026-06-08T20:36:28Z'
+    failure: operator stopped mb8 run before checkpoint to test mb16 throughput
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb8
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb8/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb8/train.log
+  - name: r33-100k-lr1e5-cos-gb192-mb16
+    config: configs/nano_ar/hpo/r33_100k_lr1e5_cosine_gb192_mb16.yaml
+    run_id: nano-ar-r33-100k-lr1e5-cosine-gb192-mb16
+    status: failed
+    notes: Stability R33 100k HPO slice with mb16 throughput probe; operator stopped after confirming ~25-28s/step to test single-GPU mb192 parallelization feasibility.
+    started_at: '2026-06-08T20:41:55Z'
+    failed_at: '2026-06-08T20:56:58Z'
+    failure: operator stopped mb16 run before checkpoint to test single-GPU mb192 feasibility
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb16
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb16/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb16/train.log
+    launch_mode: direct_runner_due_stale_queue_lock
+  - name: r33-100k-lr1e5-cos-gb192-mb192-gpu1
+    config: configs/nano_ar/hpo/r33_100k_lr1e5_cosine_gb192_mb192_gpu1.yaml
+    run_id: nano-ar-r33-100k-lr1e5-cosine-gb192-mb192-gpu1
+    status: failed
+    notes: Single-GPU feasibility probe with global batch 192 and microbatch 192; OOMed before completing step 0, proving the one-microbatch path is wired but too large for one H100.
+    started_at: '2026-06-08T20:58:58Z'
+    failed_at: '2026-06-08T21:01:16Z'
+    failure: CUDA OOM before step 0; GPU0 reached 139.79 GiB process memory with PyTorch allocated 137.41 GiB.
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb192-gpu1
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb192-gpu1/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb192-gpu1/train.log
+    launch_mode: direct_runner_gpu1_mb192
+  - name: r33-100k-lr1e5-cos-gb192-mb96-gpu1
+    config: configs/nano_ar/hpo/r33_100k_lr1e5_cosine_gb192_mb96_gpu1.yaml
+    run_id: nano-ar-r33-100k-lr1e5-cosine-gb192-mb96-gpu1
+    status: failed
+    notes: Single-GPU feasibility probe after mb192 OOM; keeps global batch 192 and halves microbatch to 96.
+    started_at: '2026-06-08T22:14:59Z'
+    failed_at: '2026-06-08T22:17:17Z'
+    failure: CUDA OOM during optimizer.step state init after two mb96 microbatches; GPU0 reached 139.80 GiB process memory with PyTorch allocated 137.30 GiB.
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb96-gpu1
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb96-gpu1/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb96-gpu1/train.log
+    launch_mode: queue_once_gpu1_mb96
+  - name: r33-100k-lr1e5-cos-gb192-mb48-gpu1
+    config: configs/nano_ar/hpo/r33_100k_lr1e5_cosine_gb192_mb48_gpu1.yaml
+    run_id: nano-ar-r33-100k-lr1e5-cosine-gb192-mb48-gpu1
+    status: failed
+    notes: Single-GPU feasibility probe after mb96 OOM; keeps global batch 192 and halves microbatch to 48.
+    started_at: '2026-06-08T22:18:35Z'
+    failed_at: '2026-06-08T22:21:08Z'
+    failure: CUDA OOM during optimizer.step state init after four mb48 microbatches; GPU0 reached 139.80 GiB process memory with PyTorch allocated 137.11 GiB.
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb48-gpu1
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb48-gpu1/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb48-gpu1/train.log
+    launch_mode: queue_once_gpu1_mb48
+  - name: r33-100k-lr1e5-cos-gb192-mb24-gpu1
+    config: configs/nano_ar/hpo/r33_100k_lr1e5_cosine_gb192_mb24_gpu1.yaml
+    run_id: nano-ar-r33-100k-lr1e5-cosine-gb192-mb24-gpu1
+    status: failed
+    notes: Single-GPU feasibility probe after mb48 OOM; keeps global batch 192 and halves microbatch to 24.
+    started_at: '2026-06-08T22:22:38Z'
+    failed_at: '2026-06-08T22:25:26Z'
+    failure: CUDA OOM during optimizer.step state init after eight mb24 microbatches; GPU0 reached 139.78 GiB process memory with PyTorch allocated 136.64 GiB.
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb24-gpu1
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb24-gpu1/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb24-gpu1/train.log
+    launch_mode: queue_once_gpu1_mb24
+  - name: r33-100k-lr1e5-cos-gb192-mb12-gpu1
+    config: configs/nano_ar/hpo/r33_100k_lr1e5_cosine_gb192_mb12_gpu1.yaml
+    run_id: nano-ar-r33-100k-lr1e5-cosine-gb192-mb12-gpu1
+    status: failed
+    notes: Single-GPU feasibility probe after mb24 OOM; keeps global batch 192 and halves microbatch to 12.
+    started_at: '2026-06-08T22:26:46Z'
+    failed_at: '2026-06-08T22:29:30Z'
+    failure: CUDA OOM during optimizer.step Adam state init after mb12 microbatches; GPU0 reached 139.79 GiB process memory with PyTorch allocated 137.50 GiB.
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb12-gpu1
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb12-gpu1/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb12-gpu1/train.log
+    launch_mode: queue_once_gpu1_mb12
+  - name: r33-100k-lr1e5-cos-gb192-mb16-rerun
+    config: configs/nano_ar/hpo/r33_100k_lr1e5_cosine_gb192_mb16_rerun.yaml
+    run_id: nano-ar-r33-100k-lr1e5-cosine-gb192-mb16-rerun
+    status: failed
+    notes: Revert to known-good two-GPU mb16 stability run after single-GPU probes showed optimizer-state memory floor.
+    started_at: '2026-06-08T22:33:41Z'
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb16-rerun
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb16-rerun/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb16-rerun/train.log
+    failed_at: '2026-06-08T22:38:00Z'
+    failure: operator stopped mb16 rerun before checkpoint to run two-GPU microbatch halving search from max legal mb96
+    launch_mode: queue_once_2gpu_mb16_rerun
+  - name: r33-100k-lr1e5-cos-gb192-mb96-2gpu
+    config: configs/nano_ar/hpo/r33_100k_lr1e5_cosine_gb192_mb96_2gpu.yaml
+    run_id: nano-ar-r33-100k-lr1e5-cosine-gb192-mb96-2gpu
+    status: complete
+    notes: Two-GPU max-legal microbatch probe for gb192; mb96 fit and completed, but lr1e-5 eval was worse than the prior lr2e-5 100k baseline.
+    started_at: '2026-06-08T22:40:37Z'
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb96-2gpu
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb96-2gpu/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb96-2gpu/train.log
+    eval_started_at: '2026-06-08T23:28:42Z'
+    eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb96-2gpu/eval_iter_0000467_v512_t512_winrates_report.json
+    eval_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr1e5-cosine-gb192-mb96-2gpu/eval_iter_0000467_v512_t512_winrates_report.log
+    completed_at: '2026-06-08T23:38:29Z'
+    metrics:
+      validation_teacher_nmse: 0.44116148352622986
+      test_teacher_nmse: 0.41993722319602966
+      validation_source_raw_nmse: 0.07225383073091507
+      test_source_raw_nmse: 0.07165582478046417
+  - name: r33-100k-lr3e5-cos-gb192-mb96
+    config: configs/nano_ar/hpo/r33_100k_lr3e5_cosine_gb192_mb96.yaml
+    run_id: nano-ar-r33-100k-lr3e5-cosine-gb192-mb96
+    status: complete
+    notes: Higher-LR R33 100k AR probe using the proven two-GPU mb96 throughput setting; compare against lr2e-5 baseline before hero promotion.
+    started_at: '2026-06-09T02:07:40Z'
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr3e5-cosine-gb192-mb96
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr3e5-cosine-gb192-mb96/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr3e5-cosine-gb192-mb96/train.log
+    eval_started_at: '2026-06-09T02:58:39Z'
+    eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr3e5-cosine-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.json
+    eval_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr3e5-cosine-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.log
+    completed_at: '2026-06-09T03:08:32Z'
+    metrics:
+      validation_teacher_nmse: 0.32281213998794556
+      test_teacher_nmse: 0.3137412667274475
+      validation_source_raw_nmse: 0.08105383813381195
+      test_source_raw_nmse: 0.07595404237508774
+  - name: r33-100k-lr2e5-cos-warmup25-gb192-mb96
+    config: configs/nano_ar/hpo/r33_100k_lr2e5_cosine_warmup25_gb192_mb96.yaml
+    run_id: nano-ar-r33-100k-lr2e5-cosine-warmup25-gb192-mb96
+    status: complete
+    notes: Short-warmup R33 100k AR probe using the proven two-GPU mb96 throughput setting; stable, but slightly worse than the earlier lr2e-5 mb8 eval and not a hero candidate.
+    started_at: '2026-06-09T16:12:55Z'
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr2e5-cosine-warmup25-gb192-mb96
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr2e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr2e5-cosine-warmup25-gb192-mb96/train.log
+    eval_started_at: '2026-06-09T17:05:21Z'
+    eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr2e5-cosine-warmup25-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.json
+    eval_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr2e5-cosine-warmup25-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.log
+    completed_at: '2026-06-09T17:15:07Z'
+    metrics:
+      validation_teacher_nmse: 0.3487679958343506
+      test_teacher_nmse: 0.33629804849624634
+      validation_source_raw_nmse: 0.07789929956197739
+      test_source_raw_nmse: 0.07373683154582977
+  - name: r33-100k-lr3e5-cos-warmup25-gb192-mb96
+    config: configs/nano_ar/hpo/r33_100k_lr3e5_cosine_warmup25_gb192_mb96.yaml
+    run_id: nano-ar-r33-100k-lr3e5-cosine-warmup25-gb192-mb96
+    status: complete
+    notes: Follow-up to the lr3e-5 probe; shortening warmup from 50 to 25 gave a small improvement, but lr4e-5 later became the 100k AR winner.
+    started_at: '2026-06-09T17:16:14Z'
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr3e5-cosine-warmup25-gb192-mb96
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr3e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr3e5-cosine-warmup25-gb192-mb96/train.log
+    eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr3e5-cosine-warmup25-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.json
+    eval_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr3e5-cosine-warmup25-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.log
+    completed_at: '2026-06-09T18:17:01Z'
+    metrics:
+      validation_teacher_nmse: 0.32103848457336426
+      test_teacher_nmse: 0.3120182156562805
+      validation_source_raw_nmse: 0.08490582555532455
+      test_source_raw_nmse: 0.07830233871936798
+  - name: r33-100k-lr4e5-cos-gb192-mb96
+    config: configs/nano_ar/hpo/r33_100k_lr4e5_cosine_gb192_mb96.yaml
+    run_id: nano-ar-r33-100k-lr4e5-cosine-gb192-mb96
+    status: complete
+    notes: Nearby higher-LR R33 100k AR probe using the proven mb96 path; completed training before pod eviction, then was evaluated from the saved checkpoint after workspace recovery. Current best 100k AR candidate for full275k hero promotion.
+    started_at: '2026-06-09T18:17:25Z'
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr4e5-cosine-gb192-mb96
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr4e5-cosine-gb192-mb96/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr4e5-cosine-gb192-mb96/train.log
+    eval_started_at: '2026-06-09T20:34:33Z'
+    eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr4e5-cosine-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.json
+    eval_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr4e5-cosine-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.log
+    completed_at: '2026-06-09T20:52:30Z'
+    metrics:
+      validation_teacher_nmse: 0.3090185821056366
+      test_teacher_nmse: 0.30121827125549316
+      validation_source_raw_nmse: 0.08696641027927399
+      test_source_raw_nmse: 0.08129613846540451
+  - name: r33-100k-lr5e5-cos-gb192-mb96
+    config: configs/nano_ar/hpo/r33_100k_lr5e5_cosine_gb192_mb96.yaml
+    run_id: nano-ar-r33-100k-lr5e5-cosine-gb192-mb96
+    status: complete
+    notes: Final higher-LR R33 100k AR probe using the proven mb96 path; improved over lr4e-5 and reached the desired heldout target band.
+    started_at: '2026-06-09T21:11:01Z'
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr5e5-cosine-gb192-mb96
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr5e5-cosine-gb192-mb96/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr5e5-cosine-gb192-mb96/train.log
+    eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr5e5-cosine-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.json
+    eval_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr5e5-cosine-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.log
+    completed_at: '2026-06-09T22:18:20Z'
+    metrics:
+      validation_teacher_nmse: 0.301175057888031
+      test_teacher_nmse: 0.29295602440834045
+      validation_source_raw_nmse: 0.09323935955762863
+      test_source_raw_nmse: 0.08650436252355576
+  - name: r33-100k-lr5e5-cos-warmup25-gb192-mb96
+    config: configs/nano_ar/hpo/r33_100k_lr5e5_cosine_warmup25_gb192_mb96.yaml
+    run_id: nano-ar-r33-100k-lr5e5-cosine-warmup25-gb192-mb96
+    status: complete
+    notes: Final lr5e-5 short-warmup check; narrowly best 100k AR candidate by teacher NMSE and selected for full275k hero promotion.
+    started_at: '2026-06-09T22:18:43Z'
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr5e5-cosine-warmup25-gb192-mb96
+    expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0000467
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr5e5-cosine-warmup25-gb192-mb96/train.log
+    eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr5e5-cosine-warmup25-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.json
+    eval_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-scaling/nano-ar-r33-100k-lr5e5-cosine-warmup25-gb192-mb96/eval_iter_0000467_v512_t512_winrates_report.log
+    completed_at: '2026-06-09T23:19:24Z'
+    metrics:
+      validation_teacher_nmse: 0.3009241223335266
+      test_teacher_nmse: 0.2929438054561615
+      validation_source_raw_nmse: 0.09452923387289047
+      test_source_raw_nmse: 0.08868926763534546

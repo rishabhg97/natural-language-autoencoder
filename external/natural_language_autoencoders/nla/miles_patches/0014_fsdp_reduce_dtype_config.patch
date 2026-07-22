@@ -1,0 +1,34 @@
+diff --git a/miles/backends/fsdp_utils/actor.py b/miles/backends/fsdp_utils/actor.py
+--- a/miles/backends/fsdp_utils/actor.py
++++ b/miles/backends/fsdp_utils/actor.py
+@@ -891,7 +891,18 @@ def apply_fsdp2(model, mesh=None, cpu_offload=False, args=None):
+ 
+     # Determine precision policy based on args
+     param_dtype = torch.bfloat16  # Default to bf16 as before
+-    reduce_dtype = torch.float32
++    reduce_dtype_name = str(getattr(args, "fsdp_reduce_dtype", "float32")).strip().lower()
++    reduce_dtype_by_name = {
++        "float32": torch.float32,
++        "fp32": torch.float32,
++        "bfloat16": torch.bfloat16,
++        "bf16": torch.bfloat16,
++        "float16": torch.float16,
++        "fp16": torch.float16,
++    }
++    if reduce_dtype_name not in reduce_dtype_by_name:
++        raise ValueError(f"Unsupported --fsdp-reduce-dtype={reduce_dtype_name!r}; expected one of {sorted(reduce_dtype_by_name)}")
++    reduce_dtype = reduce_dtype_by_name[reduce_dtype_name]
+ 
+     if args.fp16:
+         param_dtype = torch.float16
+diff --git a/miles/backends/fsdp_utils/arguments.py b/miles/backends/fsdp_utils/arguments.py
+--- a/miles/backends/fsdp_utils/arguments.py
++++ b/miles/backends/fsdp_utils/arguments.py
+@@ -40,6 +40,7 @@ class FSDPArgs:
+ 
+     # Precision
+     gradient_checkpointing: bool = False
++    fsdp_reduce_dtype: str = "float32"
+     fp16: bool = False
+ 
+     # FSDP configuration

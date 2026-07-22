@@ -1,0 +1,74 @@
+schema_version: nano_av_probe_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  generation_examples: 8
+  cleanup_converted_hf_after_eval: true
+  converted_hf_dtype: bfloat16
+  cleanup_dcp_model_after_eval: false
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/av_hpo_queue/r33_component_full_hero_trials.jsonl
+items:
+- name: r33-component-full-av-smoke-lr1e4-warmup25-gb192-mb2-dyn512-32-roundtrip
+  config: configs/nano_av/hpo/r33_component_full_smoke_lr1e4_cosine_warmup25_gb192_mb2_seq1152_dyn512_32steps.yaml
+  run_id: nano-av-r33-component-full-smoke-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512-32steps
+  status: blocked
+  study_task: av_roundtrip
+  roundtrip_enabled: true
+  roundtrip:
+    ar_checkpoint_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289
+    validation_limit: 64
+    test_limit: 64
+    generation_controls: [real, shuffled, zero, mean, none]
+    max_new_tokens: 256
+    generation_prefix: "<explanation>\n"
+    stop_text: </explanation>
+    generated_text_fallback: empty
+    generation_backend: cache
+    generation_workers: 2
+    generation_worker_devices: ["0", "1"]
+    stream_generated: true
+    resume_generated: true
+    progress_every: 8
+    min_closed_fraction: 0.8
+    min_usable_fraction: 0.95
+    injection_scale: "75"
+    ar_batch_size: 4
+    torch_dtype: bfloat16
+    control_margin: 5.0e-5
+    min_control_win_fraction: 0.9
+    av_device_map: auto
+    ar_device_map: auto
+  notes: Full-source component-preserving R33 AV smoke, gated on the clean R33 component-full AR hero checkpoint and scored by actual AV-generated-text -> AR reconstruction.
+- name: r33-component-full-av-hero-lr1e4-warmup25-gb192-mb2-dyn512-roundtrip
+  config: configs/nano_av/hpo/r33_component_full_hero_lr1e4_cosine_warmup25_gb192_mb2_seq1152_dyn512.yaml
+  run_id: nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512
+  status: blocked
+  study_task: av_roundtrip
+  roundtrip_enabled: true
+  roundtrip:
+    ar_checkpoint_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289
+    validation_limit: 256
+    test_limit: 256
+    generation_controls: [real, shuffled, zero, mean, none]
+    max_new_tokens: 256
+    generation_prefix: "<explanation>\n"
+    stop_text: </explanation>
+    generated_text_fallback: empty
+    generation_backend: cache
+    generation_workers: 2
+    generation_worker_devices: ["0", "1"]
+    stream_generated: true
+    resume_generated: true
+    progress_every: 16
+    min_closed_fraction: 0.8
+    min_usable_fraction: 0.95
+    injection_scale: "75"
+    ar_batch_size: 4
+    torch_dtype: bfloat16
+    control_margin: 5.0e-5
+    min_control_win_fraction: 0.9
+    av_device_map: auto
+    ar_device_map: auto
+  notes: Full component-preserving R33 AV hero run. Unblock only after the AV smoke round-trip gate passes; final report is the 256/256 full round-trip milestone.

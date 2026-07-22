@@ -1,0 +1,22 @@
+schema_version: nano_viz_queue.v1
+
+defaults:
+  code_root: /workspace/nla-viz/nano30b-nla-pilot
+  config: /workspace/nla-viz/nano30b-nla-pilot/configs/nano_viz/offline_observatory.yaml
+  python: /workspace/nla-viz/.venv/bin/python
+  state_json: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/logs/gpu_queue_state.json
+  log_dir: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/logs/gpu_queue
+
+items:
+  - name: e1_canary_av
+    phase: canary-av
+  - name: e1_canary_ar
+    phase: canary-ar
+  - name: e2_token_logprobs
+    phase: token-logprobs
+  - name: e3_lattice_pilot
+    phase: lattice-pilot
+  - name: p1_alternate_tellings
+    phase: alternate-tellings
+  - name: p2_lattice_full
+    phase: lattice-full

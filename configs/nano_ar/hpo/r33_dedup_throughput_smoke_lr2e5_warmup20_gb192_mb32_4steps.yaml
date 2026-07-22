@@ -1,0 +1,63 @@
+run:
+  name: nano-ar-r33-dedup-throughput-smoke-lr2e5-warmup20-gb192-mb32-4step
+  experiment_class: tuning-probe
+  output_root: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-dedup-throughput
+  wandb_mode: offline
+  wandb_project: nano30b-nla-pilot
+  wandb_group: nano-ar-r33-dedup-throughput
+
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  miles_root: /workspace/interp/code/miles-051cd15
+  model_id: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  critic_init_model_id: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-critic-init/nano-ar-r33-critic-init
+  input_ar_source: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_dedup_content_fullscan
+  input_ar_sft: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_dedup_content_fullscan/ar_sft_R33_r33_prefix_dedup_content_fullscan.parquet
+
+dataset:
+  row_limit: 1920
+  split_mode: doc
+  fractions: {train: 0.9, validation: 0.05, test: 0.05}
+  materialize_splits: true
+  cache_materialized_splits: true
+  split_cache_dir: /workspace/interp/outputs/nano30b-nla-pilot/split_cache
+  verify_materialized_splits: true
+  final_batch_policy: pad_with_train_duplicates
+  expected_d_model: 2688
+  seed: 42
+
+training:
+  objective: ar_sft
+  backend: miles_fsdp2
+  epochs: 1
+  num_rollout: 4
+  num_gpus: 2
+  global_batch_size: 192
+  micro_batch_size: 32
+  rollout_batch_size: 192
+  lr: 2e-5
+  min_lr: 2e-6
+  lr_decay_style: cosine
+  lr_warmup_iters: 20
+  grad_norm_policy: clip
+  timing_debug: false
+  gradient_checkpointing: true
+  allow_packed_critic_training: true
+  system_metrics:
+    enabled: true
+    interval_steps: 1
+    nvidia_smi_interval_steps: 1
+    router_entropy: true
+
+checkpoint:
+  save_interval: 4
+  keep_last: 1
+  save_enabled: true
+  no_save_optim: true
+  require_optimizer_state_for_hero: false
+
+eval:
+  interval: 4
+  controls: [teacher, teacher_shuffled, blank, generic, mean, source_context, source_raw]
+  validation_limit: 64
+  test_limit: 64

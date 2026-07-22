@@ -1,0 +1,11 @@
+? /Users/rigarg/Desktop/agents/research-projects/nano30b-nla-pilot/runs/introspection/ar-r27-r30-fullscan-20260528T234403Z/teacher_local/tokenizer_nano30b_runai
+: block: cjk_symbols
+  char: 々
+  token_id: 42019
+meta-llama/Llama-3.3-70B-Instruct:
+  char: ㎡
+  token_id: 105565
+nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16:
+  block: cjk_symbols
+  char: 々
+  token_id: 42019

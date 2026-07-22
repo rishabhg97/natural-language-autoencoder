@@ -1,0 +1,13 @@
+schema_version: nano_teacher_corpus_inventory.v1
+batch_size: 8192
+roots:
+  - /workspace/interp/outputs/nano30b-nla-pilot
+  - /workspace/interp/artifacts/nano30b-nla-pilot
+patterns:
+  - "**/*ar_sft*.parquet"
+  - "**/*teacher_keys*.parquet"
+  - "**/*explained*.parquet"
+known_exposed_numeric_doc_ranges:
+  - [0, 38161]
+outputs:
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/teacher_corpus_external_boundary_inventory_v2.json

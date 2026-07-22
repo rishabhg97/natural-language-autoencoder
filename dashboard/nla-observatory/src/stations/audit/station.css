@@ -1,0 +1,355 @@
+/* AUDIT station styles. All classes are prefixed audit- to avoid collisions. */
+
+.audit-grid [id] {
+  scroll-margin-top: 96px;
+}
+
+/* Deep-link highlight: applied for ~2s when state.claim targets an anchor. */
+.audit-flash {
+  outline: 2px solid var(--selected);
+  outline-offset: 2px;
+  background: var(--selected-wash);
+  transition:
+    background 0.4s ease,
+    outline-color 0.4s ease;
+}
+
+.audit-subhead {
+  margin: 10px 0 4px;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.audit-spaced {
+  margin-top: 8px;
+}
+
+.audit-note {
+  margin: 6px 0;
+  font-size: 12px;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+
+.audit-boundary {
+  margin: 4px 0 8px;
+  font-size: 12px;
+  border-left: 3px solid var(--status-caveat);
+  padding-left: 8px;
+  overflow-wrap: anywhere;
+}
+
+.audit-fineprint {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.audit-statement {
+  overflow-wrap: anywhere;
+  min-width: 180px;
+}
+
+.audit-wrap {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 420px;
+}
+
+.audit-path {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  overflow-wrap: anywhere;
+  margin: 4px 0;
+}
+
+/* ------------------------------ claim ledger ------------------------------ */
+
+.audit-claim-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+
+.audit-claim-card {
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  padding: 12px 14px;
+  min-width: 0;
+}
+
+.audit-claim-card:first-child {
+  border-left: 0;
+}
+
+.audit-claim-card h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.audit-claim-card p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.audit-claim-status {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  overflow-wrap: anywhere;
+}
+
+.audit-legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  margin: 8px 0 2px;
+}
+
+.audit-legend-row > span {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.audit-limitations {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+}
+
+.audit-limitations li {
+  margin: 2px 0;
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------- chips ---------------------------------- */
+
+.audit-chip {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 8px;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+
+.audit-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+/* --------------------------------- tables --------------------------------- */
+
+.audit-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.audit-rowlink {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--selected);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.audit-inline-count {
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+
+/* ---------------------------------- court ---------------------------------- */
+
+.audit-court-thresholds {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.audit-threshold-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.audit-threshold-card .audit-subhead {
+  margin-top: 0;
+}
+
+.audit-court-cells {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.audit-court-cell {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  line-height: 1;
+  border-radius: 4px;
+  border: 1px solid var(--axis);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  padding: 0;
+  cursor: default;
+  flex: none;
+}
+
+/* Calibration label colors are category identity (series palette), not
+   evidence status; the verdict glyph inside each cell is the non-color
+   encoding. */
+.audit-court-cell-negative {
+  background: var(--series-5);
+  border-color: var(--series-5);
+  color: var(--surface-1);
+}
+
+.audit-court-cell-positive {
+  background: var(--series-2);
+  border-color: var(--series-2);
+  color: var(--surface-1);
+}
+
+.audit-court-cell-swatch {
+  cursor: default;
+}
+
+/* -------------------------------- word lists ------------------------------- */
+
+.audit-wordlists {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0 4px;
+}
+
+.audit-wordlist {
+  flex: 1 1 240px;
+  min-width: 0;
+  margin: 0;
+  max-width: 100%;
+}
+
+.audit-wordlist figcaption {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+/* --------------------------------- details --------------------------------- */
+
+.audit-details {
+  margin: 10px 0 0;
+  border-top: 1px solid var(--border);
+  padding-top: 6px;
+}
+
+.audit-details summary {
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-2);
+  padding: 2px 0;
+}
+
+.audit-details summary:hover {
+  color: var(--selected);
+}
+
+/* -------------------------------- provenance ------------------------------- */
+
+.audit-prov-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.audit-prov-card {
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  padding: 12px 14px;
+  min-width: 0;
+}
+
+.audit-prov-card:first-child {
+  border-left: 0;
+}
+
+@media (max-width: 680px) {
+  .audit-claim-card,
+  .audit-prov-card {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .audit-claim-card:first-child,
+  .audit-prov-card:first-child {
+    border-top: 0;
+  }
+}
+
+.audit-prov-card .audit-subhead:first-child {
+  margin-top: 0;
+}
+
+.audit-poetry-phases {
+  margin: 4px 0 6px;
+  font-size: 12.5px;
+  font-weight: 650;
+}
+
+/* ------------------- audit-pass additions (2026-07-18) -------------------- */
+
+/* Unexpected court outcomes (preserved heavy corruption / broken paraphrase)
+   get a ring so the suspicious cells pop out of the docket. */
+.audit-court-cell-unexpected {
+  outline: 2px solid var(--status-caveat);
+  outline-offset: 1px;
+}
+
+.audit-kind-key {
+  color: var(--ink-3);
+  font-size: 10px;
+}

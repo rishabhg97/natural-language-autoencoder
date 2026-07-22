@@ -1,0 +1,39 @@
+{
+  "name": "nla-observatory",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "NLA Offline Observatory — static evidence viewer for the Nano30B R33 NLA bundle",
+  "scripts": {
+    "data:build": "uv run --frozen python scripts/build_static_data.py",
+    "data:verify": "uv run --frozen python scripts/verify_static_data.py",
+    "data:verify:published": "python3 scripts/verify_published_data.py",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lucide-react": "^0.469.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.49.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "axe-core": "^4.10.2",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "vitest": "^4.1.10"
+  }
+}

@@ -1,0 +1,36 @@
+schema_version: nano_release_bundle_audit.v1
+root: /Users/rigarg/Desktop/agents/research-projects/nano30b-nla-pilot/artifacts/publication/r33-clean-sft-public-release-candidate-20260716
+output_json: /Users/rigarg/Desktop/agents/research-projects/nano30b-nla-pilot/artifacts/runai_eval/r33-clean-sft-publication-evidence-20260716/public_bundle_security_audit.json
+exclude_globs: []
+max_text_bytes: 33554432
+fail_pattern_kinds:
+  - private_key
+  - aws_access_key
+  - openai_style_key
+  - github_token
+  - slack_token
+  - credential_assignment
+  - local_home_path
+  - runai_workspace_path
+  - internal_s3
+  - cluster_hostname
+  - internal_s3_endpoint
+allowed_findings:
+  - path_glob: source/tests/test_audit_nano_release_text.py
+    kinds: [aws_access_key, credential_assignment]
+    max_count: 1
+  - path_glob: source/tests/test_audit_nano_release_bundle.py
+    kinds: [aws_access_key, internal_s3, runai_workspace_path]
+    max_count: 2
+  - path_glob: source/scripts/audit_nano_release_bundle.py
+    kinds: [internal_s3]
+    max_count: 1
+  - path_glob: source/scripts/audit_nano_release_text.py
+    kinds: [internal_s3]
+    max_count: 1
+  - path_glob: source/scripts/build_nano_public_release_bundle.py
+    kinds: [internal_s3]
+    max_count: 1
+  - path_glob: source/tests/test_build_nano_public_release_bundle.py
+    kinds: [internal_s3]
+    max_count: 1

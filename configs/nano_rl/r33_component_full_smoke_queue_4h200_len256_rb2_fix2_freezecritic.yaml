@@ -1,0 +1,87 @@
+schema_version: nano_rl_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  miles_root: /workspace/interp/code/miles-051cd15
+  rl_script: external/natural_language_autoencoders/configs/rl.sh
+  workspace_gpus: 4
+  env:
+    WANDB_MODE: offline
+    NLA_EMBED_DUMP_DIR: /dev/shm/nla
+    NLA_BYPASS_ROUTER: "1"
+    NLA_BF16_B64_EMBEDS: "1"
+    NLA_WEIGHT_UPDATE_LOG_EVERY: "100"
+    NLA_SKIP_ROLLOUT_WEIGHT_SYNC: "1"
+    NLA_FREEZE_CRITIC_TRAIN: "1"
+    NLA_ROLLOUT_TEXT_DUMP: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_4h200_len256_rb2_fix2_freezecritic/rollout_text_dump.txt
+  resources:
+    actor_nodes: 1
+    actor_gpus: 2
+    critic_nodes: 1
+    critic_gpus: 1
+    rollout_gpus: 1
+    min_actor_gpus: 2
+  training:
+    train_backend: fsdp
+    actor_lr: 1e-6
+    critic_lr: 1e-5
+    actor_micro_batch: 1
+    attn_implementation: eager
+    kl_loss_coef: 0
+    save_interval: 1
+    loss_mask_type: qwen
+    lr_decay_style: constant
+  rollout:
+    rollout_batch_size: 2
+    global_batch_size: 2
+    n_samples_per_prompt: 2
+    max_response_len: 256
+    max_context_len: 256
+    num_rollout: 1
+  sglang:
+    mode: external
+    python: /workspace/interp/.venvs/sglang-cu130/bin/python
+    managed: true
+    terminate_on_exit: true
+    env:
+      SGLANG_MIN_NEW_TOKEN_RATIO_FACTOR: "1"
+    engine_addrs:
+      - 127.0.0.1:31000
+    timeout_seconds: 900
+    poll_seconds: 2
+    start_commands:
+      - - /workspace/interp/.venvs/sglang-cu130/bin/python
+        - -m
+        - sglang.launch_server
+        - --model-path
+        - /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+        - --host
+        - 127.0.0.1
+        - --port
+        - "31000"
+        - --tp-size
+        - "1"
+        - --base-gpu-id
+        - "2"
+        - --trust-remote-code
+        - --skip-server-warmup
+        - --disable-radix-cache
+        - --attention-backend
+        - fa3
+        - --schedule-conservativeness
+        - "1.5"
+        - --enable-draft-weights-cpu-backup
+    health_urls:
+      - http://127.0.0.1:31000/health_generate
+  extra_args:
+    - --sglang-attention-backend
+    - fa3
+items:
+  - name: r33-component-full-rl-smoke-512row-4h200-len256-rb2-fix2-freezecritic
+    status: pending
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_4h200_len256_rb2_fix2_freezecritic
+    notes: "Retry after fix1 proved actor step but the one-GPU online critic OOMed on Adam state init. Freezes critic training for this smoke while preserving reward forward and actor RL update."

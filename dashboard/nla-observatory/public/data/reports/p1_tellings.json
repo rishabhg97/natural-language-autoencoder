@@ -1,0 +1,21 @@
+{
+  "closed_fraction": 1.0,
+  "config_sha256": "c7492fecc776f3991ac605a83c1f74c57eeabd5ed9f8cd4838676b164161b259",
+  "passed": true,
+  "phase": "p1_alternate_tellings",
+  "records": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p1_alternate_tellings/alternate_tellings.jsonl",
+    "sha256": "913aa395ab9ef2adcea29a13a3cd59f39e611f0e6af1fd3ed82d7af6388443e4"
+  },
+  "rows": 50,
+  "samples": 400,
+  "sampling": {
+    "backend": "full_prefix_batch",
+    "max_new_tokens": 256,
+    "temperature": 0.7,
+    "top_p": 0.95
+  },
+  "schema_version": "nano_viz_model_batches.v1",
+  "split": "validation",
+  "usable_fraction": 1.0
+}

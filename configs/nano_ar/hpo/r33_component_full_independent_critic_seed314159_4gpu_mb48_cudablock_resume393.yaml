@@ -1,0 +1,70 @@
+run:
+  name: nano-ar-r33-component-full-independent-seed314159-lr5e5-warmup25-gb192-mb48-4gpu-cudablock-resume393
+  experiment_class: complete-performance
+  output_root: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-independent-critic
+  wandb_mode: offline
+  wandb_project: nano30b-nla-pilot
+  wandb_group: nano-ar-r33-independent-critic
+
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-hero-current
+  miles_root: /workspace/interp/code/miles-051cd15
+  model_id: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  critic_init_model_id: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-critic-init/nano-ar-r33-critic-init
+  input_ar_source: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396
+  input_ar_sft: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/ar_sft_R33_r33_prefix_fullscan275396.parquet
+
+dataset:
+  row_limit: 275396
+  split_mode: content_component
+  fractions: {train: 0.9, validation: 0.05, test: 0.05}
+  materialize_splits: true
+  cache_materialized_splits: true
+  split_cache_dir: /workspace/interp/outputs/nano30b-nla-pilot/split_cache
+  verify_materialized_splits: true
+  final_batch_policy: pad_with_train_duplicates
+  expected_d_model: 2688
+  seed: 42
+  verified_source_ar_report: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_component_fullscan275396/verify_ar_R33_component_fullscan275396.json
+
+training:
+  objective: ar_sft
+  backend: miles_fsdp2
+  epochs: 1
+  resume_steps: 896
+  num_gpus: 4
+  global_batch_size: 192
+  micro_batch_size: 48
+  rollout_batch_size: 192
+  rollout_seed: 314159
+  lr: "5e-5"
+  min_lr: "5e-6"
+  lr_decay_style: cosine
+  lr_decay_iters: 1289
+  lr_warmup_iters: 25
+  grad_norm_policy: clip
+  timing_debug: false
+  gradient_checkpointing: true
+  moe_routing_impl: expert_scan
+  cuda_launch_blocking: true
+  system_metrics:
+    enabled: true
+    interval_steps: 10
+    nvidia_smi_interval_steps: 20
+    router_entropy: false
+
+checkpoint:
+  resume_from: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-independent-critic/nano-ar-r33-component-full-independent-seed314159-lr5e5-warmup25-gb192-mb48-4gpu-cudablock-diag393/checkpoints
+  finetune: false
+  resume_optimizer_state_required: true
+  save_interval: 1289
+  keep_last: 1
+  save_enabled: true
+  no_save_optim: true
+  require_optimizer_state_for_hero: false
+
+eval:
+  interval: 1289
+  controls: [teacher, teacher_shuffled, blank, generic, mean, source_context, source_raw]
+  validation_limit: 512
+  test_limit: 512

@@ -1,0 +1,17 @@
+schema_version: nano_av_probe_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  generation_examples: 4
+  cleanup_dcp_model_after_eval: true
+items:
+- name: r33-av-20k-lr1e5-128-seq1152-dyn512-eval-retry
+  config: configs/nano_av/layer_probe/r33_av_probe_20k_lr1e5_128steps_seq1152.yaml
+  run_id: nano-av-r33-medium-probe-20k-lr1e5-128steps-seq1152-dyn512
+  status: cancelled
+  eval_only: true
+  notes: Retry R33 AV eval after DCP-to-HF conversion fix; do not retrain.
+  cancelled_at: '2026-06-10T23:29:32Z'
+  cancellation_reason: operator requested removal of pending jobs after packed-boundary contamination and LR-schedule audit; clean reruns must be explicitly queued

@@ -1,0 +1,293 @@
+schema_version: nano_ar_layer_sweep_queue.v1
+created_at: "2026-07-03T18:00:00Z"
+notes: >-
+  Evaluation-only promotion queue for the guarded corrected-K3 confirmation.
+  It enriches provenance, scores fixed generated text with an independent AR
+  critic, runs Stage-2 evidence, and fails closed at qualitative review.
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-hero-current
+  logs_dir: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/logs
+  environment:
+    WANDB_MODE: offline
+    HF_HUB_OFFLINE: "1"
+    TRANSFORMERS_OFFLINE: "1"
+    TOKENIZERS_PARALLELISM: "false"
+    PYTHONUNBUFFERED: "1"
+items:
+  - name: enrich-sft-v512
+    status: pending
+    kind: provenance
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/enrich_nano_generated_provenance.py
+      - --generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_generated.jsonl
+      - --train-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+      - --validation-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+      - --test-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+      - --output-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/sft_roundtrip_v512_t512_generated_enriched.jsonl
+      - --report-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/sft_provenance_report.json
+      - --overwrite
+  - name: enrich-confirm16-v512
+    status: pending
+    kind: provenance
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/enrich_nano_generated_provenance.py
+      - --generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/rl_corrected/r33_corrected_k3_confirm_lr1e5_update32_runtimefix_retry4_keyedloss_mem768/diagnostics/update16_v512_hardened/generated.jsonl
+      - --train-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+      - --validation-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+      - --test-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+      - --output-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/confirm16_roundtrip_v512_t512_generated_enriched.jsonl
+      - --report-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/confirm16_provenance_report.json
+      - --overwrite
+  - name: independent-sft-roundtrip-v512
+    status: pending
+    kind: independent_roundtrip
+    command: &independent_sft_command
+      - /workspace/interp/.venv/bin/python
+      - scripts/eval_nano_av_ar_roundtrip_gate.py
+      - --ar-checkpoint-dir
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-independent-critic/nano-ar-r33-component-full-independent-seed314159-lr5e5-warmup25-gb192-mb48-4gpu-cudablock-resume393/checkpoints/iter_0001289
+      - --train-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+      - --validation-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+      - --test-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+      - --report-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/independent_sft_roundtrip_v512_t512_report.json
+      - --generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_generated.jsonl
+      - --reuse-generated
+      - --validation-limit
+      - "512"
+      - --test-limit
+      - "512"
+      - --generation-controls
+      - real
+      - shuffled
+      - zero
+      - mean
+      - none
+      - --generated-text-fallback
+      - raw
+      - --ar-device-map
+      - cuda:0
+      - --ar-batch-size
+      - "4"
+      - --ar-max-length
+      - "1152"
+      - --local-files-only
+  - name: independent-confirm16-roundtrip-v512
+    status: pending
+    kind: independent_roundtrip
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/eval_nano_av_ar_roundtrip_gate.py
+      - --ar-checkpoint-dir
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-independent-critic/nano-ar-r33-component-full-independent-seed314159-lr5e5-warmup25-gb192-mb48-4gpu-cudablock-resume393/checkpoints/iter_0001289
+      - --train-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+      - --validation-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+      - --test-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+      - --report-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/independent_confirm16_roundtrip_v512_t512_report.json
+      - --generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/rl_corrected/r33_corrected_k3_confirm_lr1e5_update32_runtimefix_retry4_keyedloss_mem768/diagnostics/update16_v512_hardened/generated.jsonl
+      - --reuse-generated
+      - --baseline-report-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/independent_sft_roundtrip_v512_t512_report.json
+      - --validation-limit
+      - "512"
+      - --test-limit
+      - "512"
+      - --generation-controls
+      - real
+      - shuffled
+      - zero
+      - mean
+      - none
+      - --generated-text-fallback
+      - raw
+      - --min-control-win-fraction
+      - "0.9"
+      - --min-baseline-win-fraction
+      - "0.5"
+      - --min-baseline-relative-improvement
+      - "0.05"
+      - --require-baseline-ci-positive
+      - --require-clustered-baseline-ci
+      - --require-baseline-dataset-match
+      - --min-closed-fraction
+      - "0.95"
+      - --min-usable-fraction
+      - "0.99"
+      - --bootstrap-samples
+      - "100000"
+      - --ar-device-map
+      - cuda:0
+      - --ar-batch-size
+      - "4"
+      - --ar-max-length
+      - "1152"
+      - --local-files-only
+  - name: confirm16-invariance-v512
+    status: pending
+    kind: invariance
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/eval_nano_roundtrip_invariance.py
+      - --generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/confirm16_roundtrip_v512_t512_generated_enriched.jsonl
+      - --ar-checkpoint-dir
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289
+      - --train-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+      - --validation-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+      - --test-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+      - --validation-limit
+      - "512"
+      - --test-limit
+      - "512"
+      - --deterministic-transforms
+      - format_normalized
+      - unit_reordered
+      - --seed
+      - "17"
+      - --torch-dtype
+      - bfloat16
+      - --ar-device-map
+      - cuda:0
+      - --ar-batch-size
+      - "4"
+      - --ar-max-length
+      - "1152"
+      - --generated-text-fallback
+      - raw
+      - --report-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/invariance_v512_t512_report.json
+  - name: confirm16-functional-v512
+    status: pending
+    kind: functional
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/nano_functional_eval_config.py
+      - configs/nano_functional/r33_corrected_confirm16_v512.yaml
+      - --run
+  - name: confirm16-response-closure
+    status: pending
+    kind: closure_audit
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/audit_nano_response_closure.py
+      - --generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/confirm16_roundtrip_v512_t512_generated_enriched.jsonl
+      - --tokenizer
+      - /workspace/interp/models/nano-30b-a3b-bf16-hf
+      - --validation-limit
+      - "512"
+      - --test-limit
+      - "512"
+      - --candidate-cap
+      - "150"
+      - --candidate-cap
+      - "192"
+      - --candidate-cap
+      - "224"
+      - --candidate-cap
+      - "256"
+      - --required-fraction
+      - "0.95"
+      - --report-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/response_closure_audit.json
+  - name: confirm16-cross-critic-gate
+    status: pending
+    kind: cross_critic
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/eval_nano_cross_critic_gate.py
+      - --primary-candidate-report
+      - /workspace/interp/outputs/nano30b-nla-pilot/rl_corrected/r33_corrected_k3_confirm_lr1e5_update32_runtimefix_retry4_keyedloss_mem768/diagnostics/update16_v512_hardened/report.json
+      - --independent-candidate-report
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/independent_confirm16_roundtrip_v512_t512_report.json
+      - --primary-sft-report
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_hardened_report.json
+      - --independent-sft-report
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/independent_sft_roundtrip_v512_t512_report.json
+      - --output-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-cross-critic-gate.json
+  - name: confirm16-qualitative-panel-unreviewed
+    status: pending
+    kind: qualitative
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/build_nano_qualitative_panel.py
+      - --candidate-generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/confirm16_roundtrip_v512_t512_generated_enriched.jsonl
+      - --sft-generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/sft_roundtrip_v512_t512_generated_enriched.jsonl
+      - --source-base-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/ar_sft_R33_r33_prefix_fullscan275396.parquet
+      - --panel-size
+      - "50"
+      - --seed
+      - "17"
+      - --report-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/qualitative_panel_unreviewed.json
+  - name: confirm16-qualitative-structural-decisions
+    status: pending
+    kind: qualitative_structural_review
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/auto_review_nano_qualitative_panel.py
+      - --panel-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/qualitative_panel_unreviewed.json
+      - --output-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/qualitative_review_decisions.json
+  - name: confirm16-qualitative-panel-reviewed
+    status: pending
+    kind: qualitative
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/build_nano_qualitative_panel.py
+      - --candidate-generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/confirm16_roundtrip_v512_t512_generated_enriched.jsonl
+      - --sft-generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/sft_roundtrip_v512_t512_generated_enriched.jsonl
+      - --source-base-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/ar_sft_R33_r33_prefix_fullscan275396.parquet
+      - --panel-size
+      - "50"
+      - --seed
+      - "17"
+      - --reviews-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/qualitative_review_decisions.json
+      - --report-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-confirm16/qualitative_panel_report.json
+  - name: confirm16-composite-validity-gate
+    status: pending
+    kind: validity
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/eval_nano_r33_validity_gate.py
+      - configs/nano_rl/r33_component_corrected_validity_eval.yaml
+      - --candidate
+      - confirmation16
+      - --report-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-stage2-gate.json

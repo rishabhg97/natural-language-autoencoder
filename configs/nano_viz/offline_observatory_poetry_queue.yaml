@@ -1,0 +1,26 @@
+schema_version: nano_viz_queue.v1
+
+defaults:
+  code_root: /workspace/nla-viz/nano30b-nla-pilot
+  config: /workspace/nla-viz/nano30b-nla-pilot/configs/nano_viz/offline_observatory_poetry.yaml
+  python: /workspace/nla-viz/.venv/bin/python
+  state_json: /workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/queue_state.json
+  log_dir: /workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/logs
+  environment:
+    WANDB_MODE: offline
+    TOKENIZERS_PARALLELISM: "false"
+
+items:
+  - name: prepare
+    phase: poetry-prepare
+  - name: extract
+    phase: poetry-extract
+  - name: describe
+    phase: poetry-describe
+  - name: score
+    phase: poetry-score
+  - name: reconstruct
+    phase: poetry-reconstruct
+  - name: intervene
+    phase: poetry-intervene
+

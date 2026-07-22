@@ -1,0 +1,29 @@
+schema_version: nano_training_metric_curves.v1
+output_json: artifacts/runai_eval/r33-clean-sft-publication-evidence-20260716/training_metric_curves.json
+include_prefixes:
+  - train/
+  - perf/
+exclude_metrics:
+  - train/nla/system/pid
+  - train/nla/system/rank
+  - train/nla/system/local_rank
+  - train/nla/system/timestamp_unix
+runs:
+  - name: primary_ar
+    component: AR
+    gpu_type: NVIDIA H100 NVL
+    gpu_count: 4
+    expected_updates: 1291
+    train_log: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_ar/train.log
+  - name: primary_av
+    component: AV
+    gpu_type: NVIDIA H100 NVL
+    gpu_count: 8
+    expected_updates: 1291
+    train_log: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/train.log
+  - name: independent_ar_seed314159
+    component: AR
+    gpu_type: NVIDIA H100 NVL
+    gpu_count: 4
+    expected_updates: 1291
+    train_log: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/run_artifacts/train.log

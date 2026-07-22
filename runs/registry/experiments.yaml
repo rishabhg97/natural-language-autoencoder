@@ -1,0 +1,669 @@
+schema_version: nano_experiment_registry.v1
+last_organized: "2026-07-16"
+notes:
+  - "This registry is lightweight and intentionally source-controlled."
+  - "Heavy artifacts stay under RunAI outputs, S3, W&B offline snapshots, or ignored local artifact directories."
+  - "Queue YAML status may lag remote state after launches; prefer eval reports and run directories for completed evidence."
+
+experiments:
+  - id: r33-deterministic-snapshot-full275396
+    task: dataset_gate
+    layer: R33
+    status: snapshot_replay_passed_fresh_forward_fidelity_failed
+    config: configs/nano_data/publication/r33_deterministic_full275396.yaml
+    dataset_root: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396
+    rows: 275396
+    d_model: 2688
+    source_parquet_sha256: 76b78d2c34a251f004d53eb5d53766fa01879e2bf3744bc4d80d4fcc1d17825e
+    content_family_manifest_sha256: 479cbab5d21cd031cb72a770eebb3428e0d5419ebf8cce38c2ca6025e49741b6
+    replay_parquet_sha256: e3008a150831b8e894eac0de9f360a46823ffbfbd7cc73a9673f7e61e84521ac
+    verification:
+      empty_explanations: 0
+      nonfinite_activations: 0
+      exact_replay: true
+      fresh_forward_fidelity_passed: false
+      fidelity_rows: 32
+      mean_relative_l2: 0.0256230157
+      max_relative_l2: 0.0772841573
+    evidence: artifacts/runai_evidence/20260709_r33_publication_remediation/r33_deterministic_full275396/
+    decision: "Use as a deterministic paired snapshot target; do not claim equality to fresh model forwards."
+
+  - id: r33-family-clean-primary-ar-sft-20260710
+    task: ar_sft
+    layer: R33
+    status: selected_pair_component_validation_passed
+    config: configs/nano_ar/publication/r33_family_clean_sft.yaml
+    queue: configs/nano_ar/publication/r33_family_clean_sft_queue.yaml
+    run_id: nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48
+    checkpoint_iteration: 1291
+    checkpoint_sha256: 5e792120ec1a00ebb4cf4abca50d2a6a962421ac4f45423479ae5061f4d2d760
+    eval_report: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_ar/eval_iter_0001291_v512_t512_winrates_report.json
+    verifier: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_ar/eval_verifier.json
+    metrics:
+      validation_rows: 512
+      validation_directional_mse: 0.2817034125
+      validation_cosine: 0.8591483
+      validation_raw_mse: 8.5377846
+      validation_train_mean_raw_mse: 7.1047764
+      validation_centered_raw_r2: -0.2016964
+    caveats:
+      - "Directional recovery passed controls, but raw activation magnitude reconstruction did not."
+      - "The component report is validation-only; the pair-level final test is registered separately."
+      - "The critic is the primary reward critic, so same-critic downstream checks are not independent."
+    evidence: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_ar/
+    decision: "Retain as the selected AR checkpoint in the qualified clean SFT pair."
+
+  - id: r33-family-clean-primary-av-sft-20260710
+    task: av_sft
+    layer: R33
+    status: selected_pair_component_validation_passed
+    config: configs/nano_av/publication/r33_family_clean_sft_8gpu_dyn4096.yaml
+    queue: configs/nano_av/publication/r33_family_clean_sft_8gpu_dyn4096_queue.yaml
+    run_id: nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096
+    checkpoint_iteration: 1291
+    checkpoint_fingerprint: dcp_model_sha256:43346232d2fc043260ee903191e20cce07801903e1e7b7956f16022eb463386a
+    training:
+      global_batch_size: 192
+      learning_rate: 1.0e-4
+      warmup_updates: 25
+      final_loss: 0.683009
+      final_gradient_norm: 0.585938
+      final_learning_rate: 1.0e-5
+      finite_updates: 1291
+    verification:
+      packed_padded_gate_passed: true
+      packed_padded_max_absolute_nll_difference: 0.022072
+      packed_padded_max_relative_nll_difference: 0.007950
+      validation_rows: 512
+      real_nll: 0.7767746376921423
+      shuffled_nll: 1.3117268836358562
+      zero_nll: 1.1764944556634873
+      mean_nll: 1.237522108363919
+      no_injection_nll: 1.220973681542091
+    eval_report: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/eval_iter_0001291_v512_t512_gen8_report.json
+    verifier: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/eval_verifier.json
+    caveats:
+      - "This component result establishes activation-conditioned text likelihood; the pair-level entry carries the end-to-end NLA claim."
+      - "The selected AV and AR checkpoints used different validated Mamba kernel profiles; do not attribute quality differences to a shared-kernel recipe."
+    decision: "Retain as the selected AV checkpoint in the qualified clean SFT pair."
+
+  - id: r33-clean-sft-av-ar-iter1291-20260715
+    task: av_ar_sft_qualification
+    layer: R33
+    status: qualified
+    release_id: r33-clean-sft-av-ar-iter1291-20260715
+    release_config: configs/nano_roundtrip/publication/r33_clean_sft_checkpoint_pair_release.yaml
+    summary: docs/runs/r33_clean_sft_av_ar_20260715.md
+    checkpoints:
+      av_fingerprint: dcp_model_sha256:43346232d2fc043260ee903191e20cce07801903e1e7b7956f16022eb463386a
+      ar_sha256: 5e792120ec1a00ebb4cf4abca50d2a6a962421ac4f45423479ae5061f4d2d760
+    boundary:
+      dataset_rows: 275396
+      content_families: 5009
+      train_families: 4504
+      validation_families: 250
+      test_families: 255
+      train_family_overlap: 0
+      cross_split_family_overlap: 0
+    metrics:
+      validation_rows: 512
+      test_rows: 512
+      validation_directional_mse: 0.3070042379760435
+      test_directional_mse: 0.3192247649882203
+      validation_teacher_directional_mse: 0.3047138391504298
+      test_teacher_directional_mse: 0.3026366898913825
+      validation_closed_fraction: 1.0
+      test_closed_fraction: 1.0
+      validation_usable_fraction: 1.0
+      test_usable_fraction: 1.0
+      validation_centered_raw_r2: -0.32658628172707593
+      test_centered_raw_r2: -0.33537367599208356
+      functional_validation_passed: true
+      functional_test_passed: true
+    evidence:
+      pair_manifest: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_pair/checkpoint_pair_manifest.json
+      local: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/
+      s3: s3://team-ipp-trustworthy-ai/nano30b-nla-pilot/sync_exports/r33_clean_sft_av_ar_qualified_20260715.tgz
+      archive_sha256: b9043eae03cbb71c38a3feb81262361e764d4a147ba98d66735293b75b24f6bc
+    caveats:
+      - "Qualified for family-disjoint directional AV-to-AR reconstruction and stored-snapshot functional recovery only."
+      - "Native raw activation magnitude is not recovered; a later validation-fitted one-scalar audit is post-hoc supporting evidence only."
+      - "Stored targets do not pass exact fresh-forward replay."
+      - "The test is family-disjoint from clean SFT training but is not guaranteed untouched by every historical project run."
+      - "Validation-only independent-AR cross-critic replication passes; no second-AV-seed, row-matched R27, external-corpus, or RL improvement claim is made."
+    decision: "Use as the selected supervised R33 NLA AV+AR checkpoint pair within the explicit claim scope."
+
+  - id: r33-clean-sft-publication-followup-20260716
+    task: publication_boundary_fidelity_and_calibration_audit
+    layer: R33
+    status: completed_claim_bounded
+    selected_pair_release_id: r33-clean-sft-av-ar-iter1291-20260715
+    training_launched: false
+    exposure_audit:
+      config: configs/nano_data/publication/r33_confirmatory_selected_pair_exposure_audit_v6.yaml
+      sources: 136
+      unique_documents: 28665
+      candidate_families: 5009
+      exposed_families: 5009
+      unmapped_documents: 0
+      report_sha256: 373e2988b32f2e4e68e2d7644a8b77430829ea7a5d5e2f6b72f870caa89d088b
+      inventory_sha256: c193f2efb7c8414f4f8a6a12ab2051e633b891107f92c2971535164128f9aabb
+      joint_manifest_sha256: 9d68a894e763ed533fba11016ebc8b8f05c0d4a39443585196e7cd24ebffbc20
+      in_corpus_confirmatory_boundary_available: false
+    teacher_inventory:
+      candidate_tables: 63
+      usable_tables: 53
+      numeric_doc_suffix_min: 0
+      numeric_doc_suffix_max: 38161
+      unexposed_numeric_documents: 0
+    fresh_forward_fidelity:
+      rows: 64
+      strict_identity_passed: false
+      failed_identity_rows: 64
+      repeat_fresh_exact: true
+      full_vs_extraction_forward_exact: true
+      mean_relative_l2: 0.0314047
+      median_relative_l2: 0.01949
+      max_relative_l2: 0.185983
+      mean_cosine: 0.99914198
+      min_cosine: 0.98314645
+      stored_predicts_fresh_centered_r2: 0.9972548
+    magnitude_calibration:
+      config: configs/nano_roundtrip/publication/r33_clean_sft_magnitude_calibration.yaml
+      fit_split: validation
+      fit_variant: teacher
+      selected_method: origin_scalar
+      scalar: 0.5606042252919684
+      test_av_identity_raw_mse: 9.647147982011639
+      test_av_calibrated_raw_mse: 3.7703528171163097
+      test_av_identity_centered_raw_r2: -0.33537367546872665
+      test_av_calibrated_centered_raw_r2: 0.47810172409560125
+      test_av_raw_mse_improvement_ci95: [5.634403774563392, 6.123574335381406]
+      test_directional_mse_unchanged: 0.3192247649882203
+      publication_status: exploratory_posthoc_exposed_test
+    subgroup_audit:
+      config: configs/nano_roundtrip/publication/r33_clean_sft_subgroup_audit.yaml
+      fit_split: validation
+      dimensions: [n_raw_tokens, target_word_count, target_activation_norm, sample_family_frequency]
+      validation_test_bins: 16
+      insufficient_bins: 0
+      test_worst_directional_mse: 0.3700769722805304
+      test_worst_dimension: target_activation_norm
+      test_min_calibrated_centered_raw_r2: 0.4156057514683159
+      all_control_ci95_low_positive: true
+      report_sha256: fd24360bfcc4ff51538b2b21f5d1b931befa7b31ee0af45551701a95835c972c
+      publication_status: exploratory_posthoc_exposed_test
+    qualitative_review:
+      panel_rows_validation: 50
+      panel_rows_test: 50
+      automatic_structural_flags: 0
+      human_review_complete: false
+      source_rows_present: 100
+      panel_sha256: 4f5d61486330b1104dd0a256ea185d8c1c99512ee9ff4731f8135305924f81c8
+      automatic_review_sha256: 33de2720d96bda3f663318be7fe8c10765740a3d603bcdf76682ca23661297da
+      blinded_answer_key_sha256: 27585eae51d55deb9bb3821afbd1f5d1d3e7cfd0e7c4167e4111566ff06c1856
+    release_text_audit:
+      generated_rows: 1024
+      generated_sensitive_findings: 0
+      panel_copy_flagged_rows: 0
+      source_phone_like_findings: 14
+      automatic_gate_passed: true
+      human_review_required: true
+      report_sha256: 00e501ff644483e614d0b60071f726f33575c95ba8b81d5c6b59c4bd79d13419
+    compute_accounting:
+      gpu_type: NVIDIA H100 NVL
+      primary_ar_wall_hours: 3.8866666666666667
+      primary_ar_gpu_hours: 15.546666666666667
+      primary_av_wall_hours: 13.460833333333333
+      primary_av_gpu_hours: 107.68666666666667
+      independent_ar_wall_hours: 3.8780555555555556
+      independent_ar_gpu_hours: 15.512222222222222
+      selected_successful_training_gpu_hours: 138.74555555555557
+      optimizer_updates_per_run: 1291
+      report_sha256: 7bde74be3a874d2ae305463ca8da211c069ce0bf1001802b6bdf7ab091fd7238
+      scope: selected_successful_training_only_with_explicit_exclusions
+    source_bundle_security_audit:
+      file_count: 680
+      forbidden_paths: 0
+      symlinks: 0
+      binary_files: 0
+      oversized_text_files: 0
+      failed_finding_files: 31
+      automatic_gate_passed: false
+      tree_manifest_sha256: 3469d92cc535e42b4e70098ce5f3640cb980e051c43427794a6afe4fef0cf8e8
+      report_sha256: bf697acdad268e219cfd729428233b1259b07aea988529e8c7e4bb01b8a62c42
+      blocker: redact_or_exclude_internal_references_then_rescan_exact_public_bundle
+    public_bundle_candidate:
+      file_count: 496
+      weights_included: false
+      legal_clearance_granted: false
+      automatic_security_gate_passed: true
+      failed_finding_files: 0
+      forbidden_paths: 0
+      symlinks: 0
+      binary_files: 0
+      oversized_text_files: 0
+      audited_tree_manifest_sha256: df175c5f61cefbfc1a02451a7bd242ba69e1cb602cdd97ca4b8bd8fe9c263b77
+      security_report_sha256: a130d8e4295a06d0372bd0d920d9dfd0c8f7649710652939b33dbc764089f096
+      archive_bytes: 6859370
+      archive_sha256: 3eb8e64ed0d9d61ed2d6b0694fbaf96b99051a63f2ce1a6c99372d93832e573a
+      archive_content_tree_sha256: df175c5f61cefbfc1a02451a7bd242ba69e1cb602cdd97ca4b8bd8fe9c263b77
+      training_metric_curves_sha256: 7d9c22b989c594e546ec08648d0319c37caad69ad502d2badb635d41706c42a6
+      internal_s3_prefix: s3://team-ipp-trustworthy-ai/nano30b-nla-pilot/publication/release-candidates/r33-clean-sft-av-ar-iter1291-20260716/
+      internal_s3_objects: 5
+      internal_s3_archive_bytes_verified: 6859370
+      human_readable_attestation: docs/releases/r33_clean_sft_release_candidate_attestation.md
+      remaining_blockers: [blinded_human_review, repository_and_weight_license_approval, exact_teacher_api_terms, third_party_notices, source_phone_like_string_adjudication]
+    independent_ar_replication:
+      seed: 314159
+      critic_init_verified: true
+      critic_verifier_checks_passed: 16
+      critic_semantic_manifest_sha256: 34e863f756e0749ca19fc8c138b7bd71b5da69c907ee42ad021517542e5c8941
+      critic_verifier_sha256: 4639285fea694f7f850c766b31d8ddea4e2b2bdd61c710f3b2a4cdd2109fb6e3
+      ar_training_status: complete_component_and_crosscritic_verified
+      ar_component_validation_rows: 512
+      ar_component_teacher_directional_mse: 0.28616863489151
+      ar_component_teacher_cosine: 0.8569157123565674
+      ar_component_teacher_fve_nrm: 0.5779480636043055
+      ar_component_report_sha256: 368c84cad8bb0b8a7235b1a1e96c862b69d33be72d49c1f07a563e62d0be65aa
+      frozen_validation_score_complete: true
+      frozen_validation_rows: 512
+      frozen_validation_families: 250
+      av_text_directional_mse: 0.3109634728220453
+      teacher_directional_mse: 0.3085329510257789
+      parse_closed_fraction: 1.0
+      parse_usable_fraction: 1.0
+      all_controls_passed: true
+      minimum_rowwise_win_fraction: 0.998046875
+      raw_magnitude_claim_supported: false
+      roundtrip_report_sha256: 6f0829a61b03ac584b109c1c7a54f689f0a14b61f7fee803afd3d5ca29bf552b
+      roundtrip_verifier_sha256: dd3de6e1dd10f0f64c25e23ff3152638c9cf46785133dfb6c0466c353e434331
+      checkpoint_hf_files: 10
+      checkpoint_hf_bytes: 38462226688
+      checkpoint_hf_directory_sha256: c2eea74f5baccee97128617b05636187804c7e59aedc560d088dbf65d52f1925
+      checkpoint_fingerprint_manifest_sha256: 79408abd1e7cafadbc68ebe627bca99381e1a3e4486aa950ca0e7a42c97bb1ed
+    evidence:
+      local: artifacts/runai_eval/r33-clean-sft-publication-evidence-20260716/
+      independent_local: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/
+      s3: s3://team-ipp-trustworthy-ai/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/
+      independent_s3: s3://team-ipp-trustworthy-ai/nano30b-nla-pilot/publication/evidence/20260716_r33_independent_ar/
+      validation_cache_sha256: e85ab5b42ab226d3d79880c953cef5eb0b9540b49826dbacd65decb36c8adc63
+      test_cache_sha256: 6968607bfd77dad56537736249daa698ce21fc3f0b11ec0d675afb463038225d
+    caveats:
+      - "The v4 evaluation-only audit is superseded because it omitted selected-pair train exposure."
+      - "No in-corpus confirmatory family or existing external teacher-backed document remains."
+      - "Fresh forwards are repeatable but do not exactly equal the archived stored snapshot."
+      - "The scalar calibration is validation-fitted but post-hoc, and the exploratory test is already exposed."
+    decision: "Retain the pair for directional stored-snapshot claims with validation-only independent-AR replication; require external data and blinded semantic review for stronger publication claims."
+
+  - id: r33-prefix-fullscan275396-dataset
+    task: dataset_gate
+    layer: R33
+    status: passed
+    dataset:
+      rows: 275396
+      d_model: 2688
+      root: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396
+      ar_sft: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/ar_sft_R33_r33_prefix_fullscan275396.parquet
+      av_sft: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/av_sft_R33_r33_prefix_fullscan275396.parquet
+      critic_init: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-critic-init/nano-ar-r33-critic-init
+    verification:
+      ar_report: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/verify_ar_R33_r33_prefix_fullscan275396.json
+      av_report: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/verify_av_R33_r33_prefix_fullscan275396.json
+      empty_explanations: 0
+      nonfinite_activations: 0
+      split_doc_overlap: 0
+    decision: "Dataset gate clears R33 bounded HPO and hero-size AR/AV training prep."
+
+  - id: nano-ar-r33-full275k-lr5e5-cosine-warmup25-gb192-mb96
+    task: ar_sft
+    layer: R33
+    status: pre_fix_scouting_checkpoint_removed
+    config: configs/nano_ar/hpo/r33_full275k_lr5e5_cosine_warmup25_gb192_mb96.yaml
+    queue: configs/nano_ar/hpo/r33_full275k_hero_queue.yaml
+    dataset: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/ar_sft_R33_r33_prefix_fullscan275396.parquet
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-hero/nano-ar-r33-full275k-lr5e5-cosine-warmup25-gb192-mb96
+    checkpoint: null
+    checkpoint_removed_at_utc: "2026-06-10T23:50:13Z"
+    checkpoint_removed_reason: "Trained before Nano/Nemotron-H packed-boundary contamination remediation; logs/eval/W&B evidence preserved."
+    eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-hero/nano-ar-r33-full275k-lr5e5-cosine-warmup25-gb192-mb96/eval_iter_0001291_v512_t512_winrates_report.json
+    metrics:
+      validation_teacher_nmse: 0.2775649428367615
+      test_teacher_nmse: 0.2766648828983307
+      validation_source_raw_nmse: 0.09694842249155045
+      test_source_raw_nmse: 0.09156802296638489
+      final_train_loss: 0.27228911717732746
+      final_train_fve: 0.5134132305781046
+    caveats:
+      - "Pre-fix packed-boundary contamination risk; use as scouting signal only."
+      - "Cosine label is a requested config; LR-decay canary evidence is required for clean reruns."
+    evidence_archive: artifacts/runai_sync/20260610T234644Z/runai_light_artifacts_20260610T234644Z.tar.gz
+    cleanup_manifests:
+      - artifacts/runai_sync/20260610T234644Z/runai_cleanup_manifest_20260610T234644Z.json
+      - artifacts/runai_sync/20260610T234644Z/runai_cleanup_manifest_20260611T0005Z.json
+    decision: "Best pre-fix AR scouting signal. Reproduce post-fix before treating as a hero checkpoint."
+
+  - id: r33-r34-corrected-av-20k-layer-decision
+    task: av_sft_layer_probe
+    layer: R33_R34
+    status: pre_fix_scouting_completed
+    configs:
+      - configs/nano_av/layer_probe/r33_av_probe_20k_lr1e5_128steps_seq1152.yaml
+      - configs/nano_av/layer_probe/r34_av_probe_20k_lr1e5_128steps_seq1152.yaml
+    metrics:
+      r33_validation_real_nll: 1.040335
+      r33_test_real_nll: 1.015130
+      r34_validation_real_nll: 1.037261
+      r34_test_real_nll: 1.013677
+    caveats:
+      - "Pre-fix packed-boundary contamination risk; use as layer-selection scouting evidence only."
+      - "Dynamic/capped-token path may reduce exposure, but clean post-fix confirmation is still required."
+    decision: "Both AV probes pass controls; R34 AV is marginally better, but R33 remains main scaling target because AR is much stronger."
+
+  - id: r33-av-20k-lr-smoke
+    task: av_sft_hpo
+    layer: R33
+    status: pre_fix_scouting_completed
+    queue: configs/nano_av/hpo/r33_20k_lr_smoke_queue.yaml
+    configs:
+      - configs/nano_av/hpo/r33_20k_lr1e6_cosine_warmup5_gb192_mb2_seq1152_dyn512_32steps.yaml
+      - configs/nano_av/hpo/r33_20k_lr5e6_cosine_warmup5_gb192_mb2_seq1152_dyn512_32steps.yaml
+      - configs/nano_av/hpo/r33_20k_lr2e5_cosine_warmup5_gb192_mb2_seq1152_dyn512_32steps.yaml
+      - configs/nano_av/hpo/r33_20k_lr1e4_cosine_warmup5_gb192_mb2_seq1152_dyn512_32steps.yaml
+    metrics:
+      lr1e6_validation_real_nll: 2.576588295865804
+      lr1e6_test_real_nll: 2.5626176805235445
+      lr5e6_validation_real_nll: 1.5473469138378277
+      lr5e6_test_real_nll: 1.531454086652957
+      lr2e5_validation_real_nll: 1.0696231446345337
+      lr2e5_test_real_nll: 1.0443942120764405
+      lr1e4_validation_real_nll: 0.9921379311126657
+      lr1e4_test_real_nll: 0.9712478321744129
+    caveats:
+      - "Pre-fix packed-boundary contamination risk; use LR ordering as scouting signal only."
+    decision: "Best pre-fix short smoke was lr=1e-4; run patched confirmation before AV hero promotion."
+
+  - id: r33-corrected-k3-hero-lr1e5-update342
+    task: rl_hero_attempt
+    layer: R33
+    status: stopped_guard_kl
+    config: configs/nano_rl/r33_component_corrected_k3_hero_342_queue_8h100.yaml
+    terminal_update: 63
+    publication_valid: false
+    decision: "Stopped by the original consecutive-KL guard; retained as failed-run evidence."
+
+  - id: r33-corrected-k3-hero-lr1e5-update342-guard3-retry1
+    task: rl_hero_attempt
+    layer: R33
+    status: stopped_guard_relative_response_length
+    config: configs/nano_rl/r33_component_corrected_k3_hero_342_guard3_retry1_queue_8h100.yaml
+    terminal_rollout: 26
+    publication_valid: false
+    decision: "Stopped by the relative response-length guard; retained as failed-run evidence."
+
+  - id: r33-corrected-k3-hero-lr1e5-update342-guard3-lengthcap-retry2
+    task: rl_hero_attempt
+    layer: R33
+    status: stopped_guard_absolute_response_length
+    config: configs/nano_rl/r33_component_corrected_k3_hero_342_guard3_lengthcap_retry2_queue_8h100.yaml
+    terminal_rollout: 253
+    retained_checkpoint_iteration: 228
+    publication_valid: false
+    decision: "Stopped by the absolute p95 response-length guard; update 228 initialized retry 3."
+
+  - id: r33-corrected-k3-hero-lr1e5-update342-resume228-retry3
+    task: rl_hero
+    layer: R33
+    status: exploratory_corrected_salvage_passed_activation_invalid
+    publication_valid: false
+    publication_invalid_reason: stored_activation_identity_failure_and_exploratory_test_exposure
+    corrected_effect_pending: false
+    config: configs/nano_rl/r33_component_corrected_k3_hero_342_resume228_retry3_queue_8h100.yaml
+    dataset: /workspace/interp/outputs/nano30b-nla-pilot/r33_rl_train_only/rl_r33_train_only.parquet
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_hero/r33_corrected_k3_hero_lr1e5_update342_resume228_retry3
+    checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/rl_hero/r33_corrected_k3_hero_lr1e5_update342_resume228_retry3/actor/iter_0000342
+    initialized_from:
+      actor_sft: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+      critic_sft: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289
+    topology:
+      workspace_gpus: 8
+      actor_gpus: 6
+      rollout_gpus: 1
+      critic_gpus: 1
+      gpu_type: NVIDIA H100 NVL
+    training:
+      actor_lr: 1.0e-5
+      lr_schedule: constant
+      kl_loss: k3
+      kl_coefficient: 0.001
+      rollout_batch_size: 48
+      samples_per_prompt: 8
+      global_batch_size: 384
+      actor_micro_batch_size: 32
+      endpoint_updates: 342
+      selected_lineage_generated_responses: 131328
+      optimizer_state_saved: false
+    continuation:
+      source_checkpoint_iteration: 228
+      restored_model: true
+      restored_rng: true
+      restored_rollout_counter: true
+      restored_dataset_state: true
+      restored_optimizer: false
+    eval_reports:
+      short: /workspace/interp/outputs/nano30b-nla-pilot/rl_hero/r33_corrected_k3_hero_lr1e5_update342_resume228_retry3/roundtrip_iter_0000342_v64_t64_report.json
+      promotion: /workspace/interp/outputs/nano30b-nla-pilot/rl_hero/r33_corrected_k3_hero_lr1e5_update342_resume228_retry3/roundtrip_iter_0000342_v512_t512_report.json
+    metrics:
+      metric_semantics: directional_mse_after_rowwise_l2_normalization
+      publication_effect_valid: false
+      short_gate_passed: true
+      promotion_gate_passed: true
+      validation_rows: 512
+      test_rows: 512
+      validation_documents: 52
+      test_documents: 52
+      validation_rl_nmse: 0.0000875280675245449
+      test_rl_nmse: 0.00009117569425143301
+      validation_sft_nmse: 0.00012679611972998828
+      test_sft_nmse: 0.0001347519864793867
+      validation_relative_improvement: 0.3096944419939734
+      test_relative_improvement: 0.3233814903044525
+      validation_rowwise_win_fraction: 0.833984375
+      test_rowwise_win_fraction: 0.88671875
+      validation_closed_fraction: 0.990234375
+      test_closed_fraction: 0.994140625
+      validation_usable_fraction: 1.0
+      test_usable_fraction: 1.0
+      validation_improvement_ci95: [0.00003214236657097694, 0.00004723649660198472]
+      test_improvement_ci95: [0.00003603164263170534, 0.00005195277870528609]
+      corrected_salvage:
+        generation_protocol_sha256: 5677d491a812baecb9fa21829866de7eb3750f7cdb0273ed3038123a3119a381
+        validation_rows: 512
+        test_rows: 512
+        validation_families: 214
+        test_families: 218
+        primary_validation_relative_improvement: 0.22638260775982455
+        primary_test_relative_improvement: 0.20307943598412737
+        retained_reseed_validation_relative_improvement: 0.22623386838274478
+        retained_reseed_test_relative_improvement: 0.19888506631694006
+        validation_independent_to_primary_gain_ratio: 0.9993429734794929
+        test_independent_to_primary_gain_ratio: 0.9793461625158584
+        primary_validation_best_length_matched_improvement: 0.16033643773692946
+        primary_test_best_length_matched_improvement: 0.1359265277273497
+        retained_reseed_validation_best_length_matched_improvement: 0.1537522146948208
+        retained_reseed_test_best_length_matched_improvement: 0.13415971254919493
+        cross_critic_gate_passed: true
+    provenance:
+      baseline_dataset_hash_match: true
+      baseline_row_identity_match: true
+      baseline_row_overlap_per_split: 512
+      controls_passed: true
+      declared_git_commit: 25bb58c84c3dc7276f6f8ec6d28630dd747f2894
+      source_sha256: aef659279c9306f4818812b0b9eb0cbd24df0d857c562d323f4da221524c32a4
+      queue_sha256: 86957f90e91692ee4c7015cac99e66e1d69f481bc31d8ff04841d1a5d595fccf
+      activation_fidelity_publication_ready: false
+      activation_fidelity_sample_rows: 16
+      activation_fidelity_mean_relative_l2: 0.023912849573352803
+      activation_fidelity_max_relative_l2: 0.05320598142386369
+      activation_fidelity_report: artifacts/runai_evidence/20260708_r33_publication_remediation/activation_fidelity/r33_activation_fidelity_current_exactsource_v8_t8.json
+      corrected_salvage_gate: artifacts/runai_evidence/20260709_r33_publication_remediation/r33_protocol_matched_salvage/r33_retained_salvage_cross_critic_gate.json
+    completed_at_utc: "2026-07-08T03:20:52Z"
+    evidence:
+      summary: docs/runs/r33_rl_hero_20260708.md
+      local: artifacts/runai_rl/20260708T151400Z_r33_rl_hero_final/
+      s3: s3://team-ipp-trustworthy-ai/nano30b-nla-pilot/sync_exports/20260708T151400Z_r33_rl_hero_final/r33_rl_hero_final_lightweight_20260708T151400Z.tgz
+      sha256: 78cbf98d27188594c25cbf9c0d695f0b3b1754df978961585bbaa6fc178f0bc7
+    caveats:
+      - "The 512-row SFT baseline mixed generation prefixes; the 30.97%/32.34% effect is invalid for publication."
+      - "Corrected no-prefix salvage passes a retained-reseed cross-critic gate, but that critic reused the historical initialization/recipe and is not the fresh publication critic."
+      - "The recorded normalized MSE is direction-only and does not establish raw activation reconstruction."
+      - "A seeded live-vs-stored R33 activation audit failed all 16 identity checks; clean extraction under a frozen runtime is required before publication retraining."
+      - "Update-228 continuation reset Adam because optimizer state was not saved."
+      - "Internal R33-over-clean-SFT result; no fresh row-matched R27 or independent-seed replication."
+    decision: "Retain iter_0000342 as positive salvage evidence only; clean extraction, clean SFT, a freshly initialized critic, and an independent confirmatory RL seed remain mandatory."
+
+  - id: r33-family-clean-online-joint-canary-update2-20260717
+    task: online_joint_av_ar_rl_canary
+    layer: R33
+    status: systems_pass_quality_not_promoted
+    summary: docs/runs/r33_online_joint_canary_20260717.md
+    run_id: r33-family-clean-online-joint-canary-update2-8h100-retry4
+    initialized_from:
+      pair_release_id: r33-clean-sft-av-ar-iter1291-20260715
+    topology:
+      workspace_gpus: 8
+      actor_gpus: 4
+      critic_gpus: 3
+      rollout_gpus: 1
+      gpu_type: NVIDIA H100 NVL
+    training:
+      actor_lr: 1.0e-5
+      critic_lr: 5.0e-6
+      lr_schedule: constant
+      prompts_per_update: 3
+      samples_per_prompt: 8
+      rollouts_per_update: 24
+      optimizer_updates: 2
+      wandb_mode: offline
+      actor_checkpoint_iteration: 2
+      critic_checkpoint_iteration: 2
+      critic_reward_train_equivalence_passed: true
+    evaluation:
+      validation_rows: 64
+      independent_families: 64
+      generation_max_new_tokens: 256
+      generation_arms: [real, shuffled, zero, mean, none]
+      protocol_sha256: ec72786f8addfe132d245ec8a981719b94dbf1c7d6fbb5710655ef2322cb75cc
+      baseline_row_identity_kind: row_key
+      baseline_dataset_hash_match: true
+      baseline_row_identity_match: true
+      baseline_row_overlap: 64
+      closed_fraction: 1.0
+      usable_fraction: 1.0
+    metrics:
+      online_directional_mse: 0.29199270869110305
+      clean_sft_directional_mse: 0.2921734043910949
+      directional_relative_improvement: 0.00061845
+      directional_paired_wins: 32
+      directional_rows: 64
+      directional_bootstrap_ci95: [-0.0077038625, 0.0085969160]
+      directional_sign_flip_p: 0.482395
+      online_raw_mse: 8.96992673256604
+      clean_sft_raw_mse: 8.797532977778747
+      raw_relative_improvement: -0.0195957
+      raw_paired_wins: 28
+      raw_sign_flip_p: 0.959660
+    gates:
+      provenance_passed: true
+      family_passed: true
+      parse_passed: true
+      controls_passed: true
+      baseline_beaten: false
+      strict_promotion_passed: false
+    evidence:
+      local: artifacts/runai_eval/r33-online-joint-canary-evidence-20260717T0951Z/
+      s3: s3://team-ipp-trustworthy-ai/nano30b-nla-pilot/run-artifacts/r33-online-joint-canary-evidence-20260717T0951Z.tgz
+      archive_sha256: 3a721f6bbd795b4aeba4a801164594c982807d8eee2160ad4ab0e484e52efc83
+      strict_report_sha256: 8c34ec3b527651c32bcfc7ede749e12f666f7206b95e68c02264ad9addee65b4
+    caveats:
+      - "The canary establishes functional online actor+critic training and evaluation plumbing, not improvement over clean SFT."
+      - "The permissive aggregate-only report mechanically passes because its minimum effect thresholds are zero; the strict report is decisive."
+      - "Two updates and 64 held-out families are insufficient to estimate a useful RL learning curve."
+    decision: "Do not promote or scale this checkpoint; retain the qualified clean SFT pair as canonical and remediate rollout variance before another bounded online probe."
+
+  - id: r33-family-clean-online-joint-internal-hero-a3e5-u342-20260719
+    task: online_joint_av_ar_rl_internal_hero
+    layer: R33
+    status: selected_internal_validation_passed
+    summary: docs/runs/r33_family_clean_internal_rl_hero_20260719.md
+    initialized_from:
+      pair_release_id: r33-clean-sft-av-ar-iter1291-20260715
+    checkpoints:
+      actor: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/actor/iter_0000342
+      critic: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/critic/iter_0000342
+      iteration: 342
+    topology:
+      workspace_gpus: 8
+      actor_gpus: 4
+      critic_gpus: 3
+      rollout_gpus: 1
+      gpu_type: NVIDIA H100 NVL
+    training:
+      actor_lr: 3.0e-5
+      critic_lr: 2.0e-6
+      lr_schedule: constant
+      k3_coefficient: 0.003
+      actor_microbatch: 2
+      prompts_per_update: 24
+      samples_per_prompt: 8
+      rollouts_per_update: 192
+      optimizer_updates: 342
+      total_generated_responses: 65664
+      wall_clock_hours_approx: 43
+      rollout_seed: 20260719
+      wandb_mode: offline
+    evaluation:
+      split: validation
+      validation_rows: 122
+      independent_families: 122
+      generation_max_new_tokens: 384
+      generation_arms: [real, shuffled, zero, mean, none]
+      protocol_sha256: fcc431ec4450adb8817cd946d6c194fa2a45b53b0c6c42c8682c1e9f12f94d4d
+      baseline_row_identity_match: true
+      generation_protocol_compatible: true
+      report_status: confirmatory
+      rl_closed_rows: 121
+      rl_closed_fraction: 0.9918032786885246
+    metrics:
+      online_directional_mse: 0.224386
+      clean_sft_directional_mse: 0.309055
+      directional_absolute_improvement: 0.084669
+      directional_relative_improvement: 0.27396094546278177
+      online_raw_mse: 7.2665
+      clean_sft_raw_mse: 9.5523
+      raw_absolute_improvement: 2.2858
+      raw_relative_improvement: 0.23929315452822889
+      online_beats_teacher_rows: 103
+      online_beats_teacher_fraction: 0.8442622950819673
+      clean_sft_beats_teacher_rows: 62
+      clean_sft_beats_teacher_fraction: 0.5081967213114754
+    gates:
+      roundtrip_passed: true
+      controls_passed: true
+      baseline_beaten: true
+      parse_passed: true
+      publication_test_passed: false
+    evidence:
+      remote_directory: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/eval384_matched_v122
+      sft_report: sft_roundtrip_report.json
+      rl_report: rl_roundtrip_report.json
+      execution_log: eval384_chain.log
+      local_sync_status: pending
+    caveats:
+      - "Validation-only evidence on 122 independent families; not a final sealed publication test."
+      - "The SFT and RL reports use their respective AR checkpoints, so 27.4% is a pair-level AV+AR effect, not an actor-only estimate."
+      - "The teacher-row win rates compare AR reconstruction error, not semantic explanation quality."
+      - "No matched R27 advantage is claimed."
+      - "Independent-critic and second-seed replication remain required for a public RL claim."
+      - "Direct local report reads and artifact hashes are pending in this worker."
+    decision: "Retain as the selected internal family-clean online-RL pair; report the strong matched validation gain, and complete replication plus a new external test boundary before a publication RL claim."

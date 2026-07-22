@@ -1,0 +1,82 @@
+run:
+  name: nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096
+  experiment_class: complete-performance
+  output_root: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean
+  wandb_mode: offline
+  wandb_project: nano30b-nla-pilot
+  wandb_group: nano-av-r33-publication-deterministic-family-clean
+
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  miles_root: /workspace/interp/code/miles-051cd15
+  model_id: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  input_av_source: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396
+  input_av_sft: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/av_sft_R33_r33_deterministic_full275396.parquet
+
+dataset:
+  row_limit: 275396
+  split_mode: content_family_manifest
+  content_family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_confirmatory_families_exact_prefix/r33_confirmatory_family_manifest.json
+  content_family_manifest_sha256: 479cbab5d21cd031cb72a770eebb3428e0d5419ebf8cce38c2ca6025e49741b6
+  fractions: {train: 0.9, validation: 0.05, test: 0.05}
+  materialize_splits: true
+  cache_materialized_splits: true
+  split_cache_dir: /workspace/interp/outputs/nano30b-nla-pilot/publication/split_cache/r33_deterministic_family_clean_av
+  verify_materialized_splits: true
+  final_batch_policy: pad_with_train_duplicates
+  expected_d_model: 2688
+  seed: 20260709
+  verified_source_av_report: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/verify_av_R33_r33_deterministic_full275396.json
+
+training:
+  objective: av_sft
+  backend: miles_fsdp2
+  epochs: 1
+  num_gpus: 8
+  global_batch_size: 192
+  micro_batch_size: 2
+  rollout_batch_size: 192
+  rollout_seed: 20260708
+  distributed_timeout_minutes: 60
+  lr: 1e-4
+  min_lr: 1e-5
+  lr_decay_style: cosine
+  lr_warmup_iters: 25
+  lr_warmup_init: 0.0
+  injection_scale: 75
+  grad_norm_policy: clip
+  timing_debug: false
+  gradient_checkpointing: true
+  moe_routing_impl: expert_scan
+  cuda_launch_blocking: true
+  use_dynamic_batch_size: true
+  max_tokens_per_gpu: 4096
+  allow_oversized_dynamic_batch: true
+  pytorch_cuda_alloc_conf: expandable_segments:True
+  max_sequence_tokens: 1152
+  max_response_tokens: 1024
+  assert_actor_packed_equivalence: true
+  actor_packed_equivalence_rtol: 0.02
+  actor_packed_equivalence_atol: 0.05
+  system_metrics:
+    enabled: true
+    interval_steps: 10
+    nvidia_smi_interval_steps: 20
+    router_entropy: true
+
+checkpoint:
+  save_interval: 1291
+  keep_last: 1
+  save_enabled: true
+  no_save_optim: false
+  require_optimizer_state_for_hero: true
+
+eval:
+  interval: 1291
+  eval_splits: [validation]
+  controls: [real, shuffled, zero, mean, none]
+  validation_limit: 512
+  test_limit: 512
+  generation_examples: 8
+  roundtrip:
+    enabled: false

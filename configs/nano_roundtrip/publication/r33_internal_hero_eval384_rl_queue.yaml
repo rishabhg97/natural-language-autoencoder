@@ -1,0 +1,38 @@
+schema_version: nano_roundtrip_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  environment:
+    WANDB_MODE: offline
+    TOKENIZERS_PARALLELISM: "false"
+    PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+  launch_guard:
+    block_if_process_matches:
+      - '(^|\s)\S*python\S*\s+scripts/nano_ar_hpo_queue\.py(\s|$)'
+      - '(^|\s)\S*python\S*\s+scripts/nano_av_probe_queue\.py(\s|$)'
+      - '(^|\s)\S*python\S*\s+\S*train\.py\s+.*--train-backend'
+      - '(^|\s)\S*python\S*\s+scripts/eval_nano_[^\s]+\.py(\s|$)'
+      - '(^|\s)\S*python\S*\s+scripts/[^\s]*convert_fsdp[^\s]*\.py(\s|$)'
+  av_checkpoint_prepare:
+    python: /workspace/interp/.venv/bin/python
+    dcp_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/actor/iter_0000342
+    stage_dcp_checkpoint: /dev/shm/nano30b-nla-pilot/post_eval_hf/r33_internal_hero_eval384_rl_dcp
+    stage_copy_workers: 32
+    stage_copy_task_bytes: 536870912
+    cleanup_staged_dcp_after_conversion: true
+    origin_hf_dir: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    output_hf_dir: /dev/shm/nano30b-nla-pilot/post_eval_hf/r33_internal_hero_eval384_rl
+    torch_dtype: bfloat16
+    fingerprint_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/eval384_matched_v122/rl_av_checkpoint_fingerprints.json
+    convert_log: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/eval384_matched_v122/rl_av_dcp_to_hf.log
+    cleanup_after_queue: true
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/studies/r33_internal_hero_eval384_rl_trials.jsonl
+items:
+  - name: r33-internal-hero-eval384-rl-generate
+    config: configs/nano_roundtrip/publication/r33_internal_hero_eval384_rl_generate.yaml
+    status: pending
+    notes: Generate the retained RL actor on the exact 384-token baseline protocol and frozen 122-family boundary.
+  - name: r33-internal-hero-eval384-rl-score
+    config: configs/nano_roundtrip/publication/r33_internal_hero_eval384_rl_score.yaml
+    status: pending
+    notes: Score the retained RL actor and critic against the protocol-matched 384-token clean-SFT baseline.
+

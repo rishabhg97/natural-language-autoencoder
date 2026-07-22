@@ -1,0 +1,41 @@
+diff --git a/miles/backends/training_utils/log_utils.py b/miles/backends/training_utils/log_utils.py
+--- a/miles/backends/training_utils/log_utils.py
++++ b/miles/backends/training_utils/log_utils.py
+@@ -5,6 +5,7 @@ import numpy as np
+ import torch
+ import torch.distributed as dist
+ 
++from miles.utils.misc import load_function
+ from miles.utils import train_metric_utils
+ from miles.utils.flops_utils import calculate_fwd_flops
+ from miles.utils.metric_utils import compute_pass_rate, compute_rollout_step
+@@ -423,6 +424,10 @@ def log_train_step(
+     if should_log is None:
+         should_log = dist.get_rank() == 0
+ 
++    if getattr(args, "custom_train_guard_function_path", None):
++        guard = load_function(args.custom_train_guard_function_path)
++        guard(args=args, metrics=log_dict_out, role=role, step=accumulated_step_id)
++
+     if should_log:
+         tracking_utils.log(args, log_dict_out, step_key="train/step")
+         logger.info(f"{role_tag}step {accumulated_step_id}: {log_dict_out}")
+diff --git a/miles/utils/arguments.py b/miles/utils/arguments.py
+--- a/miles/utils/arguments.py
++++ b/miles/utils/arguments.py
+@@ -510,6 +510,15 @@ def get_miles_extra_args_provider(add_custom_arguments=None):
+                     "The return value indicates whether to skip the default logging. "
+                 ),
+             )
++            parser.add_argument(
++                "--custom-train-guard-function-path",
++                type=str,
++                default=None,
++                help=(
++                    "Optional every-rank callback after training metrics are aggregated. "
++                    "Signature: guard(args, metrics, role, step)."
++                ),
++            )
+             parser.add_argument(
+                 "--custom-eval-rollout-log-function-path",
+                 type=str,

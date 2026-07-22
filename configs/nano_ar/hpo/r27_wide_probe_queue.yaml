@@ -1,0 +1,52 @@
+schema_version: nano_ar_hpo_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  batch_size: 4
+  controls:
+  - teacher
+  - teacher_shuffled
+  - blank
+  - generic
+  - mean
+  - source_context
+  - source_raw
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/ar_hpo_queue/trials.jsonl
+items:
+- name: r27-wide-best1547-lr3e5-cos128
+  config: configs/nano_ar/hpo/r27_wide_probe_best1547_lr3e5_cosine_128steps.yaml
+  run_id: nano-ar-r27-wide-probe-best1547-lr3e5-cosine-128steps
+  status: cancelled
+  notes: Wide probe from current best basin; higher LR escape attempt.
+  cancelled_at: '2026-06-10T23:29:32Z'
+  cancellation_reason: operator requested removal of pending jobs after packed-boundary contamination and LR-schedule audit; clean reruns must be explicitly queued
+- name: r27-wide-best1547-lr1e5-constant128
+  config: configs/nano_ar/hpo/r27_wide_probe_best1547_lr1e5_constant_128steps.yaml
+  run_id: nano-ar-r27-wide-probe-best1547-lr1e5-constant-128steps
+  status: cancelled
+  notes: Current-basin constant-LR ablation.
+  cancelled_at: '2026-06-10T23:29:32Z'
+  cancellation_reason: operator requested removal of pending jobs after packed-boundary contamination and LR-schedule audit; clean reruns must be explicitly queued
+- name: r27-wide-best1547-lr5e6-cos128
+  config: configs/nano_ar/hpo/r27_wide_probe_best1547_lr5e6_cosine_128steps.yaml
+  run_id: nano-ar-r27-wide-probe-best1547-lr5e6-cosine-128steps
+  status: cancelled
+  notes: Current-basin lower-LR cooldown probe.
+  cancelled_at: '2026-06-10T23:29:32Z'
+  cancellation_reason: operator requested removal of pending jobs after packed-boundary contamination and LR-schedule audit; clean reruns must be explicitly queued
+- name: r27-wide-fullscan-lr2e5-cos192
+  config: configs/nano_ar/hpo/r27_wide_probe_fullscan_lr2e5_cosine_192steps.yaml
+  run_id: nano-ar-r27-wide-probe-fullscan-lr2e5-cosine-192steps
+  status: cancelled
+  notes: Escape probe from one-epoch fullscan checkpoint.
+  cancelled_at: '2026-06-10T23:29:32Z'
+  cancellation_reason: operator requested removal of pending jobs after packed-boundary contamination and LR-schedule audit; clean reruns must be explicitly queued
+- name: r27-wide-fullscan-lr5e5-cos128
+  config: configs/nano_ar/hpo/r27_wide_probe_fullscan_lr5e5_cosine_128steps.yaml
+  run_id: nano-ar-r27-wide-probe-fullscan-lr5e5-cosine-128steps
+  status: cancelled
+  notes: Aggressive fullscan escape probe with short budget.
+  cancelled_at: '2026-06-10T23:29:32Z'
+  cancellation_reason: operator requested removal of pending jobs after packed-boundary contamination and LR-schedule audit; clean reruns must be explicitly queued

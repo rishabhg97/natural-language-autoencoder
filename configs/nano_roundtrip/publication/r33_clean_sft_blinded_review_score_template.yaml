@@ -1,0 +1,14 @@
+schema_version: nano_blinded_qualitative_review_score.v1
+paths:
+  answer_key: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/blinded_human_review/answer_key.json
+  completed_packets:
+    reviewer_1: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/blinded_human_review/review_packet_reviewer_1.json
+    reviewer_2: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/blinded_human_review/review_packet_reviewer_2.json
+  output_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/blinded_human_review/review_score_report.json
+thresholds:
+  min_candidate_mean_factuality: 3.5
+  min_candidate_mean_coverage: 3.5
+  min_candidate_mean_coherence: 3.5
+  max_candidate_unsupported_specific_claim_fraction: 0.10
+  max_candidate_privacy_or_sensitive_content_fraction: 0.0
+  min_candidate_release_appropriate_fraction: 0.90

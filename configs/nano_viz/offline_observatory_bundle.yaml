@@ -1,0 +1,29 @@
+schema_version: nano_viz_bundle_config.v1
+
+source_config: /workspace/nla-viz/nano30b-nla-pilot/configs/nano_viz/offline_observatory.yaml
+
+paths:
+  corpus_dir: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/corpus
+  model_outputs_dir: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs
+  derived_dir: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/derived
+  bundle_dir: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/bundle
+
+geometry:
+  components: 16
+  display_components: 3
+  neighbors: 10
+
+statistics:
+  bootstrap_samples: 2000
+  confidence: 0.95
+  seed: 20260716
+
+verification:
+  vector_spot_checks: 64
+  vector_metric_rtol: 5.0e-3
+  vector_metric_atol: 5.0e-4
+  aggregate_tolerance: 1.0e-6
+  require_exact_rows: 50
+  require_exact_lattice_cells: 7434
+  require_exact_behavior_cells: 888
+  require_exact_trace_rows: 400

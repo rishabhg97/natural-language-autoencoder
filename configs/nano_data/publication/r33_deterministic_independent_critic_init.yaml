@@ -1,0 +1,46 @@
+schema_version: nano_prefix_dataset_pipeline.v1
+python: /workspace/interp/.venv/bin/python
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  source_parquet: /workspace/interp/outputs/nano30b-nla-pilot/ar-r27-r30-fullscan-20260528T234403Z/R_27/ar_sft.parquet
+  contract: /workspace/interp/outputs/nano30b-nla-pilot/ar-r27-r30-fullscan-20260528T234403Z/R_27/ar_sft.parquet.nla_meta.yaml
+  out: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396
+  extract_root: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/extract_prefix
+  critic: /workspace/models/nano30b-nla-pilot/publication/r33_deterministic_independent_critic_init_seed314159
+  model_fingerprint_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/runtime_deterministic/base_model_fingerprint.json
+  runtime_provenance_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/runtime_deterministic/extraction_runtime_provenance.json
+  content_family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_confirmatory_families_exact_prefix/r33_confirmatory_family_manifest.json
+dataset:
+  layer: 33
+  layers: R33
+  row_start: 0
+  row_limit: null
+  slug: r33_deterministic_full275396
+  expected_rows: 275396
+  expected_d_model: 2688
+  expected_source_parquet_sha256: 76b78d2c34a251f004d53eb5d53766fa01879e2bf3744bc4d80d4fcc1d17825e
+  content_family_manifest_sha256: 479cbab5d21cd031cb72a770eebb3428e0d5419ebf8cce38c2ca6025e49741b6
+extraction:
+  batch_size: 2
+  source_batch_size: 4096
+  publication_mode: true
+  deterministic_algorithms: true
+  allow_tf32: false
+  cudnn_benchmark: false
+  float32_matmul_precision: highest
+  cublas_workspace_config: ":4096:8"
+  seed: 20260709
+  devices: ["0", "1", "2", "3", "4", "5", "6", "7"]
+  shard_alignment: document_batch
+critic_initialization:
+  value_head: seeded_givens
+  seed: 314159
+  value_head_rotation_radians: 0.2
+  router: seeded_relative_noise
+  router_relative_std: 0.01
+build:
+  ar: true
+  av: false
+  prep_critic: true
+  verify: true

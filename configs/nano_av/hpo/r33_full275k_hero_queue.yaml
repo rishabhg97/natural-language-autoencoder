@@ -1,0 +1,16 @@
+schema_version: nano_av_probe_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  generation_examples: 8
+  cleanup_converted_hf_after_eval: true
+  cleanup_dcp_model_after_eval: true
+
+items:
+  - name: r33-av-full275k-lr1e5-gb192-mb2-seq1152-dyn512
+    config: configs/nano_av/hpo/r33_full275k_lr1e5_gb192_mb2_seq1152_dyn512.yaml
+    run_id: nano-av-r33-full275k-lr1e5-gb192-mb2-seq1152-dyn512
+    status: blocked
+    notes: Hero candidate; unblock only after AR/AV 100k HPO and round-trip planning gates are satisfied.

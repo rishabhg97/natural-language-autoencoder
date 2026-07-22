@@ -1,0 +1,34 @@
+schema_version: nano_roundtrip_eval.v1
+python: /workspace/interp/.venv/bin/python
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  av_hf_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/checkpoints/r27-av-ar-best/av_hf_iter_0000467
+  ar_checkpoint_dir: /workspace/interp/outputs/nano30b-nla-pilot/checkpoints/r27-av-ar-best/ar_hf_iter_0000256
+  train_parquet: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/splits/train.parquet
+  validation_parquet: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/splits/validation.parquet
+  test_parquet: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/splits/test.parquet
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/r27_roundtrip_v64_t64_full_controls_prefix256_report.json
+  generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/r27_roundtrip_v64_t64_full_controls_prefix256_generated.jsonl
+eval:
+  validation_limit: 64
+  test_limit: 64
+  generation_controls: [real, shuffled, zero, mean, none]
+  max_new_tokens: 256
+  generation_prefix: "<explanation>\n"
+  stop_text: "</explanation>"
+  generated_text_fallback: empty
+  generation_backend: cache
+  generation_workers: 2
+  generation_worker_devices: ["0", "1"]
+  stream_generated: true
+  resume_generated: true
+  progress_every: 8
+  min_closed_fraction: 0.8
+  min_usable_fraction: 0.95
+  injection_scale: "75"
+  ar_batch_size: 4
+  torch_dtype: bfloat16
+  control_margin: 5.0e-5
+  min_control_win_fraction: 0.9
+  av_device_map: auto
+  ar_device_map: auto

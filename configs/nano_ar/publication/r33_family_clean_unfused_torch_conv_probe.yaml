@@ -1,0 +1,72 @@
+run:
+  name: nano-ar-r33-publication-unfusedtorchconv-capacity-probe4-gb192-mb48
+  experiment_class: runtime-diagnostic
+  output_root: /workspace/interp/outputs/nano30b-nla-pilot/publication/diagnostics/ar-unfused-torch-conv
+  wandb_mode: offline
+  wandb_project: nano30b-nla-pilot
+  wandb_group: nano-ar-r33-publication-runtime-diagnostics
+
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  miles_root: /workspace/interp/code/miles-051cd15
+  model_id: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  critic_init_model_id: /workspace/models/nano30b-nla-pilot/publication/r33_deterministic_critic_init
+  input_ar_source: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396
+  input_ar_sft: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/ar_sft_R33_r33_deterministic_full275396.parquet
+
+dataset:
+  row_limit: 275396
+  split_mode: content_family_manifest
+  content_family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_confirmatory_families_exact_prefix/r33_confirmatory_family_manifest.json
+  content_family_manifest_sha256: 479cbab5d21cd031cb72a770eebb3428e0d5419ebf8cce38c2ca6025e49741b6
+  fractions: {train: 0.9, validation: 0.05, test: 0.05}
+  materialize_splits: true
+  cache_materialized_splits: true
+  split_cache_dir: /workspace/interp/outputs/nano30b-nla-pilot/publication/split_cache/r33_deterministic_family_clean_ar
+  verify_materialized_splits: true
+  final_batch_policy: pad_with_train_duplicates
+  expected_d_model: 2688
+  seed: 20260709
+  verified_source_ar_report: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/verify_ar_R33_r33_deterministic_full275396.json
+
+training:
+  objective: ar_sft
+  backend: miles_fsdp2
+  epochs: 1
+  num_rollout: 4
+  num_gpus: 4
+  global_batch_size: 192
+  micro_batch_size: 48
+  rollout_batch_size: 192
+  rollout_seed: 20260708
+  distributed_timeout_minutes: 60
+  lr: 5e-5
+  min_lr: 5e-6
+  lr_decay_style: cosine
+  lr_decay_iters: 1291
+  lr_warmup_iters: 25
+  grad_norm_policy: clip
+  timing_debug: true
+  gradient_checkpointing: true
+  moe_routing_impl: expert_scan
+  mamba_kernel_mode: unfused_torch_conv
+  cuda_launch_blocking: true
+  system_metrics:
+    enabled: true
+    interval_steps: 1
+    nvidia_smi_interval_steps: 1
+    router_entropy: false
+
+checkpoint:
+  save_interval: 4
+  keep_last: 1
+  save_enabled: false
+  no_save_optim: true
+  require_optimizer_state_for_hero: false
+
+eval:
+  interval: 4
+  eval_splits: [validation]
+  controls: [teacher, teacher_shuffled, blank, generic, mean, source_context, source_raw]
+  validation_limit: 16
+  test_limit: 16

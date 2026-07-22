@@ -1,0 +1,23 @@
+schema_version: nano_av_probe_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  eval_splits: [validation]
+  generation_examples: 8
+  cleanup_converted_hf_after_eval: true
+  converted_hf_dtype: bfloat16
+  cleanup_dcp_model_after_eval: false
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/studies/r33_deterministic_family_clean_av_trials.jsonl
+items:
+  - name: r33-publication-deterministic-family-clean-av-sft-4gpu-expertscan-cudablock
+    config: configs/nano_av/publication/r33_family_clean_sft.yaml
+    run_id: nano-av-r33-publication-deterministic-family-clean-4gpu-expertscan-cudablock-lr1e4-warmup25-gb192-mb2-dyn512
+    status: pending
+    study_task: av
+    roundtrip_enabled: false
+    notes: >-
+      H100-NVL-safe topology plus the validated expert-scan/CUDA-launch-blocking
+      mitigation for the asynchronous model-kernel race; deterministic full-stream
+      replication and AV verifier passed; validation-only selection.

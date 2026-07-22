@@ -1,0 +1,32 @@
+schema_version: nano_release_text_audit.v1
+paths:
+  generated_jsonl:
+    - name: validation
+      path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/validation_generated.jsonl
+    - name: exploratory_test
+      path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/final_test_generated.jsonl
+  panel_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/teacher_grounded_qualitative_panel.json
+  output_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/release_text_privacy_memorization_audit.json
+protocol:
+  generated_text_path: controls.real.parsed.explanation
+  min_copy_block_words: 5
+  max_contiguous_source_copy_words: 30
+  max_source_copy_fraction: 0.50
+  min_words_for_copy_fraction: 20
+  fail_sensitive_kinds:
+    - aws_access_key
+    - credential_assignment
+    - email
+    - github_token
+    - internal_hostname
+    - internal_s3
+    - openai_style_key
+    - payment_card
+    - phone
+    - private_ipv4
+    - private_key
+    - slack_token
+    - ssn
+    - workspace_path
+  fail_on_source_copy: true
+  fail_on_reference_copy: false

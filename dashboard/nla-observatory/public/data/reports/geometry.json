@@ -1,0 +1,44 @@
+{
+  "artifacts": {
+    "basis": {
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/derived/geometry_basis.npz",
+      "sha256": "c56922f5c207be33d8e94b9eb8e97721ecceee426b451cfeccb8490853274327"
+    },
+    "geometry": {
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/derived/geometry.parquet",
+      "sha256": "6f38e301f805f065c8ce1963343062266de5936da9e120df6aab89eb416baad5"
+    },
+    "retrieval": {
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/derived/retrieval.parquet",
+      "sha256": "46dcebefd28ad58e6c7f57de36cc8eefc6800a01f00d181811b7f1f555faf678"
+    }
+  },
+  "bundle_config_sha256": "182e739fa79fa72d4d3e898f63f66f68ee5987b505c3605aa3c16b8b61a4fcd4",
+  "claim_scope": "stored_snapshot",
+  "components": 16,
+  "explained_variance_ratio": [
+    0.05425560101866722,
+    0.043029941618442535,
+    0.042205363512039185,
+    0.04037977755069733,
+    0.03906917944550514,
+    0.03604760766029358,
+    0.03267272561788559,
+    0.031134232878684998,
+    0.030193965882062912,
+    0.028340468183159828,
+    0.02758873626589775,
+    0.02633473463356495,
+    0.024682700634002686,
+    0.024206198751926422,
+    0.023580748587846756,
+    0.023213963955640793
+  ],
+  "fit_split": "validation",
+  "identity_retrieval_rows": 100,
+  "passed": true,
+  "predictions": 8084,
+  "schema_version": "nano_viz_geometry.v1",
+  "source_config_sha256": "c7492fecc776f3991ac605a83c1f74c57eeabd5ed9f8cd4838676b164161b259",
+  "targets": 50
+}

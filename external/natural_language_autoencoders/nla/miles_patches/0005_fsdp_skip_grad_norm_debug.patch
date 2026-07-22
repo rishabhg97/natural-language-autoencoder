@@ -1,0 +1,77 @@
+diff --git a/miles/backends/fsdp_utils/actor.py b/miles/backends/fsdp_utils/actor.py
+--- a/miles/backends/fsdp_utils/actor.py
++++ b/miles/backends/fsdp_utils/actor.py
+@@ -15,3 +15,5 @@ import torch
+ import torch.distributed as dist
+ from torch.distributed.checkpoint.state_dict import get_model_state_dict, set_model_state_dict, StateDictOptions
++from nla.audit_runtime import clip_grad_norm_local_shards
++
+ from miles.backends.training_utils.data import get_batch
+@@ -573,19 +573,42 @@ class FSDPTrainRayActor(TrainRayActor):
+                     )
+                     losses_reduced.append(log_dict)
+ 
+-                nla_timing_clip_start = self._nla_timing_start()
+-                grad_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.args.clip_grad)
+-                self._nla_timing_log("nla_timing_clip_grad_norm_raw", nla_timing_clip_start, rollout_id=rollout_id, step_id=step_id)
+-
+-                nla_timing_full_tensor_start = self._nla_timing_start()
+-                grad_norm = grad_norm.full_tensor().item()
+-                self._nla_timing_log(
+-                    "nla_timing_clip_grad_norm_full_tensor",
+-                    nla_timing_full_tensor_start,
+-                    rollout_id=rollout_id,
+-                    step_id=step_id,
+-                    grad_norm=grad_norm,
+-                )
++                if getattr(self.args, "nla_skip_grad_norm", False):
++                    grad_norm = 0.0
++                    self._nla_timing_log(
++                        "nla_timing_clip_grad_norm_skipped",
++                        rollout_id=rollout_id,
++                        step_id=step_id,
++                    )
++                else:
++                    nla_timing_clip_start = self._nla_timing_start()
++                    if getattr(self.args, "nla_local_grad_norm", True):
++                        grad_norm = clip_grad_norm_local_shards(
++                            self.model.parameters(),
++                            self.args.clip_grad,
++                            process_group=self.parallel_state.dp_group,
++                        )
++                        grad_norm = float(grad_norm.item())
++                        self._nla_timing_log(
++                            "nla_timing_clip_grad_norm_local_shards",
++                            nla_timing_clip_start,
++                            rollout_id=rollout_id,
++                            step_id=step_id,
++                            grad_norm=grad_norm,
++                        )
++                    else:
++                        grad_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.args.clip_grad)
++                        self._nla_timing_log("nla_timing_clip_grad_norm_raw", nla_timing_clip_start, rollout_id=rollout_id, step_id=step_id)
++
++                        nla_timing_full_tensor_start = self._nla_timing_start()
++                        grad_norm = grad_norm.full_tensor().item()
++                        self._nla_timing_log(
++                            "nla_timing_clip_grad_norm_full_tensor",
++                            nla_timing_full_tensor_start,
++                            rollout_id=rollout_id,
++                            step_id=step_id,
++                            grad_norm=grad_norm,
++                        )
+ 
+                 nla_timing_optimizer_start = self._nla_timing_start()
+                 self.optimizer.step()
+diff --git a/miles/backends/fsdp_utils/arguments.py b/miles/backends/fsdp_utils/arguments.py
+--- a/miles/backends/fsdp_utils/arguments.py
++++ b/miles/backends/fsdp_utils/arguments.py
+@@ -26,6 +26,8 @@ class FSDPArgs:
+     adam_eps: float = 1e-8
+     adam_foreach: bool = False
+     nla_timing_debug: bool = False
++    nla_skip_grad_norm: bool = False
++    nla_local_grad_norm: bool = True
+     warmup_ratio: float = 0.03
+ 
+     attn_implementation: str = "flash_attention_2"

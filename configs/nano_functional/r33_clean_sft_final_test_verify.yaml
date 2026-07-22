@@ -1,0 +1,29 @@
+schema_version: nano_functional_eval_verifier.v1
+report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/final_test_functional_report.json
+output_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/final_test_functional_verifier.json
+expected:
+  eval_splits: [test]
+  ar_checkpoint_dir: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean/nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/checkpoints/iter_0001291
+  target_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  source_base_parquet: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/base_R33_r33_deterministic_full275396.parquet
+  mean_activation_parquet: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean/nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/splits/train.parquet
+  boundary: 33
+  generation_identity:
+    model_fingerprint: dcp_model_sha256:43346232d2fc043260ee903191e20cce07801903e1e7b7956f16022eb463386a
+    tokenizer_fingerprint: tokenizer_files_sha256:924108201acc4872dca41bbd39caad108038634a428c2bb26fee7516d424ad0f
+    dataset_sha256:
+      train: cf618cb08b682f6316e2807a095b3bfcef597c8b2d1182c7cce753dca4c9fe6c
+      validation: f543eb9e1017a655c3ab436c0140c5c334e8485b0d493083d27aaaed9d9ce1ff
+      test: 86973528e153c7d6bd9c0fd0fdb72ebfb614e2964e4bde2b76c742d7f5763c5f
+  counts: {test: 512}
+  min_independent_families: 100
+  required_variants: [candidate, teacher, stored_gold, mean, zero, shuffled]
+  variant_counts: {candidate: 512, teacher: 512, stored_gold: 512, mean: 512, zero: 512}
+  variant_min_counts: {shuffled: 64}
+  candidate_control_variants: [mean, zero, shuffled]
+  control_min_independent_families: {mean: 100, zero: 100, shuffled: 30}
+  positive_ci_metrics: [kl_original_to_patched, js_divergence]
+  positive_mean_metrics: [logit_pearson, top_10_overlap, top_50_overlap, original_top1_rank]
+  min_family_better_fraction: 0.5
+  require_stored_activation_replay: false
+  forbid_unrequested_rows: true

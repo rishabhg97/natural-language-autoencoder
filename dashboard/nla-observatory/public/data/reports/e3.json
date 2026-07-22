@@ -1,0 +1,28 @@
+{
+  "config_sha256": "c7492fecc776f3991ac605a83c1f74c57eeabd5ed9f8cd4838676b164161b259",
+  "passed": true,
+  "phase": "e3_lattice_pilot",
+  "prediction_rows": 1222,
+  "predictions": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/e3_lattice_pilot/lattice_pilot_predictions.parquet",
+    "sha256": "704e75d6d5a87962b48fa3e7b6db65800673eb8fa6fcab770362e81f2e5c62c8"
+  },
+  "ready_cells": 1118,
+  "rows": 8,
+  "schema_version": "nano_viz_model_batches.v1",
+  "split": "validation",
+  "summaries": {
+    "independent": {
+      "cells": 104,
+      "identity_directional_mse": 0.33005994245611114,
+      "mean_cosine": 0.8211065592343049,
+      "mean_directional_mse": 0.35778688153139004
+    },
+    "primary": {
+      "cells": 1118,
+      "identity_directional_mse": 0.32073313265960124,
+      "mean_cosine": 0.8079639879107123,
+      "mean_directional_mse": 0.38407202417857544
+    }
+  }
+}

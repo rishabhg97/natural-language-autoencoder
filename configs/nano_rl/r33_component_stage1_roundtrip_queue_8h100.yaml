@@ -1,0 +1,218 @@
+schema_version: nano_ar_layer_sweep_queue.v1
+created_at: "2026-06-30T22:15:00Z"
+notes: >-
+  Evaluation-only Stage 1 queue. Seeds existing 256/256 generation into the
+  target eight-worker layout, resumes to 512/512, scores with the frozen R33
+  AR checkpoint, enriches exact provenance, and removes temporary HF copies.
+  This queue never launches training.
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  logs_dir: /workspace/interp/outputs/nano30b-nla-pilot/validity/stage1_queue_logs
+  environment:
+    WANDB_MODE: offline
+    HF_HUB_OFFLINE: "1"
+    TRANSFORMERS_OFFLINE: "1"
+    TOKENIZERS_PARALLELISM: "false"
+    PYTHONUNBUFFERED: "1"
+items:
+- name: sft-clean-temp
+  status: pending
+  kind: cleanup
+  command:
+  - /bin/rm
+  - -rf
+  - /dev/shm/nano30b-nla-pilot/r33-validity/sft
+- name: sft-seed-v512-shards
+  status: pending
+  kind: seed_generation
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/seed_nano_generated_shards.py
+  - --generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/roundtrip_iter_0001291_v256_t256_report_generated.jsonl
+  - --train-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+  - --validation-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+  - --test-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+  - --output-generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_generated.jsonl
+  - --validation-limit
+  - "512"
+  - --test-limit
+  - "512"
+  - --shard-count
+  - "8"
+  - --report-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_shard_seed_report.json
+  - --overwrite
+- name: sft-convert-dcp-to-tmpfs-hf
+  status: pending
+  kind: convert
+  command:
+  - /workspace/interp/.venv/bin/python
+  - external/natural_language_autoencoders/tools/convert_fsdp_to_hf.py
+  - --input-dir
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+  - --origin-hf-dir
+  - /workspace/interp/models/nano-30b-a3b-bf16-hf
+  - --output-dir
+  - /dev/shm/nano30b-nla-pilot/r33-validity/sft/hf
+  - --torch-dtype
+  - bfloat16
+- name: sft-resume-generation-v512
+  status: pending
+  kind: generate
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/nano_roundtrip_eval_config.py
+  - configs/nano_roundtrip/r33_stage1_sft_v512_generate.yaml
+  - --run
+- name: sft-enrich-provenance
+  status: pending
+  kind: provenance
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/enrich_nano_generated_provenance.py
+  - --generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_generated.jsonl
+  - --train-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+  - --validation-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+  - --test-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+  - --output-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_generated_enriched.jsonl
+  - --report-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_provenance_report.json
+  - --overwrite
+- name: sft-score-v512
+  status: pending
+  kind: score
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/nano_roundtrip_eval_config.py
+  - configs/nano_roundtrip/r33_stage1_sft_v512_score.yaml
+  - --run
+- name: sft-clean-tmpfs-hf
+  status: pending
+  kind: cleanup
+  command:
+  - /bin/rm
+  - -rf
+  - /dev/shm/nano30b-nla-pilot/r33-validity/sft
+- name: update16-clean-temp
+  status: pending
+  kind: cleanup
+  command:
+  - /bin/rm
+  - -rf
+  - /dev/shm/nano30b-nla-pilot/r33-validity/update16
+- name: update16-seed-v512-shards
+  status: pending
+  kind: seed_generation
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/seed_nano_generated_shards.py
+  - --generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_confirm_lr2e5_kl1e3_rb30_n16_gb480_mb32_rollout16_v256t256/roundtrip_iter_0000016_v256_t256_report_generated.jsonl
+  - --train-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+  - --validation-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+  - --test-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+  - --output-generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/roundtrip_v512_t512_generated.jsonl
+  - --validation-limit
+  - "512"
+  - --test-limit
+  - "512"
+  - --shard-count
+  - "8"
+  - --report-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/roundtrip_v512_t512_shard_seed_report.json
+  - --overwrite
+- name: update16-convert-dcp-to-tmpfs-hf
+  status: pending
+  kind: convert
+  command:
+  - /workspace/interp/.venvs/sglang-cu130/bin/python
+  - external/natural_language_autoencoders/tools/convert_fsdp_to_hf.py
+  - --input-dir
+  - /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_confirm_lr2e5_kl1e3_rb30_n16_gb480_mb32_rollout16_v256t256/actor/iter_0000016
+  - --origin-hf-dir
+  - /workspace/interp/models/nano-30b-a3b-bf16-hf
+  - --output-dir
+  - /dev/shm/nano30b-nla-pilot/r33-validity/update16/hf
+- name: update16-resume-generation-v512
+  status: pending
+  kind: generate
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/nano_roundtrip_eval_config.py
+  - configs/nano_roundtrip/r33_stage1_update16_v512_generate.yaml
+  - --run
+- name: update16-enrich-provenance
+  status: pending
+  kind: provenance
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/enrich_nano_generated_provenance.py
+  - --generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/roundtrip_v512_t512_generated.jsonl
+  - --train-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+  - --validation-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+  - --test-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+  - --output-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/roundtrip_v512_t512_generated_enriched.jsonl
+  - --report-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/roundtrip_v512_t512_provenance_report.json
+  - --overwrite
+- name: update16-score-v512
+  status: pending
+  kind: score
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/nano_roundtrip_eval_config.py
+  - configs/nano_roundtrip/r33_stage1_update16_v512_score.yaml
+  - --run
+- name: update16-clean-tmpfs-hf
+  status: pending
+  kind: cleanup
+  command:
+  - /bin/rm
+  - -rf
+  - /dev/shm/nano30b-nla-pilot/r33-validity/update16
+- name: update32-enrich-provenance
+  status: pending
+  kind: provenance
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/enrich_nano_generated_provenance.py
+  - --generated-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_medium_lr2e5_kl1e3_rb30_n16_gb480_mb32_rollout32_v512t512/roundtrip_iter_0000032_v512_t512_report_generated.jsonl
+  - --train-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+  - --validation-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+  - --test-parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+  - --output-jsonl
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/roundtrip_v512_t512_generated_enriched.jsonl
+  - --report-json
+  - /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update32/roundtrip_v512_t512_provenance_report.json
+  - --overwrite
+- name: update32-rescore-v512
+  status: pending
+  kind: score
+  command:
+  - /workspace/interp/.venv/bin/python
+  - scripts/nano_roundtrip_eval_config.py
+  - configs/nano_roundtrip/r33_stage1_update32_v512_score.yaml
+  - --run

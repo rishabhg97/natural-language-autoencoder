@@ -1,0 +1,396 @@
+{
+ "aggregates": {
+  "cases": 2,
+  "cases_with_baseline_target_rhyme": 1,
+  "cases_with_planning_onset": 1,
+  "editable_cases": 1,
+  "edited_alternate_hit_rate": 0.0,
+  "mean_anchor_lift": 0.125,
+  "mean_original_dmse": 0.4,
+  "positions": 6,
+  "random_alternate_hit_rate": 0.0,
+  "samples": 4,
+  "steering_doses": [
+   0.5,
+   1.0
+  ],
+  "usable_fraction": 0.75
+ },
+ "cases": [
+  {
+   "alternate_terms": [
+    "night",
+    "light"
+   ],
+   "analysis": [
+    {
+     "position": 4,
+     "relative_offset": -2,
+     "token_id": 204,
+     "token_text": " w4"
+    },
+    {
+     "position": 5,
+     "relative_offset": -1,
+     "token_id": 205,
+     "token_text": " w5"
+    },
+    {
+     "position": 6,
+     "relative_offset": 0,
+     "token_id": 206,
+     "token_text": " w6"
+    }
+   ],
+   "anchor_lift": 0.25,
+   "anchor_position": 6,
+   "anchor_real_target_family_rate": 0.5,
+   "anchor_shuffled_target_family_rate": 0.25,
+   "baseline_continuation": "below the fixture rows they flow.",
+   "baseline_hits_target_family": true,
+   "case_id": "fixture-alpha",
+   "cue": "glow",
+   "edit_map": {
+    "flow": "light",
+    "glow": "night"
+   },
+   "first_line": "A fixture lantern starts to glow,",
+   "framing": "Synthetic couplet prompt (fixture).",
+   "interventions": [
+    {
+     "continuation_text": "Synthetic continuation (edited, dose 0.5).",
+     "direction": "edited",
+     "dose": 0.5,
+     "hits_alternate_family": false,
+     "hits_target_family": true
+    },
+    {
+     "continuation_text": "Synthetic continuation (edited, dose 1.0).",
+     "direction": "edited",
+     "dose": 1.0,
+     "hits_alternate_family": false,
+     "hits_target_family": false
+    },
+    {
+     "continuation_text": "Synthetic continuation (random, dose 0.5).",
+     "direction": "random",
+     "dose": 0.5,
+     "hits_alternate_family": false,
+     "hits_target_family": false
+    },
+    {
+     "continuation_text": "Synthetic continuation (random, dose 1.0).",
+     "direction": "random",
+     "dose": 1.0,
+     "hits_alternate_family": false,
+     "hits_target_family": false
+    }
+   ],
+   "planning_onset_position": 4,
+   "planning_onset_relative_offset": -2,
+   "position_scores": [
+    {
+     "alternate_family_rate": 0.0,
+     "position": 4,
+     "relative_offset": -2,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.5,
+     "usable_rate": 1.0,
+     "variant": "real"
+    },
+    {
+     "alternate_family_rate": 0.0,
+     "position": 4,
+     "relative_offset": -2,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.25,
+     "usable_rate": 1.0,
+     "variant": "shuffled"
+    },
+    {
+     "alternate_family_rate": 0.0,
+     "position": 5,
+     "relative_offset": -1,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.5,
+     "usable_rate": 1.0,
+     "variant": "real"
+    },
+    {
+     "alternate_family_rate": 0.0,
+     "position": 5,
+     "relative_offset": -1,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.25,
+     "usable_rate": 1.0,
+     "variant": "shuffled"
+    },
+    {
+     "alternate_family_rate": 0.0,
+     "position": 6,
+     "relative_offset": 0,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.5,
+     "usable_rate": 1.0,
+     "variant": "real"
+    },
+    {
+     "alternate_family_rate": 0.0,
+     "position": 6,
+     "relative_offset": 0,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.25,
+     "usable_rate": 1.0,
+     "variant": "shuffled"
+    }
+   ],
+   "prefix_text": "A fixture lantern starts to glow,\nand casts a light on rows",
+   "reconstruction": {
+    "changed_terms": [
+     "glow",
+     "night"
+    ],
+    "edit_delta_norm": 12.5,
+    "edited_explanation": "Synthetic edited encoding mentioning night.",
+    "original_cosine": 0.9,
+    "original_dmse": 0.4,
+    "original_explanation": "Synthetic original encoding mentioning glow."
+   },
+   "samples": [
+    {
+     "alternate_family": false,
+     "explanation": "Synthetic encoding sample 0 for case fixture-alpha.",
+     "parse": {
+      "closed": true,
+      "extraction_mode": "strict",
+      "repetition_loop": false
+     },
+     "position": 4,
+     "relative_offset": -2,
+     "sample_index": 0,
+     "source_case_id": "fixture-alpha",
+     "target_exact": false,
+     "target_family": true,
+     "usable": true,
+     "variant": "real"
+    },
+    {
+     "alternate_family": false,
+     "explanation": "Synthetic encoding sample 1 for case fixture-alpha.",
+     "parse": {
+      "closed": true,
+      "extraction_mode": "strict",
+      "repetition_loop": false
+     },
+     "position": 5,
+     "relative_offset": -1,
+     "sample_index": 1,
+     "source_case_id": "fixture-alpha",
+     "target_exact": false,
+     "target_family": false,
+     "usable": true,
+     "variant": "shuffled"
+    }
+   ],
+   "second_line": "and casts a light on rows below.",
+   "target_terms": [
+    "glow",
+    "flow"
+   ],
+   "target_word": "glow"
+  },
+  {
+   "alternate_terms": [
+    "sea",
+    "tree"
+   ],
+   "analysis": [
+    {
+     "position": 4,
+     "relative_offset": -2,
+     "token_id": 304,
+     "token_text": " v4"
+    },
+    {
+     "position": 5,
+     "relative_offset": -1,
+     "token_id": 305,
+     "token_text": " v5"
+    },
+    {
+     "position": 6,
+     "relative_offset": 0,
+     "token_id": 306,
+     "token_text": " v6"
+    }
+   ],
+   "anchor_lift": 0.0,
+   "anchor_position": 6,
+   "anchor_real_target_family_rate": 0.25,
+   "anchor_shuffled_target_family_rate": 0.25,
+   "baseline_continuation": "a passing cart on the old lane.",
+   "baseline_hits_target_family": false,
+   "case_id": "fixture-beta",
+   "cue": "rain",
+   "edit_map": {},
+   "first_line": "A fixture window frames the rain,",
+   "framing": "Synthetic couplet prompt without onset (fixture).",
+   "interventions": [],
+   "planning_onset_position": null,
+   "planning_onset_relative_offset": null,
+   "position_scores": [
+    {
+     "alternate_family_rate": 0.0,
+     "position": 4,
+     "relative_offset": -2,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.5,
+     "usable_rate": 1.0,
+     "variant": "real"
+    },
+    {
+     "alternate_family_rate": 0.0,
+     "position": 4,
+     "relative_offset": -2,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.25,
+     "usable_rate": 1.0,
+     "variant": "shuffled"
+    },
+    {
+     "alternate_family_rate": 0.0,
+     "position": 5,
+     "relative_offset": -1,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.5,
+     "usable_rate": 1.0,
+     "variant": "real"
+    },
+    {
+     "alternate_family_rate": 0.0,
+     "position": 5,
+     "relative_offset": -1,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.25,
+     "usable_rate": 1.0,
+     "variant": "shuffled"
+    },
+    {
+     "alternate_family_rate": 0.0,
+     "position": 6,
+     "relative_offset": 0,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.5,
+     "usable_rate": 1.0,
+     "variant": "real"
+    },
+    {
+     "alternate_family_rate": 0.0,
+     "position": 6,
+     "relative_offset": 0,
+     "samples": 2,
+     "target_exact_rate": 0.0,
+     "target_family_rate": 0.25,
+     "usable_rate": 1.0,
+     "variant": "shuffled"
+    }
+   ],
+   "prefix_text": "A fixture window frames the rain,\nand hums beside a passing",
+   "reconstruction": null,
+   "samples": [
+    {
+     "alternate_family": false,
+     "explanation": "Synthetic encoding sample 0 for case fixture-beta.",
+     "parse": {
+      "closed": true,
+      "extraction_mode": "strict",
+      "repetition_loop": false
+     },
+     "position": 4,
+     "relative_offset": -2,
+     "sample_index": 0,
+     "source_case_id": "fixture-beta",
+     "target_exact": false,
+     "target_family": true,
+     "usable": true,
+     "variant": "real"
+    },
+    {
+     "alternate_family": false,
+     "explanation": "Synthetic encoding sample 1 for case fixture-beta.",
+     "parse": {
+      "closed": true,
+      "extraction_mode": "strict",
+      "repetition_loop": false
+     },
+     "position": 5,
+     "relative_offset": -1,
+     "sample_index": 1,
+     "source_case_id": "fixture-beta",
+     "target_exact": false,
+     "target_family": false,
+     "usable": false,
+     "variant": "shuffled"
+    }
+   ],
+   "second_line": "and hums beside a passing train.",
+   "target_terms": [
+    "train",
+    "rain"
+   ],
+   "target_word": "train"
+  }
+ ],
+ "claim_scope": "fresh_forward_exploratory",
+ "config_sha256": "a0b0b7d82a94dbe23b2c791cb62135829c1b3ed7363c62c3aefd1ed5544be8ef",
+ "gates": {
+  "minimum_usable_fraction": 0.8,
+  "planning_onset_rate": 0.25
+ },
+ "interpretation": {
+  "notes": [
+   "Synthetic fixture: anchor lift is positive for 1 of 2 cases.",
+   "Synthetic fixture: no causal edit produced an alternate-family hit at any dose."
+  ],
+  "signal": "weak"
+ },
+ "kind": "poetry",
+ "reports": {
+  "poetry_describe": {
+   "config_sha256": "a0b0b7d82a94dbe23b2c791cb62135829c1b3ed7363c62c3aefd1ed5544be8ef",
+   "passed": true
+  },
+  "poetry_extract": {
+   "config_sha256": "a0b0b7d82a94dbe23b2c791cb62135829c1b3ed7363c62c3aefd1ed5544be8ef",
+   "passed": true
+  },
+  "poetry_intervene": {
+   "config_sha256": "a0b0b7d82a94dbe23b2c791cb62135829c1b3ed7363c62c3aefd1ed5544be8ef",
+   "passed": true
+  },
+  "poetry_prepare": {
+   "config_sha256": "a0b0b7d82a94dbe23b2c791cb62135829c1b3ed7363c62c3aefd1ed5544be8ef",
+   "passed": true
+  },
+  "poetry_reconstruct": {
+   "config_sha256": "a0b0b7d82a94dbe23b2c791cb62135829c1b3ed7363c62c3aefd1ed5544be8ef",
+   "passed": true
+  },
+  "poetry_score": {
+   "config_sha256": "a0b0b7d82a94dbe23b2c791cb62135829c1b3ed7363c62c3aefd1ed5544be8ef",
+   "passed": true
+  }
+ },
+ "schema_version": "nla_observatory_dashboard.v2"
+}

@@ -1,0 +1,94 @@
+schema_version: nano_ar_layer_sweep_queue.v1
+created_at: "2026-07-04T10:05:00Z"
+notes: >-
+  Evaluation-only hardened 512/512 diagnostic for retry4 update 16. It seeds
+  the valid 64/64 legacy-batch generations, resumes the missing rows, scores
+  against the hardened matched SFT baseline, and removes only temporary HF.
+  This queue never launches training and cannot promote the hero directly.
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-hero-current
+  logs_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_corrected/r33_corrected_k3_confirm_lr1e5_update32_runtimefix_retry4_keyedloss_mem768/diagnostics/update16_v512_hardened/queue_logs
+  environment:
+    WANDB_MODE: offline
+    HF_HUB_OFFLINE: "1"
+    TRANSFORMERS_OFFLINE: "1"
+    TOKENIZERS_PARALLELISM: "false"
+    PYTHONUNBUFFERED: "1"
+items:
+  - name: clean-temporary-hf
+    status: pending
+    kind: cleanup
+    command:
+      - /bin/rm
+      - -rf
+      - /dev/shm/nano30b-nla-pilot/r33-retry4-update16-v512
+  - name: seed-existing-64-row-generations
+    status: pending
+    kind: seed_generation
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/seed_nano_generated_shards.py
+      - --generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/rl_corrected/r33_corrected_k3_confirm_lr1e5_update32_runtimefix_retry4_keyedloss_mem768/roundtrip_iter_0000016_v64_t64_report_generated.jsonl
+      - --train-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+      - --validation-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+      - --test-parquet
+      - /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+      - --output-generated-jsonl
+      - /workspace/interp/outputs/nano30b-nla-pilot/rl_corrected/r33_corrected_k3_confirm_lr1e5_update32_runtimefix_retry4_keyedloss_mem768/diagnostics/update16_v512_hardened/generated.jsonl
+      - --validation-limit
+      - "512"
+      - --test-limit
+      - "512"
+      - --shard-count
+      - "8"
+      - --report-json
+      - /workspace/interp/outputs/nano30b-nla-pilot/rl_corrected/r33_corrected_k3_confirm_lr1e5_update32_runtimefix_retry4_keyedloss_mem768/diagnostics/update16_v512_hardened/seed_report.json
+      - --overwrite
+  - name: convert-update16-to-tmpfs-hf
+    status: pending
+    kind: convert
+    command:
+      - /workspace/interp/.venvs/sglang-cu130/bin/python
+      - external/natural_language_autoencoders/tools/convert_fsdp_to_hf.py
+      - --input-dir
+      - /workspace/interp/outputs/nano30b-nla-pilot/rl_corrected/r33_corrected_k3_confirm_lr1e5_update32_runtimefix_retry4_keyedloss_mem768/actor/iter_0000016
+      - --origin-hf-dir
+      - /workspace/interp/models/nano-30b-a3b-bf16-hf
+      - --output-dir
+      - /dev/shm/nano30b-nla-pilot/r33-retry4-update16-v512/hf
+      - --torch-dtype
+      - bfloat16
+  - name: patch-temporary-hf-remote-code
+    status: pending
+    kind: patch
+    command:
+      - /workspace/interp/.venvs/sglang-cu130/bin/python
+      - -m
+      - nla.remote_code_patches
+      - /dev/shm/nano30b-nla-pilot/r33-retry4-update16-v512/hf
+  - name: resume-generation-v512
+    status: pending
+    kind: generate
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/nano_roundtrip_eval_config.py
+      - configs/nano_roundtrip/r33_retry4_update16_v512_generate.yaml
+      - --run
+  - name: score-hardened-v512
+    status: pending
+    kind: score
+    command:
+      - /workspace/interp/.venv/bin/python
+      - scripts/nano_roundtrip_eval_config.py
+      - configs/nano_roundtrip/r33_retry4_update16_v512_score.yaml
+      - --run
+  - name: clean-temporary-hf-after-score
+    status: pending
+    kind: cleanup
+    command:
+      - /bin/rm
+      - -rf
+      - /dev/shm/nano30b-nla-pilot/r33-retry4-update16-v512

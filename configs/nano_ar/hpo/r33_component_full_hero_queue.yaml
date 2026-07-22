@@ -1,0 +1,22 @@
+schema_version: nano_ar_hpo_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  batch_size: 4
+  controls:
+  - teacher
+  - teacher_shuffled
+  - blank
+  - generic
+  - mean
+  - source_context
+  - source_raw
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/ar_hpo_queue/r33_component_full_hero_trials.jsonl
+items:
+- name: r33-component-full-preflight-lr5e5-warmup4-gb192-mb96-16step
+  config: configs/nano_ar/hpo/r33_component_full_preflight_lr5e5_cosine_warmup4_gb192_mb96_16steps.yaml
+  run_id: nano-ar-r33-component-full-preflight-lr5e5-cosine-warmup4-gb192-mb96-16step
+  status: pending
+  notes: First clean full-row component-preserving R33 AR preflight. Uses verified 275,396-row source with content-component materialized splits, padded train rows 247,488, and no synthetic doc-split leakage.

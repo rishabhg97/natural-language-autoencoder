@@ -1,0 +1,42 @@
+diff --git a/miles/backends/fsdp_utils/actor.py b/miles/backends/fsdp_utils/actor.py
+index 3498392..77f3c4d 100644
+--- a/miles/backends/fsdp_utils/actor.py
++++ b/miles/backends/fsdp_utils/actor.py
+@@ -179,11 +179,26 @@ class FSDPTrainRayActor(TrainRayActor):
+
+         checkpoint_payload = checkpoint.load(self)
+
+-        # Constant lr only — checkpoint-loaded scheduler state can carry stale
+-        # decay config that drives lr→0 on resume. Neuter scheduler + set live lr.
+-        self.lr_scheduler.max_lr = float(args.lr)
+-        self.lr_scheduler.min_lr = float(args.lr)
+-        for pg in self.optimizer.param_groups:
+-            pg["lr"] = float(args.lr)
+-            pg.pop("max_lr", None)
+-        logger.info(f"[FSDP] reset scheduler + optimizer lr = {args.lr} (constant)")
++        # Checkpoint-loaded scheduler state can carry stale bounds that drive
++        # lr→0 on resume. Refresh those bounds, but preserve requested decay
++        # for fresh SFT/finetune runs. Use NLA_FORCE_CONSTANT_LR=1 only when a
++        # stale optimizer+scheduler resume really needs the old safety valve.
++        force_constant_lr = os.environ.get("NLA_FORCE_CONSTANT_LR", "").strip().lower() in {"1", "true", "yes", "on"}
++        requested_style = str(getattr(args, "lr_decay_style", "constant") or "constant")
++        fresh_sft = bool(getattr(args, "finetune", False) or getattr(args, "no_load_optim", False))
++        stale_resume = bool(getattr(args, "load", None)) and not fresh_sft
++        if requested_style.lower() in {"", "constant", "none"} or force_constant_lr or stale_resume:
++            min_lr = float(args.lr)
++            style = "constant"
++        else:
++            min_lr = float(getattr(args, "min_lr", 0.0) or 0.0)
++            style = requested_style
++
++        self.lr_scheduler.max_lr = float(args.lr)
++        self.lr_scheduler.min_lr = min_lr
++        self.lr_scheduler.lr_decay_style = style
++        for pg in self.optimizer.param_groups:
++            pg["lr"] = float(args.lr)
++            pg["max_lr"] = float(args.lr)
++            pg["min_lr"] = min_lr
++        logger.info(f"[FSDP] scheduler live: lr={args.lr}, decay={style}, min_lr={min_lr}")
+
+         # Create separate ref model if needed (kept in CPU until needed)
+         self.ref_model = None

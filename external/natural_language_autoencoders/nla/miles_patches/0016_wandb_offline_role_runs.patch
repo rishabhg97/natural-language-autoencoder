@@ -1,0 +1,97 @@
+diff --git a/miles/utils/tracking_utils.py b/miles/utils/tracking_utils.py
+--- a/miles/utils/tracking_utils.py
++++ b/miles/utils/tracking_utils.py
+@@ -4,10 +4,10 @@ from miles.utils.tensorboard_utils import _TensorboardAdapter
+ from . import wandb_utils
+ 
+ 
+-def init_tracking(args, primary: bool = True, **kwargs):
++def init_tracking(args, primary: bool = True, role: str | None = None, **kwargs):
+     if primary:
+         wandb_utils.init_wandb_primary(args, **kwargs)
+     else:
+-        wandb_utils.init_wandb_secondary(args, **kwargs)
++        wandb_utils.init_wandb_secondary(args, role=role, **kwargs)
+ 
+ 
+diff --git a/miles/ray/rollout.py b/miles/ray/rollout.py
+--- a/miles/ray/rollout.py
++++ b/miles/ray/rollout.py
+@@ -67,7 +67,7 @@ class RolloutManager:
+         self.pg = pg
+         _start_router(args)
+         # TODO make args immutable
+-        init_tracking(args, primary=False, router_addr=f"http://{args.sglang_router_ip}:{args.sglang_router_port}")
++        init_tracking(args, primary=False, role="rollout", router_addr=f"http://{args.sglang_router_ip}:{args.sglang_router_port}")
+         init_http_client(args)
+ 
+         data_source_cls = load_function(self.args.data_source_path)
+diff --git a/miles/backends/fsdp_utils/actor.py b/miles/backends/fsdp_utils/actor.py
+--- a/miles/backends/fsdp_utils/actor.py
++++ b/miles/backends/fsdp_utils/actor.py
+@@ -110,8 +110,8 @@ class FSDPTrainRayActor(TrainRayActor):
+             self.args.offload_train = False
+ 
+         self._enable_true_on_policy_optimizations(args)
+         if dist.get_rank() == 0:
+-            init_tracking(args, primary=False)
++            init_tracking(args, primary=False, role=role)
+ 
+         if getattr(self.args, "start_rollout_id", None) is None:
+             self.args.start_rollout_id = 0
+diff --git a/miles/utils/wandb_utils.py b/miles/utils/wandb_utils.py
+--- a/miles/utils/wandb_utils.py
++++ b/miles/utils/wandb_utils.py
+@@ -52,11 +52,15 @@ def init_wandb_primary(args):
+     init_kwargs = {
+         "entity": args.wandb_team,
+         "project": args.wandb_project,
+         "group": group,
+         "name": run_name,
+         "config": _compute_config_for_logging(args),
+     }
+ 
++    if args.wandb_run_id:
++        init_kwargs["id"] = args.wandb_run_id
++        init_kwargs["resume"] = "allow"
++
+     # Configure settings based on offline/online mode
+     if offline:
+         init_kwargs["settings"] = wandb.Settings(mode="offline")
+@@ -92,7 +96,7 @@ def _compute_config_for_logging(args):
+ 
+ 
+ # https://docs.wandb.ai/guides/track/log/distributed-training/#track-all-processes-to-a-single-run
+-def init_wandb_secondary(args, router_addr=None):
++def init_wandb_secondary(args, router_addr=None, role=None):
+     wandb_run_id = getattr(args, "wandb_run_id", None)
+     if wandb_run_id is None:
+         return
+@@ -100,4 +104,6 @@ def init_wandb_secondary(args, router_addr=None):
+     if args.wandb_mode:
+         os.environ["WANDB_MODE"] = args.wandb_mode
+ 
+     offline = _is_offline_mode(args)
++    offline_role = role or "secondary"
++    offline_run_id = f"{wandb_run_id}-{offline_role}" if offline else wandb_run_id
+@@ -127,15 +134,19 @@ def init_wandb_secondary(args, router_addr=None):
+     }
+ 
+     init_kwargs = {
+-        "id": wandb_run_id,
++        "id": offline_run_id,
+         "entity": args.wandb_team,
+         "project": args.wandb_project,
+         "config": args.__dict__,
+         "resume": "allow",
+         "reinit": True,
+         "settings": wandb.Settings(**settings_kwargs),
+     }
+ 
++    if offline:
++        init_kwargs["group"] = args.wandb_group
++        init_kwargs["name"] = f"{args.wandb_group}-{offline_role}"
++
+     # Add custom directory if specified
+     if args.wandb_dir:
+         os.makedirs(args.wandb_dir, exist_ok=True)

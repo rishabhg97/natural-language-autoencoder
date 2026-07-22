@@ -1,0 +1,45 @@
+{
+  "config_sha256": "c7492fecc776f3991ac605a83c1f74c57eeabd5ed9f8cd4838676b164161b259",
+  "controls": [
+    "real",
+    "shuffled",
+    "zero",
+    "mean",
+    "none"
+  ],
+  "mean_loss": {
+    "mean": 1.2536763533541222,
+    "none": 1.2331295115413188,
+    "real": 0.7959321888527546,
+    "shuffled": 1.2995873495806,
+    "zero": 1.1808708131189443
+  },
+  "paired": {
+    "mean": {
+      "mean_real_minus_control": -0.45774416450136757,
+      "real_win_fraction": 1.0
+    },
+    "none": {
+      "mean_real_minus_control": -0.43719732268856415,
+      "real_win_fraction": 1.0
+    },
+    "shuffled": {
+      "mean_real_minus_control": -0.5036551607278453,
+      "real_win_fraction": 1.0
+    },
+    "zero": {
+      "mean_real_minus_control": -0.3849386242661895,
+      "real_win_fraction": 1.0
+    }
+  },
+  "passed": true,
+  "phase": "e2_token_logprobs",
+  "records": 2560,
+  "rows": 512,
+  "schema_version": "nano_viz_model_batches.v1",
+  "split": "validation",
+  "token_logprobs": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/e2_token_logprobs/validation_token_logprobs.jsonl",
+    "sha256": "d80336423ffa757d4d6bd5c7f49cda223f373ceda48371b93c5c82a3e2db6cb8"
+  }
+}

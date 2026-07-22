@@ -1,0 +1,31 @@
+schema_version: nano_roundtrip_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  environment:
+    WANDB_MODE: offline
+    TOKENIZERS_PARALLELISM: "false"
+    PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+  launch_guard:
+    block_if_process_matches:
+      - '(^|\s)\S*python\S*\s+scripts/nano_ar_hpo_queue\.py(\s|$)'
+      - '(^|\s)\S*python\S*\s+scripts/nano_av_probe_queue\.py(\s|$)'
+      - '(^|\s)\S*python\S*\s+\S*train\.py\s+.*--train-backend'
+      - '(^|\s)\S*python\S*\s+scripts/eval_nano_[^\s]+\.py(\s|$)'
+      - '(^|\s)\S*python\S*\s+scripts/[^\s]*convert_fsdp[^\s]*\.py(\s|$)'
+items:
+  - name: r33-sft-primary-generate-family512
+    config: configs/nano_roundtrip/publication/r33_sft_primary_generate.yaml
+    status: pending
+    notes: No-prefix protocol-matched SFT generation. Controls are sanity checks only.
+  - name: r33-sft-primary-score-family512
+    config: configs/nano_roundtrip/publication/r33_sft_primary_score.yaml
+    status: pending
+    notes: Primary-critic SFT baseline over family-disjoint 512/512 rows.
+  - name: r33-hero-primary-generate-family512
+    config: configs/nano_roundtrip/publication/r33_hero_primary_generate.yaml
+    status: pending
+    notes: No-prefix protocol-matched retained-hero generation; salvage evidence only.
+  - name: r33-hero-primary-score-family512
+    config: configs/nano_roundtrip/publication/r33_hero_primary_score.yaml
+    status: pending
+    notes: Corrected primary-critic comparison; not an independent replication.

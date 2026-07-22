@@ -1,0 +1,22 @@
+schema_version: nano_activation_magnitude_calibration.v1
+paths:
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/roundtrip_magnitude_calibration_report.json
+  datasets:
+    validation:
+      cache_npz: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/validation_roundtrip_predictions.npz
+      score_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/validation_roundtrip_magnitude_cache_report.json
+      split: validation
+    exploratory_test:
+      cache_npz: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/final_test_roundtrip_predictions.npz
+      score_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/final_test_roundtrip_magnitude_cache_report.json
+      split: test
+protocol:
+  fit_dataset: validation
+  fit_variant: teacher
+  candidate_methods: [identity, origin_scalar, train_mean_scalar]
+  evaluation_variants: [teacher, av_real]
+  selection_metric: raw_mse
+  nonnegative_scalar: true
+  bootstrap_samples: 10000
+  bootstrap_seed: 20260715
+  publication_status: exploratory_posthoc_exposed_test

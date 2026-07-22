@@ -1,0 +1,36 @@
+schema_version: nano_release_bundle_audit.v1
+root: /workspace/interp/code/nano30b-nla-pilot-publication-work-20260716T151715Z
+output_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260716_r33_clean_pair/source_bundle_security_audit.json
+exclude_globs:
+  - .git/**
+  - .pytest_cache/**
+  - __pycache__/**
+  - "**/__pycache__/**"
+max_text_bytes: 5242880
+fail_pattern_kinds:
+  - private_key
+  - aws_access_key
+  - openai_style_key
+  - github_token
+  - slack_token
+  - credential_assignment
+  - local_home_path
+  - internal_s3
+  - cluster_hostname
+  - internal_s3_endpoint
+allowed_findings:
+  - path_glob: tests/test_audit_nano_release_text.py
+    kinds: [aws_access_key, credential_assignment]
+    max_count: 1
+  - path_glob: tests/test_audit_nano_release_bundle.py
+    kinds: [aws_access_key, internal_s3, runai_workspace_path]
+    max_count: 2
+  - path_glob: scripts/audit_nano_release_bundle.py
+    kinds: [internal_s3]
+    max_count: 1
+  - path_glob: scripts/audit_nano_release_text.py
+    kinds: [internal_s3]
+    max_count: 1
+  - path_glob: tests/test_nano_s3_helper.py
+    kinds: [internal_s3, internal_s3_endpoint, local_home_path, runai_workspace_path]
+    max_count: 4

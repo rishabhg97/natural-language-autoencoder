@@ -1,0 +1,140 @@
+schema_version: nano_public_release_bundle.v1
+source_root: /Users/rigarg/Desktop/agents/research-projects/nano30b-nla-pilot
+output_root: /Users/rigarg/Desktop/agents/research-projects/nano30b-nla-pilot/artifacts/publication/r33-clean-sft-public-release-candidate-20260716
+release_id: r33-clean-sft-av-ar-iter1291-20260715
+claim_boundary: exploratory within-corpus family-disjoint directional AV-to-AR reconstruction and stored-snapshot functional recovery; no exact fresh-forward, native raw-magnitude, R33-over-R27, external-generalization, RL-gain, or legal-clearance claim
+source_prefix: source
+replace_existing: true
+max_source_bytes: 33554432
+include_globs:
+  - README.md
+  - .gitignore
+  - .github/**
+  - pytest.ini
+  - requirements-test.txt
+  - configs/nano_ar/publication/**
+  - configs/nano_av/publication/**
+  - configs/nano_data/publication/**
+  - configs/nano_functional/r33_clean_sft_*
+  - configs/nano_release/**
+  - configs/nano_roundtrip/publication/**
+  - docs/methods/**
+  - docs/releases/**
+  - docs/runs/README.md
+  - docs/runs/r33_gate_matrix.md
+  - docs/runs/r33_sft_confirmatory_preregistration.md
+  - external/natural_language_autoencoders/**
+  - scripts/**
+  - tests/**
+exclude_globs:
+  - "**/.git/**"
+  - "**/.cache/**"
+  - "**/.pytest_cache/**"
+  - "**/.ruff_cache/**"
+  - "**/.venv/**"
+  - "**/.DS_Store"
+  - "**/__pycache__/**"
+  - "**/*.pyc"
+  - "**/*.lock"
+  - docs/releases/r33_clean_sft_release_candidate_attestation.md
+  - scripts/fetch_runai_wandb_offline.sh
+  - scripts/run_super_teacher_delta_local.sh
+extra_files:
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_pair/checkpoint_pair_manifest.json
+    destination: evidence/selected_pair/checkpoint_pair_manifest.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_ar/eval_iter_0001291_v512_t512_winrates_report.json
+    destination: evidence/selected_pair/ar_component_eval_report.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_ar/eval_verifier.json
+    destination: evidence/selected_pair/ar_component_eval_verifier.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_ar/ar_hf_fingerprint.json
+    destination: evidence/selected_pair/ar_hf_fingerprint.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_ar/run_plan.json
+    destination: evidence/selected_pair/ar_run_plan.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/eval_iter_0001291_v512_t512_gen8_report.json
+    destination: evidence/selected_pair/av_component_eval_report.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/eval_verifier.json
+    destination: evidence/selected_pair/av_component_eval_verifier.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/s3_attestation.json
+    destination: evidence/selected_pair/av_checkpoint_attestation.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/optimizer_retention_manifest.json
+    destination: evidence/selected_pair/av_optimizer_retention_manifest.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/run_plan.json
+    destination: evidence/selected_pair/av_run_plan.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/run_spec.yaml
+    destination: evidence/selected_pair/av_run_spec.yaml
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/r33_clean_sft_roundtrip/validation_roundtrip_report.json
+    destination: evidence/selected_pair/validation_roundtrip_report.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/r33_clean_sft_roundtrip/validation_roundtrip_verifier.json
+    destination: evidence/selected_pair/validation_roundtrip_verifier.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/r33_clean_sft_roundtrip/final_test_roundtrip_report.json
+    destination: evidence/selected_pair/test_roundtrip_report.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/r33_clean_sft_roundtrip/final_test_roundtrip_verifier.json
+    destination: evidence/selected_pair/test_roundtrip_verifier.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/r33_clean_sft_roundtrip/validation_functional_report.json
+    destination: evidence/selected_pair/validation_functional_report.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/r33_clean_sft_roundtrip/validation_functional_verifier.json
+    destination: evidence/selected_pair/validation_functional_verifier.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/r33_clean_sft_roundtrip/final_test_functional_report.json
+    destination: evidence/selected_pair/test_functional_report.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/r33_clean_sft_roundtrip/final_test_functional_verifier.json
+    destination: evidence/selected_pair/test_functional_verifier.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/confirmatory/r33_content_families_v2/r33_content_family_base_manifest.json
+    destination: evidence/family_boundary/r33_content_family_base_manifest.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/confirmatory/r33_content_families_v2/r33_exact_prefix_refined_base_manifest.json
+    destination: evidence/family_boundary/r33_exact_prefix_refined_base_manifest.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/confirmatory/r33_content_families_v2/r33_exact_prefix_refinement_report.json
+    destination: evidence/family_boundary/r33_exact_prefix_refinement_report.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/confirmatory/r33_content_families_v2/r33_clean_sft_family_coverage.json
+    destination: evidence/family_boundary/r33_clean_sft_family_coverage.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/confirmatory/r33_content_families_v2/r33_confirmatory_family_split_report.json
+    destination: evidence/family_boundary/r33_confirmatory_family_split_report.json
+  - source: artifacts/runai_eval/r33-clean-sft-publication-evidence-20260716/activation_fidelity_validation64_mb8.json
+    destination: evidence/followup/fresh_forward_fidelity_validation64.json
+  - source: artifacts/runai_eval/r33-clean-sft-publication-evidence-20260716/compute_accounting.json
+    destination: evidence/followup/compute_accounting.json
+  - source: artifacts/runai_eval/r33-clean-sft-publication-evidence-20260716/release_text_privacy_memorization_audit.json
+    destination: evidence/followup/release_text_privacy_memorization_audit.json
+  - source: artifacts/runai_eval/r33-clean-sft-publication-evidence-20260716/roundtrip_magnitude_calibration_report.json
+    destination: evidence/followup/roundtrip_magnitude_calibration_report.json
+  - source: artifacts/runai_eval/r33-clean-sft-publication-evidence-20260716/roundtrip_subgroup_audit_report.json
+    destination: evidence/followup/roundtrip_subgroup_audit_report.json
+  - source: artifacts/runai_eval/r33-clean-sft-publication-evidence-20260716/teacher_corpus_external_boundary_inventory_v2.json
+    destination: evidence/followup/teacher_corpus_external_boundary_inventory.json
+  - source: artifacts/runai_eval/r33-clean-sft-publication-evidence-20260716/training_metric_curves.json
+    destination: evidence/followup/training_metric_curves.json
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/critic_initialization/critic_initialization_verification.json
+    destination: evidence/independent_ar/critic_initialization_verification.json
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/independent_ar_checkpoint_fingerprint.json
+    destination: evidence/independent_ar/checkpoint_fingerprint.json
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/independent_ar_checkpoint_retention_manifest.json
+    destination: evidence/independent_ar/checkpoint_retention_manifest.json
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/run_artifacts/eval_iter_0001291_v512_t512_winrates_report.json
+    destination: evidence/independent_ar/component_eval_report.json
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/component_eval_verifier.json
+    destination: evidence/independent_ar/component_eval_verifier.json
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/run_artifacts/run_plan.json
+    destination: evidence/independent_ar/run_plan.json
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/run_artifacts/run_spec.yaml
+    destination: evidence/independent_ar/run_spec.yaml
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/run_artifacts/splits/split_manifest.json
+    destination: evidence/independent_ar/split_manifest.json
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/run_artifacts/splits/split_content_verify.json
+    destination: evidence/independent_ar/split_content_verify.json
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/validation_roundtrip_report.json
+    destination: evidence/independent_ar/validation_roundtrip_report.json
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/validation_roundtrip_verifier.json
+    destination: evidence/independent_ar/validation_roundtrip_verifier.json
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/wandb/offline-run-20260710_204845-gh66u9l7/files/requirements.txt
+    destination: evidence/environment/primary_av_coordinator_requirements.txt
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/wandb/wandb/offline-run-20260710_011910-51japcfg/files/requirements.txt
+    destination: evidence/environment/primary_av_driver_requirements.txt
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/wandb/wandb/offline-run-20260710_011931-51japcfg-rollout/files/requirements.txt
+    destination: evidence/environment/primary_av_rollout_requirements.txt
+  - source: artifacts/runai_eval/r33-clean-sft-av-ar-qualified-20260715/publication/evidence/20260715_r33_clean_av/wandb/wandb/offline-run-20260710_011939-51japcfg-actor/files/requirements.txt
+    destination: evidence/environment/primary_av_actor_requirements.txt
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/run_artifacts/wandb/wandb/offline-run-20260716_035146-ohvmqmqs/files/requirements.txt
+    destination: evidence/environment/independent_ar_driver_requirements.txt
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/run_artifacts/wandb/wandb/offline-run-20260716_035207-ohvmqmqs-rollout/files/requirements.txt
+    destination: evidence/environment/independent_ar_rollout_requirements.txt
+  - source: artifacts/runai_eval/r33-independent-ar-publication-evidence-20260716/run_artifacts/wandb/wandb/offline-run-20260716_035215-ohvmqmqs-actor/files/requirements.txt
+    destination: evidence/environment/independent_ar_actor_requirements.txt

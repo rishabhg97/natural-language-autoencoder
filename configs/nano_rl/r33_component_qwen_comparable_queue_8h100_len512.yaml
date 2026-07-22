@@ -1,0 +1,725 @@
+schema_version: nano_rl_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venvs/sglang-cu130/bin/python
+  miles_root: /workspace/interp/code/miles-051cd15
+  rl_script: external/natural_language_autoencoders/configs/rl.sh
+  workspace_gpus: 8
+  launch:
+    requires_approval: true
+    approved: false
+  env:
+    WANDB_MODE: offline
+    PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+    NLA_EMBED_DUMP_DIR: /dev/shm/nla
+    NLA_BYPASS_ROUTER: "1"
+    NLA_BF16_B64_EMBEDS: "1"
+    NLA_WEIGHT_UPDATE_LOG_EVERY: "100"
+    NLA_FREEZE_CRITIC_TRAIN: "1"
+    NLA_ASSERT_PACKED_EQUIV: "0"
+    NLA_CRITIC_FWD_DISABLE_MAMBA_FAST_PATH: "1"
+    NLA_ROLLOUT_SUMMARY_STDOUT: "1"
+    NLA_FAILED_EXTRACTION_REWARD: "-2.0"
+    NLA_ROUTER_METRICS: "1"
+    NLA_PREWARM_HF_MODULES: "1"
+    HF_MODULES_CACHE: /dev/shm/nano30b-nla-pilot/hf_modules_cache/r33_component_qwen_comparable_8h100
+  wandb:
+    project: nano30b-nla-pilot
+    group: nano-rl-qwen-scale-r33
+  resources:
+    actor_nodes: 1
+    actor_gpus: 4
+    critic_nodes: 1
+    critic_gpus: 2
+    rollout_gpus: 2
+    min_actor_gpus: 4
+  training:
+    train_backend: fsdp
+    actor_lr: "5e-6"
+    critic_lr: 1e-5
+    actor_micro_batch: 1
+    attn_implementation: eager
+    gradient_checkpointing: true
+    kl_loss_coef: 0.0003
+    save_interval: 4
+    loss_mask_type: qwen
+    lr_decay_style: constant
+    finetune: true
+    no_load_optim: true
+    fsdp_reduce_dtype: bfloat16
+    fsdp_disable_backward_prefetch: true
+    advantage_estimator: grpo
+    normalize_advantages: false
+    rewards_normalization: true
+    grpo_std_normalization: true
+  rollout:
+    rollout_batch_size: 64
+    global_batch_size: 512
+    n_samples_per_prompt: 8
+    require_global_batch_match: true
+    max_response_len: 256
+    max_context_len: 512
+    num_rollout: 2
+  sglang:
+    mode: external
+    python: /workspace/interp/.venvs/sglang-cu130/bin/python
+    managed: true
+    terminate_on_exit: true
+    tensor_parallel_size: 2
+    base_gpu_id: 4
+    rollout_num_gpus_per_engine: 2
+    env:
+      SGLANG_MIN_NEW_TOKEN_RATIO_FACTOR: "1"
+    engine_addrs:
+      - 127.0.0.1:31000
+    timeout_seconds: 1200
+    poll_seconds: 2
+    model_staging:
+      enabled: true
+      source_model_path: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+      target_path: /dev/shm/nano30b-nla-pilot/sglang_models/r33_component_full_actor_sft_iter_0001291
+      reuse_existing: true
+      clean: true
+    start_commands:
+      - - /workspace/interp/.venvs/sglang-cu130/bin/python
+        - -m
+        - sglang.launch_server
+        - --model-path
+        - /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+        - --host
+        - 127.0.0.1
+        - --port
+        - "31000"
+        - --tp-size
+        - "2"
+        - --base-gpu-id
+        - "4"
+        - --trust-remote-code
+        - --skip-server-warmup
+        - --disable-radix-cache
+        - --disable-custom-all-reduce
+        - --attention-backend
+        - fa3
+        - --schedule-conservativeness
+        - "1.5"
+        - --enable-draft-weights-cpu-backup
+    health_urls:
+      - http://127.0.0.1:31000/health_generate
+  post_eval:
+    roundtrip:
+      enabled: true
+      origin_hf_dir: /workspace/interp/models/nano-30b-a3b-bf16-hf
+      ar_checkpoint_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289
+      train_parquet: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+      validation_parquet: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+      test_parquet: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+      baseline_report_json: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/roundtrip_iter_0001291_v256_t256_report.json
+      validation_limit: 64
+      test_limit: 64
+      max_new_tokens: 256
+      generation_backend: legacy_batch
+      generation_workers: 8
+      generation_worker_devices: ["0", "1", "2", "3", "4", "5", "6", "7"]
+      generation_controls: [real, shuffled, zero, mean, none]
+      generated_text_fallback: raw
+      min_control_win_fraction: 0.9
+      min_closed_fraction: 0.8
+      min_usable_fraction: 0.95
+      scoring_python: /workspace/interp/.venv/bin/python
+      cleanup_hf: true
+      cleanup_actor_checkpoint: true
+  extra_args:
+    - --no-save-optim
+    - --sglang-attention-backend
+    - fa3
+items:
+  - name: r33-component-rl-8h100-tier1-fit-rb64-n8-gb512-lr5e6-tp2
+    status: complete
+    rollout:
+      rollout_batch_size: 64
+      global_batch_size: 512
+      n_samples_per_prompt: 8
+      num_rollout: 2
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 1
+      kl_loss_coef: 0.0003
+      save_interval: 2
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-fit-rb64-n8-gb512-lr5e6-tp2-20260625
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_fit_rb64_n8_gb512_lr5e6_tp2
+    notes: "Tier 1 fit canary: first 512-generation/update R33 RL run. Two updates only. Do not judge quality; measure memory, throughput, KL/reward diagnostics, SGLang/reward pressure, and cleanup."
+  - name: r33-component-rl-8h100-tier1-fit-rb64-n8-gb512-lr5e6-tp1-actor5
+    status: blocked
+    resources:
+      actor_gpus: 5
+      critic_gpus: 2
+      rollout_gpus: 1
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 1
+    rollout:
+      rollout_batch_size: 64
+      global_batch_size: 512
+      n_samples_per_prompt: 8
+      num_rollout: 2
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 1
+      kl_loss_coef: 0.0003
+      save_interval: 2
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-fit-rb64-n8-gb512-lr5e6-tp1-actor5-20260625
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_fit_rb64_n8_gb512_lr5e6_tp1_actor5
+    notes: "Throughput canary for the engineering review: move one idle rollout GPU to actor FSDP (5 actor / 1 rollout TP1 / 2 critic). Quality is not judged; compare actor_train_time, ref_log_probs_time, generation time, GPU util, and OOM headroom against the completed TP2 actor4 fit."
+  - name: r33-component-rl-8h100-tier1-fit-rb64-n8-gb512-lr5e6-tp1-actor5-cpuoffload-nockpt-mb2
+    status: blocked
+    resources:
+      actor_gpus: 5
+      critic_gpus: 2
+      rollout_gpus: 1
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 1
+    rollout:
+      rollout_batch_size: 64
+      global_batch_size: 512
+      n_samples_per_prompt: 8
+      num_rollout: 2
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 2
+      gradient_checkpointing: false
+      fsdp_cpu_offload: true
+      fsdp_cpu_backend: gloo
+      kl_loss_coef: 0.0003
+      save_interval: 2
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-fit-rb64-n8-gb512-lr5e6-tp1-actor5-cpuoffload-nockpt-mb2-20260625
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_fit_rb64_n8_gb512_lr5e6_tp1_actor5_cpuoffload_nockpt_mb2
+    notes: "Memory/compute canary: FSDP CPU offload plus gradient checkpointing disabled and actor mb=2. Run only after the plain TP1 actor5 canary proves stable; expect lower VRAM but possible CPU/offload overhead."
+  - name: r33-component-rl-8h100-tier1-fit-rb64-n8-gb512-lr5e6-async-tp2
+    status: blocked
+    training:
+      async_training: true
+      actor_lr: "5e-6"
+      actor_micro_batch: 1
+      gradient_checkpointing: true
+      kl_loss_coef: 0.0003
+      save_interval: 2
+    rollout:
+      rollout_batch_size: 64
+      global_batch_size: 512
+      n_samples_per_prompt: 8
+      num_rollout: 2
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-fit-rb64-n8-gb512-lr5e6-async-tp2-20260625
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_fit_rb64_n8_gb512_lr5e6_async_tp2
+    notes: "Async pipelining canary using Miles train_async.py. This overlaps rollout N+1 with actor training on rollout N, changes policy staleness semantics, and must be interpreted with TIS/KL/round-trip diagnostics before scaling."
+  - name: r33-component-rl-8h100-tier1-fit-rb32-n16-gb512-lr5e6-tp1-actor5
+    status: blocked
+    resources:
+      actor_gpus: 5
+      critic_gpus: 2
+      rollout_gpus: 1
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 1
+    rollout:
+      rollout_batch_size: 32
+      global_batch_size: 512
+      n_samples_per_prompt: 16
+      num_rollout: 2
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 1
+      kl_loss_coef: 0.0003
+      save_interval: 2
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-fit-rb32-n16-gb512-lr5e6-tp1-actor5-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_fit_rb32_n16_gb512_lr5e6_tp1_actor5
+    notes: "Stopped after proving n=16 rollout/reward path is viable because actor_micro_batch=1 made ref_log_probs too slow: rollout reached 512/512, first train step completed, then ref_log_probs was only 3/102 after ~83s with actor GPUs busy and large VRAM headroom. Keep logs as the mb1 throughput-bottleneck record."
+  - name: r33-component-rl-8h100-tier1-fit-rb32-n16-gb512-lr5e6-tp1-actor5-mb4
+    status: cancelled
+    resources:
+      actor_gpus: 5
+      critic_gpus: 2
+      rollout_gpus: 1
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 1
+    rollout:
+      rollout_batch_size: 32
+      global_batch_size: 512
+      n_samples_per_prompt: 16
+      num_rollout: 2
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 4
+      kl_loss_coef: 0.0003
+      save_interval: 2
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-fit-rb32-n16-gb512-lr5e6-tp1-actor5-mb4-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_fit_rb32_n16_gb512_lr5e6_tp1_actor5_mb4
+    notes: "Intentionally stopped after the first update's ref pass to move faster to mb8. Evidence: n=16 rollout reached 512/512, ref_log_probs reduced from 102 chunks (mb1) to 25 chunks, completed 25/25 in 641.7s, no errors/OOM, actor GPUs were compute-bound, and post-ref actor train used only about 28GiB per actor H100. Keep logs as the mb4 throughput/memory record."
+  - name: r33-component-rl-8h100-tier1-fit-rb32-n16-gb512-lr5e6-tp1-actor5-mb8
+    status: cancelled
+    resources:
+      actor_gpus: 5
+      critic_gpus: 2
+      rollout_gpus: 1
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 1
+    rollout:
+      rollout_batch_size: 32
+      global_batch_size: 512
+      n_samples_per_prompt: 16
+      num_rollout: 2
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 8
+      kl_loss_coef: 0.0003
+      save_interval: 2
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-fit-rb32-n16-gb512-lr5e6-tp1-actor5-mb8-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_fit_rb32_n16_gb512_lr5e6_tp1_actor5_mb8
+    notes: "Intentionally stopped after one complete update to test mb16. Evidence: n=16 rollout reached 512/512, ref_log_probs reduced to 12 chunks and completed in 318.2s, log_probs completed in 300.9s, actor_train completed 12/12 in 693.8s, full train_time was 1328.0s, no errors/OOM, and actor GPU memory was about 41-51GiB. Keep logs as the mb8 throughput/memory record."
+  - name: r33-component-rl-8h100-tier1-fit-rb32-n16-gb512-lr5e6-tp1-actor5-mb16
+    status: complete
+    started_at: "2026-06-26T03:45:29Z"
+    post_eval_status: complete
+    post_eval_started_at: "2026-06-26T04:18:36Z"
+    resources:
+      actor_gpus: 5
+      critic_gpus: 2
+      rollout_gpus: 1
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 1
+    rollout:
+      rollout_batch_size: 32
+      global_batch_size: 512
+      n_samples_per_prompt: 16
+      num_rollout: 2
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 16
+      kl_loss_coef: 0.0003
+      save_interval: 2
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-fit-rb32-n16-gb512-lr5e6-tp1-actor5-mb16-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_fit_rb32_n16_gb512_lr5e6_tp1_actor5_mb16
+    notes: "Completed n=16 throughput canary. Two RL updates saved actor/iter_0000002; actor_micro_batch=16 reduced ref/log/actor chunks to 6 and cut step time to about 829-838s versus mb8's 1476s, with peak actor reserved memory about 75.2GiB on H100. 64/64 post-eval completed with perfect parse health and AV-real beating all controls, but gate.passed=false because validation did not beat matched SFT baseline (0.000111836 vs 0.000109631); test did beat matched SFT baseline (0.000119757 vs 0.000120639). Treat this as the successful n=16 systems/throughput shape, not a quality checkpoint."
+  - name: r33-component-rl-8h100-tier1-medium-rb30-n16-gb480-lr5e6-rollout16-mb16-v64t64
+    status: cancelled
+    started_at: "2026-06-26T14:42:07Z"
+    stopped_at: "2026-06-26T15:07:00Z"
+    stop_reason: "Stopped manually after the rollout8 probe completed so Stage-A diagnostics and observability fixes could be applied before any longer run."
+    train_log: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_medium_rb30_n16_gb480_lr5e6_rollout16_mb16_v64t64/train.log
+    resources:
+      actor_gpus: 5
+      critic_gpus: 2
+      rollout_gpus: 1
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 1
+    rollout:
+      rollout_batch_size: 30
+      global_batch_size: 480
+      n_samples_per_prompt: 16
+      num_rollout: 16
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 16
+      kl_loss_coef: 0.0003
+      save_interval: 16
+    post_eval:
+      roundtrip:
+        validation_limit: 64
+        test_limit: 64
+        cleanup_actor_checkpoint: false
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-medium-rb30-n16-gb480-lr5e6-rollout16-mb16-v64t64-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_medium_rb30_n16_gb480_lr5e6_rollout16_mb16_v64t64
+    notes: "Clean divisible n=16 medium candidate: 30 prompts x 16 samples = 480 generated samples/update, actor DP=5 gives 96 samples/rank, and actor_micro_batch=16 divides each rank exactly. This avoids the prior 512-requested/480-trained truncation while preserving the mb16 throughput point. Runs 16 updates (7,680 generated rollouts) with 64/64 post-eval; keep the final actor checkpoint until the gate result is reviewed."
+  - name: r33-component-rl-8h100-stageb-advcheck-rb30-n16-gb480-lr5e6-rollout3-mb16-v64t64
+    status: cancelled
+    started_at: "2026-06-26T16:07:05Z"
+    stopped_at: "2026-06-26T16:16:00Z"
+    stop_reason: "Stopped after rollout 0 showed [NLA ROLLOUT] but no [NLA ADVANTAGE]; the active NLA actor path needed direct advantage logging."
+    resources:
+      actor_gpus: 5
+      critic_gpus: 2
+      rollout_gpus: 1
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 1
+    rollout:
+      rollout_batch_size: 30
+      global_batch_size: 480
+      n_samples_per_prompt: 16
+      num_rollout: 3
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 16
+      kl_loss_coef: 0.0003
+      save_interval: 3
+    post_eval:
+      roundtrip:
+        validation_limit: 64
+        test_limit: 64
+        cleanup_actor_checkpoint: false
+    wandb:
+      run_id: r33-component-rl-8h100-stageb-advcheck-rb30-n16-gb480-lr5e6-rollout3-mb16-v64t64-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_stageb_advcheck_rb30_n16_gb480_lr5e6_rollout3_mb16_v64t64
+    notes: "Stage-B instrumented canary after rollout8 passed Stage A. Runs only 3 updates so train.log can prove [NLA ROLLOUT] and [NLA ADVANTAGE] health before unblocking any medium or hero RL run. Treat as a gate/observability run: require finite reward/KL, advantage std >=0.5, frac_zero <=0.25, and neutral-or-better 64/64 paired gate versus matched SFT before scaling."
+  - name: r33-component-rl-8h100-stageb-advcheck2-rb30-n16-gb480-lr5e6-rollout3-mb16-v64t64
+    status: cancelled
+    started_at: "2026-06-26T16:20:09Z"
+    stopped_at: "2026-06-26T16:40:00Z"
+    stop_reason: "Stopped after rollout 0/1 still lacked [NLA ADVANTAGE]; helper was gated on global rank 0 instead of actor DP leader."
+    resources:
+      actor_gpus: 5
+      critic_gpus: 2
+      rollout_gpus: 1
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 1
+    rollout:
+      rollout_batch_size: 30
+      global_batch_size: 480
+      n_samples_per_prompt: 16
+      num_rollout: 3
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 16
+      kl_loss_coef: 0.0003
+      save_interval: 3
+    post_eval:
+      roundtrip:
+        validation_limit: 64
+        test_limit: 64
+        cleanup_actor_checkpoint: false
+    wandb:
+      run_id: r33-component-rl-8h100-stageb-advcheck2-rb30-n16-gb480-lr5e6-rollout3-mb16-v64t64-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_stageb_advcheck2_rb30_n16_gb480_lr5e6_rollout3_mb16_v64t64
+    notes: "Clean retry of the Stage-B instrumented canary after adding direct NLA actor advantage logging. Same short 3-update, rb30/n16/gb480, mb16 topology as the cancelled advcheck run, but with a clean run directory and required [NLA ADVANTAGE] gate."
+  - name: r33-component-rl-8h100-stageb-advcheck3-rb30-n16-gb480-lr5e6-rollout3-mb16-v64t64
+    status: cancelled
+    started_at: "2026-06-26T16:43:01Z"
+    stopped_at: "2026-06-26T17:02:00Z"
+    stop_reason: "Stopped after rollout 0 still lacked [NLA ADVANTAGE]; next retry prints advantage diagnostics from every actor shard, including missing-keys diagnostics."
+    resources:
+      actor_gpus: 5
+      critic_gpus: 2
+      rollout_gpus: 1
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 1
+    rollout:
+      rollout_batch_size: 30
+      global_batch_size: 480
+      n_samples_per_prompt: 16
+      num_rollout: 3
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 16
+      kl_loss_coef: 0.0003
+      save_interval: 3
+    post_eval:
+      roundtrip:
+        validation_limit: 64
+        test_limit: 64
+        cleanup_actor_checkpoint: false
+    wandb:
+      run_id: r33-component-rl-8h100-stageb-advcheck3-rb30-n16-gb480-lr5e6-rollout3-mb16-v64t64-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_stageb_advcheck3_rb30_n16_gb480_lr5e6_rollout3_mb16_v64t64
+    notes: "Clean retry after fixing [NLA ADVANTAGE] to emit from the actor DP leader rather than global rank 0. Same rb30/n16/gb480 mb16 Stage-B gate."
+  - name: r33-component-rl-8h100-stageb-advcheck4-rb30-n16-gb480-lr5e6-rollout3-mb16-v64t64
+    status: pending
+    resources:
+      actor_gpus: 5
+      critic_gpus: 2
+      rollout_gpus: 1
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 1
+    rollout:
+      rollout_batch_size: 30
+      global_batch_size: 480
+      n_samples_per_prompt: 16
+      num_rollout: 3
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 16
+      kl_loss_coef: 0.0003
+      save_interval: 3
+    post_eval:
+      roundtrip:
+        validation_limit: 64
+        test_limit: 64
+        cleanup_actor_checkpoint: false
+    wandb:
+      run_id: r33-component-rl-8h100-stageb-advcheck4-rb30-n16-gb480-lr5e6-rollout3-mb16-v64t64-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_stageb_advcheck4_rb30_n16_gb480_lr5e6_rollout3_mb16_v64t64
+    notes: "Diagnostic Stage-B retry with [NLA ADVANTAGE] printed by every actor shard after actor train. If advantages are missing, the log prints rollout_data keys instead of silently skipping."
+  - name: r33-component-rl-8h100-tier1-probe-rb64-n8-gb512-lr5e6-rollout8-v256t256
+    status: complete
+    rollout:
+      rollout_batch_size: 64
+      global_batch_size: 512
+      n_samples_per_prompt: 8
+      num_rollout: 8
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 1
+      kl_loss_coef: 0.0003
+      save_interval: 8
+    post_eval:
+      roundtrip:
+        validation_limit: 256
+        test_limit: 256
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-probe-rb64-n8-gb512-lr5e6-rollout8-v256t256-20260625
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_probe_rb64_n8_gb512_lr5e6_rollout8_v256t256
+    notes: "Tier 1 paired-gate probe: 4,096 generated rollouts at lr=5e-6. Uses 256/256 post-eval so baseline comparison is paired against the stored SFT baseline subset."
+  - name: r33-component-rl-8h100-tier1-probe-rb64-n8-gb512-lr1e5-rollout8-v256t256
+    status: blocked
+    rollout:
+      rollout_batch_size: 64
+      global_batch_size: 512
+      n_samples_per_prompt: 8
+      num_rollout: 8
+    training:
+      actor_lr: "1e-5"
+      actor_micro_batch: 1
+      kl_loss_coef: 0.0003
+      save_interval: 8
+    post_eval:
+      roundtrip:
+        validation_limit: 256
+        test_limit: 256
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-probe-rb64-n8-gb512-lr1e5-rollout8-v256t256-20260625
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_probe_rb64_n8_gb512_lr1e5_rollout8_v256t256
+    notes: "Conditional LR follow-up: unblock only if the lr=5e-6 rollout-8 probe still has near-zero KL/policy movement or fails to improve the paired SFT baseline."
+  - name: r33-component-rl-8h100-tier1-medium-rb64-n8-gb512-lr5e6-rollout32
+    status: blocked
+    rollout:
+      rollout_batch_size: 64
+      global_batch_size: 512
+      n_samples_per_prompt: 8
+      num_rollout: 32
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 1
+      kl_loss_coef: 0.0003
+      save_interval: 32
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-medium-rb64-n8-gb512-lr5e6-rollout32-20260625
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_medium_rb64_n8_gb512_lr5e6_rollout32
+    notes: "Tier 1 medium A: 16,384 generated rollouts. Unblock only after the fit canary completes without OOM and has finite KL/reward diagnostics."
+  - name: r33-component-rl-8h100-tier1-confirm-rb64-n8-gb512-lr5e6-rollout64
+    status: blocked
+    rollout:
+      rollout_batch_size: 64
+      global_batch_size: 512
+      n_samples_per_prompt: 8
+      num_rollout: 64
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 1
+      kl_loss_coef: 0.0003
+      save_interval: 64
+    wandb:
+      run_id: r33-component-rl-8h100-tier1-confirm-rb64-n8-gb512-lr5e6-rollout64-20260625
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier1_confirm_rb64_n8_gb512_lr5e6_rollout64
+    notes: "Tier 1 medium B: 32,768 generated rollouts. Unblock only if Tier 1 medium A has no OOM and is at least neutral versus clean SFT on both validation and test."
+  - name: r33-component-rl-8h100-tier2-minhero-rb64-n8-gb512-lr5e6-rollout150
+    status: blocked
+    rollout:
+      rollout_batch_size: 64
+      global_batch_size: 512
+      n_samples_per_prompt: 8
+      num_rollout: 150
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 1
+      kl_loss_coef: 0.0003
+      save_interval: 150
+    wandb:
+      run_id: r33-component-rl-8h100-tier2-minhero-rb64-n8-gb512-lr5e6-rollout150-20260625
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier2_minhero_rb64_n8_gb512_lr5e6_rollout150
+    notes: "Tier 2 minimum Qwen-useful hero: 76,800 generated rollouts. Unblock only if Tier 1 confirm passes both-split clean SFT gate."
+  - name: r33-component-rl-8h100-tier2-hero-rb64-n8-gb512-lr5e6-rollout256
+    status: blocked
+    rollout:
+      rollout_batch_size: 64
+      global_batch_size: 512
+      n_samples_per_prompt: 8
+      num_rollout: 256
+    training:
+      actor_lr: "5e-6"
+      actor_micro_batch: 1
+      kl_loss_coef: 0.0003
+      save_interval: 256
+    wandb:
+      run_id: r33-component-rl-8h100-tier2-hero-rb64-n8-gb512-lr5e6-rollout256-20260625
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_tier2_hero_rb64_n8_gb512_lr5e6_rollout256
+    notes: "Tier 2 preferred Nano hero: 131,072 generated rollouts. Unblock only after the 150-rollout minimum hero passes and storage/time budget is acceptable."

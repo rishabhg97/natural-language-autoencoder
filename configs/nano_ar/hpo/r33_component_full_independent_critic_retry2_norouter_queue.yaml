@@ -1,0 +1,27 @@
+schema_version: nano_ar_hpo_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-hero-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  batch_size: 4
+  controls:
+    - teacher
+    - teacher_shuffled
+    - blank
+    - generic
+    - mean
+    - source_context
+    - source_raw
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/ar_hpo_queue/r33_independent_critic_trials.jsonl
+items:
+  - name: r33-component-full-independent-critic-seed314159-4gpu-mb48-norouter
+    config: configs/nano_ar/hpo/r33_component_full_independent_critic_seed314159_4gpu_mb48_norouter.yaml
+    run_id: nano-ar-r33-component-full-independent-seed314159-lr5e5-warmup25-gb192-mb48-4gpu-norouter
+    status: pending
+    notes: >-
+      Fresh H100-NVL retry after the otherwise stable 4xmb48 attempt reached
+      step 391 and then hit a CUDA illegal-memory-access first surfaced in the
+      optional router-entropy forward hook. This keeps dataset, seed, order,
+      global and micro batch, optimizer, LR schedule, topology, and eval exact;
+      only optional router-entropy observability is disabled.

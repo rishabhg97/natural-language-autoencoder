@@ -1,0 +1,15 @@
+{
+  "artifacts": {
+    "case_scores": "/workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/poetry_score/case_scores.jsonl",
+    "position_scores": "/workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/poetry_score/position_scores.jsonl",
+    "sample_scores": "/workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/poetry_score/sample_scores.jsonl"
+  },
+  "cases": 8,
+  "cases_with_baseline_target_rhyme": 1,
+  "cases_with_planning_onset": 5,
+  "config_sha256": "87191f785c1f183edcc8d12317155ec0d1569848c7a9c637e2b4060fe44a41aa",
+  "mean_anchor_lift": 0.03125,
+  "passed": true,
+  "phase": "poetry_score",
+  "schema_version": "nano_viz_poetry_planning_report.v1"
+}

@@ -1,0 +1,80 @@
+schema_version: nano_ar_hpo_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 64
+  test_limit: 64
+  batch_size: 4
+  controls:
+  - teacher
+  - teacher_shuffled
+  - blank
+  - generic
+  - mean
+  - source_context
+  - source_raw
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/ar_hpo_queue/r33_dedup_throughput_trials.jsonl
+items:
+- name: r33-dedup-throughput-lr2e5-warmup20-gb192-mb32-4step
+  config: configs/nano_ar/hpo/r33_dedup_throughput_smoke_lr2e5_warmup20_gb192_mb32_4steps.yaml
+  run_id: nano-ar-r33-dedup-throughput-lr2e5-warmup20-gb192-mb32-4step
+  status: failed
+  failed_at: '2026-06-12T16:32:48Z'
+  failure: 'Config invalid for a 4-step smoke: Miles requires lr_warmup_steps < lr_decay_steps, but warmup20 >= num_rollout4.'
+  notes: Fast correctness/throughput ladder. Step-0 packed reward/train equivalence guard remains enabled; run is not a quality or hero claim.
+- name: r33-dedup-throughput-lr2e5-warmup2-gb192-mb32-4step
+  config: configs/nano_ar/hpo/r33_dedup_throughput_smoke_lr2e5_warmup2_gb192_mb32_4steps.yaml
+  run_id: nano-ar-r33-dedup-throughput-lr2e5-warmup2-gb192-mb32-4step
+  status: failed
+  failed_at: '2026-06-12T16:35:49Z'
+  failure: 'Step-0 packed reward/train equivalence failed: max |ratio-1| was about 20-22%, above the 2% guard.'
+  notes: Fast correctness/throughput ladder rerun with warmup2 because a 4-step smoke cannot use warmup20. Step-0 packed reward/train equivalence guard remains enabled.
+- name: r33-dedup-throughput-lr2e5-warmup2-gb192-mb16-4step
+  config: configs/nano_ar/hpo/r33_dedup_throughput_smoke_lr2e5_warmup2_gb192_mb16_4steps.yaml
+  run_id: nano-ar-r33-dedup-throughput-lr2e5-warmup2-gb192-mb16-4step
+  status: failed
+  failed_at: '2026-06-12T16:38:19Z'
+  failure: 'Step-0 packed reward/train equivalence failed: max |ratio-1| was about 20-22%, same pattern as mb32.'
+  notes: Fast correctness/throughput ladder after mb32 failed packed equivalence. Step-0 packed reward/train equivalence guard remains enabled.
+- name: r33-dedup-throughput-lr2e5-warmup4-gb64-mb1-16step
+  config: configs/nano_ar/hpo/r33_dedup_throughput_smoke_lr2e5_warmup4_gb64_mb1_16steps.yaml
+  run_id: nano-ar-r33-dedup-throughput-lr2e5-warmup4-gb64-mb1-16step
+  status: complete
+  notes: 'Correctness-preserving fast smoke: avoid packed critic training with mb1, but reduce global batch to 64 so each step has 32 microsteps instead of 96.'
+  started_at: '2026-06-12T16:41:37Z'
+  run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-dedup-throughput/nano-ar-r33-dedup-throughput-lr2e5-warmup4-gb64-mb1-16step
+  expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-dedup-throughput/nano-ar-r33-dedup-throughput-lr2e5-warmup4-gb64-mb1-16step/checkpoints/iter_0000016
+  checkpoint_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-dedup-throughput/nano-ar-r33-dedup-throughput-lr2e5-warmup4-gb64-mb1-16step/checkpoints/iter_0000016
+  train_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-dedup-throughput/nano-ar-r33-dedup-throughput-lr2e5-warmup4-gb64-mb1-16step/train.log
+  eval_started_at: '2026-06-12T17:14:01Z'
+  eval_log: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-dedup-throughput/nano-ar-r33-dedup-throughput-lr2e5-warmup4-gb64-mb1-16step/eval_iter_0000016_v64_t64_winrates_report.log
+  eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-dedup-throughput/nano-ar-r33-dedup-throughput-lr2e5-warmup4-gb64-mb1-16step/eval_iter_0000016_v64_t64_winrates_report.json
+  completed_at: '2026-06-12T17:15:21Z'
+- name: r33-dedup-throughput-lr2e5-warmup20-gb192-mb16-4step
+  config: configs/nano_ar/hpo/r33_dedup_throughput_smoke_lr2e5_warmup20_gb192_mb16_4steps.yaml
+  run_id: nano-ar-r33-dedup-throughput-lr2e5-warmup20-gb192-mb16-4step
+  status: cancelled
+  cancelled_at: '2026-06-22T15:26:15Z'
+  cancellation_reason: Superseded by the padded AR critic path and component-full R33 hero; do not launch stale packed-throughput ladder items.
+  notes: Unblock only if mb32 fails the equivalence guard or is too slow.
+- name: r33-dedup-throughput-lr2e5-warmup20-gb192-mb8-4step
+  config: configs/nano_ar/hpo/r33_dedup_throughput_smoke_lr2e5_warmup20_gb192_mb8_4steps.yaml
+  run_id: nano-ar-r33-dedup-throughput-lr2e5-warmup20-gb192-mb8-4step
+  status: cancelled
+  cancelled_at: '2026-06-22T15:26:15Z'
+  cancellation_reason: Superseded by the padded AR critic path and component-full R33 hero; do not launch stale packed-throughput ladder items.
+  notes: Unblock only if larger microbatches fail the equivalence guard.
+- name: r33-dedup-throughput-lr2e5-warmup20-gb192-mb4-4step
+  config: configs/nano_ar/hpo/r33_dedup_throughput_smoke_lr2e5_warmup20_gb192_mb4_4steps.yaml
+  run_id: nano-ar-r33-dedup-throughput-lr2e5-warmup20-gb192-mb4-4step
+  status: cancelled
+  cancelled_at: '2026-06-22T15:26:15Z'
+  cancellation_reason: Superseded by the padded AR critic path and component-full R33 hero; do not launch stale packed-throughput ladder items.
+  notes: Unblock only if larger microbatches fail the equivalence guard.
+- name: r33-dedup-throughput-lr2e5-warmup20-gb192-mb2-4step
+  config: configs/nano_ar/hpo/r33_dedup_throughput_smoke_lr2e5_warmup20_gb192_mb2_4steps.yaml
+  run_id: nano-ar-r33-dedup-throughput-lr2e5-warmup20-gb192-mb2-4step
+  status: cancelled
+  cancelled_at: '2026-06-22T15:26:15Z'
+  cancellation_reason: Superseded by the padded AR critic path and component-full R33 hero; do not launch stale packed-throughput ladder items.
+  notes: Last packed candidate before returning to mb1.

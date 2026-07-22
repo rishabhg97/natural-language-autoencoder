@@ -1,0 +1,22 @@
+schema_version: nano_rl_dataset_pipeline.v1
+
+paths:
+  base_parquet: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/base_R33_r33_deterministic_full275396.parquet
+  actor_sidecar_source: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/checkpoints/iter_0001291
+  split_manifest: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/split_manifest.json
+  content_family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_exact_prefix_refined_base_manifest.json
+  content_family_coverage: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_clean_sft_family_coverage.json
+  output: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/r33_family_clean_train.parquet
+  build_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/r33_family_clean_train_build_report.json
+  verify_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/r33_family_clean_train_verify_report.json
+  pipeline_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/r33_family_clean_train_pipeline_report.json
+
+expectations:
+  rows: 247865
+  d_model: 2688
+  activation_layer: 33
+
+runtime:
+  batch_size: 4096
+  reuse_verified: true
+  overwrite: false

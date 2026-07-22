@@ -1,0 +1,22 @@
+schema_version: nano_roundtrip_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  environment:
+    WANDB_MODE: offline
+    TOKENIZERS_PARALLELISM: "false"
+    PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+    HF_HUB_OFFLINE: "1"
+    TRANSFORMERS_OFFLINE: "1"
+  launch_guard:
+    block_if_process_matches:
+      - '(^|\\s)\\S*python\\S*\\s+scripts/nano_ar_hpo_queue\\.py(\\s|$)'
+      - '(^|\\s)\\S*python\\S*\\s+scripts/nano_av_probe_queue\\.py(\\s|$)'
+      - '(^|\\s)\\S*python\\S*\\s+\\S*train\\.py\\s+.*--train-backend'
+      - '(^|\\s)\\S*python\\S*\\s+scripts/eval_nano_[^\\s]+\\.py(\\s|$)'
+      - '(^|\\s)\\S*python\\S*\\s+scripts/[^\\s]*convert_fsdp[^\\s]*\\.py(\\s|$)'
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/studies/r33_online_joint_actor_hpo_dev_v2_single_gpu_score_trials.jsonl
+items:
+  - name: r33-clean-sft-online-joint-actor-hpo-dev-v2-score-single-gpu
+    config: configs/nano_roundtrip/publication/r33_clean_sft_online_joint_actor_hpo_dev_v2_score_single_gpu.yaml
+    status: pending
+    notes: Reuse completed v2 generations and score the 36 GiB AR critic on one H100; placement only changes from the interrupted auto-sharded score attempt.

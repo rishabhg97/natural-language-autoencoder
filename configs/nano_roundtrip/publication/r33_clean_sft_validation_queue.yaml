@@ -1,0 +1,35 @@
+schema_version: nano_roundtrip_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-publication-current
+  environment:
+    WANDB_MODE: offline
+    TOKENIZERS_PARALLELISM: "false"
+    PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+  launch_guard:
+    block_if_process_matches:
+      - '(^|\s)\S*python\S*\s+scripts/nano_ar_hpo_queue\.py(\s|$)'
+      - '(^|\s)\S*python\S*\s+scripts/nano_av_probe_queue\.py(\s|$)'
+      - '(^|\s)\S*python\S*\s+\S*train\.py\s+.*--train-backend'
+      - '(^|\s)\S*python\S*\s+scripts/eval_nano_[^\s]+\.py(\s|$)'
+      - '(^|\s)\S*python\S*\s+scripts/[^\s]*convert_fsdp[^\s]*\.py(\s|$)'
+  av_checkpoint_prepare:
+    python: /workspace/interp/.venv/bin/python
+    dcp_checkpoint: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/checkpoints/iter_0001291
+    stage_dcp_checkpoint: /dev/shm/nano30b-nla-pilot/publication/r33-clean-sft/dcp_iter_0001291
+    cleanup_staged_dcp_after_conversion: true
+    origin_hf_dir: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    output_hf_dir: /dev/shm/nano30b-nla-pilot/publication/r33-clean-sft/av_iter_0001291
+    torch_dtype: bfloat16
+    fingerprint_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/av_checkpoint_fingerprints.json
+    convert_log: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/av_dcp_to_hf.log
+    cleanup_after_queue: true
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/studies/r33_clean_sft_roundtrip_trials.jsonl
+items:
+  - name: r33-clean-sft-validation-generate
+    config: configs/nano_roundtrip/publication/r33_clean_sft_validation_generate.yaml
+    status: pending
+    notes: Validation-only family-stratified generation with all AV controls.
+  - name: r33-clean-sft-validation-score
+    config: configs/nano_roundtrip/publication/r33_clean_sft_validation_score.yaml
+    status: pending
+    notes: Score cached clean AV generations through the selected clean R33 AR critic.

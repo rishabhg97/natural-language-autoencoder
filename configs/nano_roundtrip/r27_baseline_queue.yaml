@@ -1,0 +1,35 @@
+schema_version: nano_roundtrip_queue.v1
+defaults:
+  python: /workspace/interp/.venv/bin/python
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/r27_roundtrip_hpo.jsonl
+  optuna_json: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/r27_roundtrip_hpo_optuna.json
+  launch_guard:
+    block_if_process_matches:
+    - (^|\s)\S*python\S*\s+scripts/nano_ar_hpo_queue\.py(\s|$)
+    - (^|\s)\S*python\S*\s+scripts/nano_av_probe_queue\.py(\s|$)
+    - (^|\s)\S*python\S*\s+\S*train\.py\s+.*--train-backend
+    - (^|\s)\S*python\S*\s+scripts/eval_nano_[^\s]+\.py(\s|$)
+    - (^|\s)\S*python\S*\s+scripts/[^\s]*convert_fsdp[^\s]*\.py(\s|$)
+items:
+- name: r27-baseline-roundtrip-v64-t64-full-controls-prefix256
+  config: configs/nano_roundtrip/r27_baseline_64_full_controls_prefix256.yaml
+  status: complete
+  completed_at: '2026-06-11T08:55:00Z'
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/r27_roundtrip_v64_t64_full_controls_prefix256_report.json
+  generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/r27_roundtrip_v64_t64_full_controls_prefix256_generated.jsonl
+  gate_passed: true
+  notes: R27 AV-generated text -> R27 AR reconstruction baseline with full controls.
+    Verified gate passed with validation/test closed parse fraction 1.0; larger 256/256
+    baseline is now eligible when GPUs are free.
+- name: r27-baseline-roundtrip-v256-t256-full-controls-prefix256
+  config: configs/nano_roundtrip/r27_baseline_256_full_controls_prefix256.yaml
+  status: complete
+  notes: Larger R27 baseline gate existed on RunAI and was reconciled on 2026-06-21.
+    Gate passed with validation/test AV-real NMSE 0.000180003 / 0.000175571 and closed/usable
+    parse fraction 1.0 / 1.0. This is useful baseline evidence, but it is not a freshly
+    retrained post-fix row-identical R27 pair.
+  completed_at: '2026-06-12T15:26:00Z'
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/r27_roundtrip_v256_t256_full_controls_prefix256_report.json
+  generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/roundtrip/r27_baseline/r27_roundtrip_v256_t256_full_controls_prefix256_generated.jsonl
+  gate_passed: true

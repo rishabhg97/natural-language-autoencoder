@@ -1,0 +1,110 @@
+schema_version: nano_viz_offline_observatory.v1
+
+paths:
+  code_root: /workspace/nla-viz/nano30b-nla-pilot
+  evidence_root: /workspace/nla-viz/evidence
+  output_root: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1
+  corpus_dir: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/corpus
+  model_outputs_dir: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs
+  bundle_dir: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/bundle
+  qualitative_panel_json: /workspace/nla-viz/evidence/r33-clean-sft-publication-evidence-20260716/teacher_grounded_qualitative_panel.json
+  privacy_audit_json: /workspace/nla-viz/evidence/r33-clean-sft-publication-evidence-20260716/release_text_privacy_memorization_audit.json
+  validation_prediction_cache_npz: /workspace/nla-viz/evidence/r33-clean-sft-publication-evidence-20260716/validation_roundtrip_predictions.npz
+  independent_validation_prediction_cache_npz: /workspace/nla-viz/evidence/r33-independent-ar-publication-evidence-20260716/validation_roundtrip_predictions.npz
+  qualified_archive: /workspace/nla-viz/evidence/r33-clean-sft-av-ar-qualified-20260715/r33_clean_sft_av_ar_qualified_20260715.tgz
+  qualified_extract_dir: /workspace/nla-viz/evidence/qualified_extract
+  generated_validation_jsonl: /workspace/nla-viz/evidence/qualified_extract/publication/r33_clean_sft_roundtrip/validation_generated.jsonl
+  generated_validation_report_json: /workspace/nla-viz/evidence/qualified_extract/publication/r33_clean_sft_roundtrip/validation_generation_report.json
+  functional_validation_report_json: /workspace/nla-viz/evidence/qualified_extract/publication/r33_clean_sft_roundtrip/validation_functional_report.json
+  train_parquet: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/train_padded.parquet
+  validation_parquet: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/validation.parquet
+  source_base_selected_parquet: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/corpus/source_base_validation50.parquet
+
+models:
+  base_repo_id: nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16
+  base_revision: cbd3fa9f933d55ef16a84236559f4ee2a0526848
+  base_cache_dir: /workspace/models/hf-cache-nano-nla
+  base_download_workers: 8
+  base_hf_source: /workspace/models/hf-cache-nano-nla/models--nvidia--NVIDIA-Nemotron-3-Nano-30B-A3B-BF16/snapshots/cbd3fa9f933d55ef16a84236559f4ee2a0526848
+  base_hf: /dev/shm/nano-viz/nemotron-3-nano-30b-a3b-bf16
+  av_dcp: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/checkpoints/iter_0001291
+  av_hf_staging: /dev/shm/nano-viz/r33-clean-av-iter_0001291
+  primary_ar_source: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean/nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/checkpoints/iter_0001291
+  primary_ar: /dev/shm/nano-viz/r33-clean-primary-ar-iter_0001291
+  independent_ar_source: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean-independent/nano-ar-r33-publication-deterministic-family-clean-independent-seed314159-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/checkpoints/iter_0001291
+  independent_ar: /dev/shm/nano-viz/r33-clean-independent-ar-iter_0001291
+
+selection:
+  population: QUALIFIED
+  split: validation
+  deep_dive_rows: 50
+  behavior_rows: 24
+  canary_rows: 8
+  film_rows: 10
+  film_min_position: 130
+  seed: 20260716
+
+grid:
+  clause_chips: 6
+  clause_lanes: [edit, paraphrase_placebo, random_edit]
+  behavior_doses: [0.5, 1.0]
+  section_subsets: 16
+  word_occlusion_limit: 80
+  truncation_points: 10
+  paraphrase_types: 6
+  corruption_types: [shuffle, delete]
+  corruption_rates: [0.10, 0.25, 0.50]
+  alternate_tellings: 8
+  wake_positions: 16
+  continuation_tokens: 32
+
+evaluation:
+  torch_dtype: bfloat16
+  stage_copy_workers: 8
+  boundary: 33
+  injection_scale: 75
+  max_new_tokens: 256
+  av_max_target_tokens: 256
+  av_score_batch_size: 1
+  av_score_candidate_batches: [1, 2, 4, 8]
+  av_generation_batch_size: 1
+  av_device_map: auto
+  ar_device_map: auto
+  base_device_map: auto
+  ar_batch_size: 1
+  ar_batch_candidate_batches: [1, 2, 4, 8]
+  ar_max_length: 1152
+  lattice_shard_cells: 512
+  functional_batch_size: 1
+  functional_shard_cells: 32
+  functional_generation_backend: full_prefix
+  trace_generation_batch_size: 5
+  film_min_context_tokens: 32
+  film_positions_per_doc: 40
+  top_k: [10, 50]
+  generation_seed: 20260716
+  sampling_temperature: 0.7
+  sampling_top_p: 0.95
+  controls: [real, shuffled, zero, mean, none]
+  phases: [canary, token_logprobs, lattice_pilot, functional_pilot, trace_pilot, court_calibration, full]
+
+gates:
+  require_validation_only: true
+  require_exact_deep_dive_rows: 50
+  require_exact_behavior_rows: 24
+  require_exact_canary_rows: 8
+  require_parse_usable_fraction: 0.99
+  require_parse_closed_fraction: 0.95
+  alternate_parse_usable_fraction: 0.90
+  av_batch_equivalence_max_loss_delta: 0.01
+  av_batch_equivalence_max_logprob_delta: 0.05
+  ar_batch_equivalence_max_relative_l2: 0.001
+  canary_ar_max_directional_mse: 0.50
+  require_finite_vectors: true
+  identity_relative_l2: 0.01
+  identity_max_abs: 0.01
+  identity_one_minus_cos: 0.0001
+  require_control_group_completeness: true
+  require_family_clustered_intervals: true
+  require_no_test_lattice_rows: true
+  require_text_privacy_pass: true

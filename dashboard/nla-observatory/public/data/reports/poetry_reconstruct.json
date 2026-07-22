@@ -1,0 +1,19 @@
+{
+  "config_sha256": "87191f785c1f183edcc8d12317155ec0d1569848c7a9c637e2b4060fe44a41aa",
+  "critics": [
+    "primary"
+  ],
+  "eligible_cases": 5,
+  "mean_original_directional_mse": 0.47947410751806546,
+  "metadata": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/poetry_reconstruct/reconstructions.jsonl",
+    "sha256": "d12f47f16d46d2da67335b1c0f12ed124a45e5e1c573d5f94d56d8f62898138e"
+  },
+  "passed": true,
+  "phase": "poetry_reconstruct",
+  "schema_version": "nano_viz_poetry_planning_report.v1",
+  "vectors": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/poetry_reconstruct/reconstructions.npz",
+    "sha256": "4bd1880349130161dff8867e55eb407691185047aeb9355d1dc0d10c155582c2"
+  }
+}

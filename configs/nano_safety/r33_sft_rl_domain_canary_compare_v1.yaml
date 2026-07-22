@@ -1,0 +1,7 @@
+schema_version: nano_domain_canary_comparison.v1
+
+inputs:
+  sft: artifacts/runai_eval/r33_sft_domain_canary_v1_20260722
+  rl: artifacts/runai_eval/r33_u342_domain_canary_v1_20260722
+
+output_json: artifacts/runai_eval/r33_sft_rl_domain_semantic_review_v1_20260722/matched_canary_comparison.json

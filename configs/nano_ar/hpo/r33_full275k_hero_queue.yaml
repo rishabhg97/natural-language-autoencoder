@@ -1,0 +1,40 @@
+schema_version: nano_ar_hpo_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  validation_limit: 512
+  test_limit: 512
+  batch_size: 4
+  controls:
+  - teacher
+  - teacher_shuffled
+  - blank
+  - generic
+  - mean
+  - source_context
+  - source_raw
+  study_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/ar_hpo_queue/r33_full275k_hero_trials.jsonl
+items:
+- name: r33-full275k-lr5e5-cos-warmup25-gb192-mb96
+  config: configs/nano_ar/hpo/r33_full275k_lr5e5_cosine_warmup25_gb192_mb96.yaml
+  run_id: nano-ar-r33-full275k-lr5e5-cosine-warmup25-gb192-mb96
+  status: complete
+  notes: Selected AR hero candidate from final 100k HPO; lr5e-5 warmup25 gb192/mb96 reached validation/test teacher NMSE 0.300924/0.292944.
+  completed_at: '2026-06-10T01:42:35Z'
+  run_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-hero/nano-ar-r33-full275k-lr5e5-cosine-warmup25-gb192-mb96
+  expected_checkpoint: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-hero/nano-ar-r33-full275k-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001291
+  checkpoint_removed_at_utc: '2026-06-10T23:50:13Z'
+  checkpoint_removed_reason: Trained before packed-boundary contamination remediation; compact evidence kept, checkpoint tree pruned.
+  eval_report: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-hero/nano-ar-r33-full275k-lr5e5-cosine-warmup25-gb192-mb96/eval_iter_0001291_v512_t512_winrates_report.json
+  pre_fix_scouting_only: true
+  invalidated_by_audit: docs/reviews/2026-06-10-nano-nla-super-audit.md
+- name: r33-full275k-lr2e5-cos-gb192-mb8
+  config: configs/nano_ar/hpo/r33_full275k_lr2e5_cosine_gb192_mb8.yaml
+  run_id: nano-ar-r33-full275k-lr2e5-cosine-gb192-mb8
+  status: failed
+  notes: Superseded by lr5e-5 warmup25 100k HPO result; retain only as historical fallback.
+- name: r33-full275k-lr1e5-cos-gb192-mb8
+  config: configs/nano_ar/hpo/r33_full275k_lr1e5_cosine_gb192_mb8.yaml
+  run_id: nano-ar-r33-full275k-lr1e5-cosine-gb192-mb8
+  status: failed
+  notes: Superseded by lr5e-5 warmup25 100k HPO result; retain only as conservative historical fallback.

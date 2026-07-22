@@ -1,0 +1,30 @@
+schema_version: nano_openai_compatible_server.v1
+server:
+  python: /workspace/interp/.venvs/sglang-cu130/bin/python
+  module: sglang.launch_server
+  model_path: /workspace/models/hub/models--Qwen--Qwen2.5-VL-32B-Instruct/snapshots/7cfb30d71a1f4f49a57592323337a4a4727301da
+  served_model_name: local-independent-paraphraser
+  host: 127.0.0.1
+  port: 30080
+  gpu_device: "6"
+  tp_size: 1
+  mem_fraction_static: 0.88
+  context_length: 4096
+  trust_remote_code: true
+runtime:
+  pid_file: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms/paraphraser_server.pid
+  log_file: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms/paraphraser_server.log
+  startup_timeout_seconds: 1200
+  model_stage:
+    output_dir: /dev/shm/nano30b-nla-pilot/research/r33_u342_abc_v1/paraphraser_qwen2_5_vl_32b
+    manifest_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/research_abc_v1/transforms/paraphraser_model_stage.json
+    workers: 8
+    task_size_bytes: 536870912
+    follow_symlinks: true
+  environment:
+    HF_HUB_OFFLINE: "1"
+    TRANSFORMERS_OFFLINE: "1"
+    TOKENIZERS_PARALLELISM: "false"
+    # This campaign sends text only, so the VL Conv3d path covered by the
+    # PyTorch 2.9.1/cuDNN 9.10 performance guard is never executed.
+    SGLANG_DISABLE_CUDNN_CHECK: "1"

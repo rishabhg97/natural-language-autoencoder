@@ -1,0 +1,110 @@
+diff --git a/miles/backends/fsdp_utils/update_weight_utils.py b/miles/backends/fsdp_utils/update_weight_utils.py
+--- a/miles/backends/fsdp_utils/update_weight_utils.py
++++ b/miles/backends/fsdp_utils/update_weight_utils.py
+@@ -1,6 +1,8 @@
+ import abc
+ import logging
++import os
+ import socket
++import time
+ from argparse import Namespace
+ from collections.abc import Sequence
+ 
+@@ -88,5 +90,10 @@ class UpdateWeight(abc.ABC):
+     def wait_and_update_bucket_weights(self, bucket):
+         bucket = [(name, param.wait()) if hasattr(param, "wait") else (name, param) for name, param in bucket]
+         self.update_bucket_weights(bucket, weight_version=self.weight_version)
++        if dist.is_initialized() and dist.get_world_size() > 1:
++            log_every = int(os.environ.get("NLA_WEIGHT_UPDATE_LOG_EVERY", "0") or 0)
++            if log_every:
++                logger.info("[NLA weight_update] actor_rank_bucket_barrier version=%s", self.weight_version)
++            dist.barrier()
+ 
+     @abc.abstractmethod
+@@ -236,36 +238,84 @@ class UpdateWeightFromDistributed(UpdateWeight):
+         """Send names/dtypes/shapes metadata to engines, then broadcast tensors.
+ 
+         Ensures tensors are contiguous; when `world_size == 1`, converts DTensors
+         to full tensors prior to `dist.broadcast`.
+         """
+         if not self._is_src_rank or not named_tensors:
+             return
+ 
++        log_every = int(os.environ.get("NLA_WEIGHT_UPDATE_LOG_EVERY", "0") or 0)
++        bucket_start = time.monotonic()
++        if log_every:
++            bucket_bytes = sum(param.numel() * param.element_size() for _, param in named_tensors)
++            logger.info(
++                "[NLA weight_update] distributed_bucket_start version=%s tensors=%d bytes=%.3fGB first=%s last=%s",
++                weight_version,
++                len(named_tensors),
++                bucket_bytes / 1_000_000_000,
++                named_tensors[0][0],
++                named_tensors[-1][0],
++            )
++
+         refs = [
+             engine.update_weights_from_distributed.remote(
+                 names=[name for name, _ in named_tensors],
+                 dtypes=[param.dtype for _, param in named_tensors],
+                 shapes=[param.shape for _, param in named_tensors],
+                 group_name=self._group_name,
+                 weight_version=str(weight_version),
+             )
+             for engine in self.rollout_engines
+         ]
++        if log_every:
++            logger.info(
++                "[NLA weight_update] distributed_bucket_metadata_sent version=%s tensors=%d elapsed=%.1fs",
++                weight_version,
++                len(named_tensors),
++                time.monotonic() - bucket_start,
++            )
+ 
+         handles = []
++        total_tensors = len(named_tensors)
+         # Broadcast parameters one by one with memory management
+-        for _name, param in named_tensors:
++        for index, (_name, param) in enumerate(named_tensors, start=1):
+             torch.cuda.empty_cache()
+             # Ensure tensor is contiguous and on the right device
+             param_data = param.data.contiguous()
+ 
+             # avoid `DTensor._op_dispatcher.dispatch` has `assert compute_mesh is not None` error
+             if dist.get_world_size() == 1 and isinstance(param_data, DTensor):
+                 param_data = param_data.full_tensor()
+ 
+             # Synchronous broadcast to avoid memory buildup
+             handles.append(dist.broadcast(param_data, 0, group=self._model_update_groups, async_op=True))
++            if log_every and (index == 1 or index % log_every == 0 or index == total_tensors):
++                tensor_bytes = param_data.numel() * param_data.element_size()
++                logger.info(
++                    "[NLA weight_update] broadcast_enqueued version=%s tensor=%d/%d name=%s shape=%s bytes=%.3fMB elapsed=%.1fs",
++                    weight_version,
++                    index,
++                    total_tensors,
++                    _name,
++                    tuple(param_data.shape),
++                    tensor_bytes / 1_000_000,
++                    time.monotonic() - bucket_start,
++                )
+ 
+-        for handle in handles:
++        for index, handle in enumerate(handles, start=1):
+             handle.wait()
++            if log_every and (index == 1 or index % log_every == 0 or index == total_tensors):
++                logger.info(
++                    "[NLA weight_update] broadcast_waited version=%s tensor=%d/%d elapsed=%.1fs",
++                    weight_version,
++                    index,
++                    total_tensors,
++                    time.monotonic() - bucket_start,
++                )
+         ray.get(refs)
++        if log_every:
++            logger.info(
++                "[NLA weight_update] distributed_bucket_done version=%s tensors=%d elapsed=%.1fs",
++                weight_version,
++                len(named_tensors),
++                time.monotonic() - bucket_start,
++            )

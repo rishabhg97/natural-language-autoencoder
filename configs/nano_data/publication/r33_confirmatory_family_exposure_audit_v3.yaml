@@ -1,0 +1,19 @@
+schema_version: nano_publication_family_split.v1
+base_manifest: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_exact_prefix_refined_base_manifest.json
+prior_evaluation_globs:
+  - /workspace/interp/outputs/nano30b-nla-pilot/**/splits/validation.parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/**/splits/test.parquet
+split_assignment:
+  seed: 20260715
+  weights:
+    train: 0.90
+    validation: 0.05
+    test: 0.05
+requirements:
+  min_test_rows: 512
+  min_test_families: 100
+  max_unmapped_prior_documents: 0
+outputs:
+  manifest_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v3_audit/r33_confirmatory_family_manifest.json
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v3_audit/r33_confirmatory_family_split_report.json
+  exposure_inventory_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v3_audit/r33_prior_evaluation_exposure_inventory.json

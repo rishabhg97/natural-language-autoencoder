@@ -1,0 +1,153 @@
+schema_version: nano_viz_poetry_planning.v1
+
+paths:
+  output_root: /workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1
+  validation_parquet: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/validation.parquet
+  train_parquet: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/train_padded.parquet
+
+models:
+  base_hf: /dev/shm/nano-viz/nemotron-3-nano-30b-a3b-bf16
+  av_hf_staging: /dev/shm/nano-viz/r33-clean-av-iter_0001291
+  primary_ar: /dev/shm/nano-viz/r33-clean-primary-ar-iter_0001291
+  independent_ar: /dev/shm/nano-viz/r33-clean-independent-ar-iter_0001291
+
+evaluation:
+  torch_dtype: bfloat16
+  boundary: 33
+  injection_scale: 75
+  base_device_map: auto
+  av_device_map: auto
+  ar_device_map: auto
+  positions_before_anchor: 12
+  av_samples_per_position: 4
+  shuffled_samples_per_position: 2
+  av_max_new_tokens: 192
+  sampling_temperature: 0.7
+  sampling_top_p: 0.95
+  continuation_tokens: 32
+  generation_backend: full_prefix
+  ar_batch_size: 4
+  ar_max_length: 1152
+  critics: [primary]
+  steering_doses: [0.0, 0.5, 1.0]
+  seed: 20260717
+
+gates:
+  minimum_cases: 8
+  minimum_usable_fraction: 0.80
+  planning_onset_rate: 0.25
+  minimum_editable_cases: 1
+
+cases:
+  - case_id: carrot-rabbit
+    framing: "A rhyming couplet:"
+    first_line: "He saw a carrot and had to grab it,"
+    second_line: "His hunger was like a starving rabbit."
+    cue: "grab it"
+    target_word: rabbit
+    target_terms: [rabbit, habit]
+    alternate_terms: [mouse, house]
+    edit_map:
+      rabbit: mouse
+      rabbits: mice
+      habit: house
+      carrot: cheese
+      carrots: cheese
+
+  - case_id: lantern-light
+    framing: "Complete this rhyming couplet:"
+    first_line: "She raised her lantern through the night,"
+    second_line: "And found the trail by silver light."
+    cue: night
+    target_word: light
+    target_terms: [light, bright, sight]
+    alternate_terms: [day, way, play]
+    edit_map:
+      light: day
+      bright: play
+      sight: way
+      night: day
+
+  - case_id: window-train
+    framing: "Complete this rhyming couplet:"
+    first_line: "He watched the drops collect like rain,"
+    second_line: "Then heard the whistle of a train."
+    cue: rain
+    target_word: train
+    target_terms: [train, plain, lane]
+    alternate_terms: [snow, glow, slow]
+    edit_map:
+      train: snow
+      plain: glow
+      lane: slow
+      rain: snow
+
+  - case_id: sailor-more
+    framing: "Complete this rhyming couplet:"
+    first_line: "The sailor pulled his boat to shore,"
+    second_line: "Then turned to face the waves once more."
+    cue: shore
+    target_word: more
+    target_terms: [more, door, floor]
+    alternate_terms: [hill, still, will]
+    edit_map:
+      more: still
+      door: hill
+      floor: will
+      shore: hill
+
+  - case_id: river-true
+    framing: "Complete this rhyming couplet:"
+    first_line: "The river wore a coat of blue,"
+    second_line: "And mirrored every star so true."
+    cue: blue
+    target_word: "true"
+    target_terms: ["true", through, new]
+    alternate_terms: [red, said, bed]
+    edit_map:
+      "true": red
+      through: said
+      new: bed
+      blue: red
+
+  - case_id: bell-sound
+    framing: "Complete this rhyming couplet:"
+    first_line: "The old brass bell fell to the ground,"
+    second_line: "Yet through the hall there rolled a sound."
+    cue: ground
+    target_word: sound
+    target_terms: [sound, found, round]
+    alternate_terms: [bell, fell, tell]
+    edit_map:
+      sound: bell
+      found: fell
+      round: tell
+      ground: bell
+
+  - case_id: sparrow-high
+    framing: "Complete this rhyming couplet:"
+    first_line: "A small brown sparrow crossed the sky,"
+    second_line: "Then caught the wind and climbed up high."
+    cue: sky
+    target_word: high
+    target_terms: [high, fly, why]
+    alternate_terms: [low, slow, below]
+    edit_map:
+      high: low
+      fly: slow
+      why: below
+      sky: low
+
+  - case_id: candle-name
+    framing: "Complete this rhyming couplet:"
+    first_line: "She held the letter near the flame,"
+    second_line: "And softly whispered out his name."
+    cue: flame
+    target_word: name
+    target_terms: [name, same, game]
+    alternate_terms: [cold, told, old]
+    edit_map:
+      name: cold
+      same: told
+      game: old
+      flame: cold

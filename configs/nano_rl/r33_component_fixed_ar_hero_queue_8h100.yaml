@@ -1,0 +1,234 @@
+schema_version: nano_rl_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venv/bin/python
+  post_eval_scoring_python: /workspace/interp/.venv/bin/python
+  miles_root: /workspace/interp/code/miles-051cd15
+  rl_script: external/natural_language_autoencoders/configs/rl.sh
+  workspace_gpus: 8
+  launch:
+    requires_approval: true
+    approved: false
+  source:
+    roots:
+      - scripts
+      - external/natural_language_autoencoders/nla
+      - external/natural_language_autoencoders/configs
+    require_expected_fingerprint: true
+    expected_code_sha256: 150d2832105c007b1d977d45560c26c09b4aff03770f265ba577257756aa67a7
+    frozen_git_commit: 30e5e26e1e831e54b83f5ac7bcf443bf89eda546
+  required_gate_reports:
+    - path: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-cross-critic-gate.json
+      field: passed
+      expected: true
+  env:
+    WANDB_MODE: offline
+    PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+    NLA_EMBED_DUMP_DIR: /dev/shm/nla
+    NLA_BYPASS_ROUTER: "1"
+    NLA_BF16_B64_EMBEDS: "1"
+    NLA_FREEZE_CRITIC_TRAIN: "1"
+    NLA_CRITIC_FWD_DISABLE_MAMBA_FAST_PATH: "1"
+    NLA_ROUTER_METRICS: "1"
+    NLA_PREWARM_HF_MODULES: "1"
+    HF_MODULES_CACHE: /dev/shm/nano30b-nla-pilot/hf_modules_cache/r33_fixed_ar_hero
+  wandb:
+    mode: offline
+    project: nano30b-nla-pilot
+    group: nano-rl-r33-fixed-ar-hero
+  resources:
+    actor_nodes: 1
+    actor_gpus: 6
+    critic_nodes: 1
+    critic_gpus: 1
+    rollout_gpus: 1
+    min_actor_gpus: 6
+  training:
+    train_backend: fsdp
+    actor_lr: "2e-5"
+    critic_lr: "1e-5"
+    actor_micro_batch: 32
+    require_exact_actor_batch: true
+    attn_implementation: eager
+    gradient_checkpointing: true
+    kl_loss_type: k3
+    kl_loss_coef: 0.001
+    loss_mask_type: qwen
+    lr_decay_style: constant
+    finetune: true
+    no_load_optim: true
+    fsdp_reduce_dtype: bfloat16
+    fsdp_disable_backward_prefetch: true
+    advantage_estimator: grpo
+    normalize_advantages: false
+    rewards_normalization: true
+    grpo_std_normalization: true
+    drift_guard:
+      enabled: true
+      max_logprob_abs_diff: 0.75
+      consecutive_steps: 2
+  rollout:
+    rollout_batch_size: 48
+    n_samples_per_prompt: 8
+    global_batch_size: 384
+    require_global_batch_match: true
+    max_response_len: 256
+    max_context_len: 512
+  sglang:
+    mode: external
+    python: /workspace/interp/.venvs/sglang-cu130/bin/python
+    managed: true
+    terminate_on_exit: true
+    tensor_parallel_size: 1
+    base_gpu_id: 6
+    rollout_num_gpus_per_engine: 1
+    engine_addrs: [127.0.0.1:31000]
+    timeout_seconds: 1200
+    poll_seconds: 2
+    model_staging:
+      enabled: true
+      source_model_path: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+      target_path: /dev/shm/nano30b-nla-pilot/sglang_models/r33_component_full_actor_sft_iter_0001291
+      reuse_existing: true
+      clean: true
+    start_commands:
+      - - /workspace/interp/.venvs/sglang-cu130/bin/python
+        - -m
+        - sglang.launch_server
+        - --model-path
+        - /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+        - --host
+        - 127.0.0.1
+        - --port
+        - "31000"
+        - --tp-size
+        - "1"
+        - --base-gpu-id
+        - "6"
+        - --trust-remote-code
+        - --skip-server-warmup
+        - --disable-radix-cache
+        - --disable-custom-all-reduce
+        - --attention-backend
+        - fa3
+        - --schedule-conservativeness
+        - "1.5"
+        - --enable-draft-weights-cpu-backup
+    health_urls: [http://127.0.0.1:31000/health_generate]
+  post_eval:
+    roundtrip:
+      enabled: true
+      origin_hf_dir: /workspace/interp/models/nano-30b-a3b-bf16-hf
+      ar_checkpoint_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289
+      train_parquet: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/train_padded.parquet
+      validation_parquet: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/validation.parquet
+      test_parquet: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/splits/test.parquet
+      baseline_report_json: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_hardened_report.json
+      validation_limit: 512
+      test_limit: 512
+      max_new_tokens: 256
+      generation_backend: legacy_batch
+      generation_workers: 8
+      generation_worker_devices: ["0", "1", "2", "3", "4", "5", "6", "7"]
+      generation_controls: [real, shuffled, zero, mean, none]
+      generated_text_fallback: raw
+      min_control_win_fraction: 0.9
+      min_closed_fraction: 0.95
+      min_usable_fraction: 0.99
+      cleanup_hf: true
+      cleanup_actor_checkpoint: false
+  extra_args:
+    - --no-save-optim
+    - --sglang-attention-backend
+    - fa3
+
+x-common-item: &common_item
+  rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/r33_rl_train_only/rl_r33_train_only.parquet
+  instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+  actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+  actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+  actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+  critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+  validity_gate_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-stage2-gate.json
+
+items:
+  - <<: *common_item
+    name: r33-fixed-ar-hero-canary-6a1c1r-update1
+    status: blocked
+    validity_gate_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-stage2-gate.json
+    resources:
+      actor_gpus: 6
+      critic_gpus: 1
+      rollout_gpus: 1
+      min_actor_gpus: 6
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_hero/r33_fixed_ar_canary_6a1c1r_update1
+    rollout:
+      rollout_batch_size: 48
+      n_samples_per_prompt: 8
+      global_batch_size: 384
+      num_rollout: 1
+    training:
+      actor_lr: "2e-5"
+      actor_micro_batch: 32
+      require_exact_actor_batch: true
+      kl_loss_type: k3
+      save_interval: 1
+    post_eval:
+      roundtrip:
+        hf_output_dir: /dev/shm/nano30b-nla-pilot/r33-hero/canary-6a1c1r
+    wandb:
+      run_id: r33-fixed-ar-hero-canary-6a1c1r-update1
+  - <<: *common_item
+    name: r33-fixed-ar-hero-canary-5a1c2r-update1
+    status: blocked
+    validity_gate_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-stage2-gate.json
+    resources:
+      actor_gpus: 5
+      critic_gpus: 1
+      rollout_gpus: 2
+      min_actor_gpus: 5
+    sglang:
+      tensor_parallel_size: 2
+      base_gpu_id: 5
+      rollout_num_gpus_per_engine: 2
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_hero/r33_fixed_ar_canary_5a1c2r_update1
+    rollout:
+      rollout_batch_size: 40
+      n_samples_per_prompt: 8
+      global_batch_size: 320
+      num_rollout: 1
+    training:
+      actor_lr: "2e-5"
+      actor_micro_batch: 32
+      require_exact_actor_batch: true
+      kl_loss_type: k3
+      save_interval: 1
+    post_eval:
+      roundtrip:
+        hf_output_dir: /dev/shm/nano30b-nla-pilot/r33-hero/canary-5a1c2r
+    wandb:
+      run_id: r33-fixed-ar-hero-canary-5a1c2r-update1
+  - <<: *common_item
+    name: r33-fixed-ar-hero-6a1c1r-update256
+    status: blocked
+    validity_gate_report: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-corrected-stage2-gate.json
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_hero/r33_fixed_ar_hero_6a1c1r_update256
+    rollout:
+      rollout_batch_size: 48
+      n_samples_per_prompt: 8
+      global_batch_size: 384
+      num_rollout: 256
+    training:
+      actor_lr: "2e-5"
+      actor_micro_batch: 32
+      require_exact_actor_batch: true
+      kl_loss_type: k3
+      save_interval: 64
+    checkpoint_retention:
+      keep_iterations: [64, 128, 256]
+    post_eval:
+      roundtrip:
+        hf_output_dir: /dev/shm/nano30b-nla-pilot/r33-hero/update256
+    wandb:
+      run_id: r33-fixed-ar-hero-6a1c1r-update256

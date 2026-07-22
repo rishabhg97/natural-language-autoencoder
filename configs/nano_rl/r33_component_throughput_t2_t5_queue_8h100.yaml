@@ -1,0 +1,183 @@
+schema_version: nano_rl_queue.v1
+defaults:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  python: /workspace/interp/.venvs/sglang-cu130/bin/python
+  miles_root: /workspace/interp/code/miles-051cd15
+  rl_script: external/natural_language_autoencoders/configs/rl.sh
+  workspace_gpus: 8
+  env:
+    WANDB_MODE: offline
+    PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+    NLA_EMBED_DUMP_DIR: /dev/shm/nla
+    NLA_BYPASS_ROUTER: "1"
+    NLA_BF16_B64_EMBEDS: "1"
+    NLA_WEIGHT_UPDATE_LOG_EVERY: "100"
+    NLA_FREEZE_CRITIC_TRAIN: "1"
+    NLA_ASSERT_PACKED_EQUIV: "0"
+    NLA_CRITIC_FWD_DISABLE_MAMBA_FAST_PATH: "1"
+    NLA_ROLLOUT_SUMMARY_STDOUT: "1"
+    NLA_FAILED_EXTRACTION_REWARD: "-2.0"
+    NLA_ROUTER_METRICS: "1"
+    NLA_PREWARM_HF_MODULES: "1"
+    HF_MODULES_CACHE: /dev/shm/nano30b-nla-pilot/hf_modules_cache/r33_component_throughput_t2_t5
+  wandb:
+    project: nano30b-nla-pilot
+    group: nano-rl-throughput-r33
+  resources:
+    actor_nodes: 1
+    actor_gpus: 5
+    critic_nodes: 1
+    critic_gpus: 2
+    rollout_gpus: 1
+    min_actor_gpus: 5
+  training:
+    train_backend: fsdp
+    actor_lr: "5e-6"
+    critic_lr: 1e-5
+    actor_micro_batch: 32
+    attn_implementation: eager
+    gradient_checkpointing: true
+    kl_loss_coef: 0.0003
+    save_interval: null
+    loss_mask_type: qwen
+    lr_decay_style: constant
+    finetune: true
+    no_load_optim: true
+    fsdp_reduce_dtype: bfloat16
+    fsdp_disable_backward_prefetch: true
+    advantage_estimator: grpo
+    normalize_advantages: false
+    rewards_normalization: true
+    grpo_std_normalization: true
+  rollout:
+    rollout_batch_size: 30
+    global_batch_size: 480
+    n_samples_per_prompt: 16
+    require_global_batch_match: true
+    max_response_len: 256
+    max_context_len: 512
+    num_rollout: 1
+  sglang:
+    mode: external
+    python: /workspace/interp/.venvs/sglang-cu130/bin/python
+    managed: true
+    terminate_on_exit: true
+    tensor_parallel_size: 1
+    base_gpu_id: 5
+    rollout_num_gpus_per_engine: 1
+    env:
+      SGLANG_MIN_NEW_TOKEN_RATIO_FACTOR: "1"
+    engine_addrs:
+      - 127.0.0.1:31000
+    timeout_seconds: 1200
+    poll_seconds: 2
+    model_staging:
+      enabled: true
+      source_model_path: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+      target_path: /dev/shm/nano30b-nla-pilot/sglang_models/r33_component_full_actor_sft_iter_0001291
+      reuse_existing: true
+      clean: true
+    start_commands:
+      - - /workspace/interp/.venvs/sglang-cu130/bin/python
+        - -m
+        - sglang.launch_server
+        - --model-path
+        - /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+        - --host
+        - 127.0.0.1
+        - --port
+        - "31000"
+        - --tp-size
+        - "1"
+        - --base-gpu-id
+        - "5"
+        - --trust-remote-code
+        - --skip-server-warmup
+        - --disable-radix-cache
+        - --disable-custom-all-reduce
+        - --attention-backend
+        - fa3
+        - --schedule-conservativeness
+        - "1.5"
+        - --enable-draft-weights-cpu-backup
+    health_urls:
+      - http://127.0.0.1:31000/health_generate
+  post_eval:
+    roundtrip:
+      enabled: false
+  extra_args:
+    - --no-save-optim
+    - --sglang-attention-backend
+    - fa3
+items:
+  - name: r33-component-rl-8h100-throughput-t2-mb32-rb30-n16-gb480-rollout1
+    status: pending
+    notes: "T2: throughput probe for actor_micro_batch=32 at current actor5/critic2/rollout1 topology. Post-eval disabled; no save interval."
+    wandb:
+      run_id: r33-component-rl-8h100-throughput-t2-mb32-rb30-n16-gb480-rollout1-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_throughput_t2_mb32_rb30_n16_gb480_rollout1
+
+  - name: r33-component-rl-8h100-throughput-t3-mb32-refgpu-rb30-n16-gb480-rollout1
+    status: pending
+    notes: "T3: T2 plus --nla-ref-on-gpu to remove actor/ref CPUOffload swap. Check KL sanity and memory."
+    extra_args:
+      - --nla-ref-on-gpu
+    wandb:
+      run_id: r33-component-rl-8h100-throughput-t3-mb32-refgpu-rb30-n16-gb480-rollout1-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_throughput_t3_mb32_refgpu_rb30_n16_gb480_rollout1
+
+  - name: r33-component-rl-8h100-throughput-t4-actor6-critic1-mb32-rb30-n16-gb480-rollout1
+    status: pending
+    notes: "T4: move one GPU from critic to actor, testing actor6/critic1/rollout1 with mb32. Confirms whether critic fits on one H100."
+    resources:
+      actor_gpus: 6
+      critic_gpus: 1
+      rollout_gpus: 1
+      min_actor_gpus: 6
+    sglang:
+      tensor_parallel_size: 1
+      base_gpu_id: 6
+      rollout_num_gpus_per_engine: 1
+    wandb:
+      run_id: r33-component-rl-8h100-throughput-t4-actor6-critic1-mb32-rb30-n16-gb480-rollout1-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_throughput_t4_actor6_critic1_mb32_rb30_n16_gb480_rollout1
+
+  - name: r33-component-rl-8h100-throughput-t5-mb32-rb64-n8-gb512-rollout1
+    status: pending
+    notes: "T5: switch rollout shape to rb64/n8/gb512 with mb32, closer to the Qwen-like prompt/sample shape."
+    rollout:
+      rollout_batch_size: 64
+      global_batch_size: 512
+      n_samples_per_prompt: 8
+      num_rollout: 1
+    wandb:
+      run_id: r33-component-rl-8h100-throughput-t5-mb32-rb64-n8-gb512-rollout1-20260626
+    rl_parquet: /workspace/interp/outputs/nano30b-nla-pilot/posthero/20260621T163000Z/rl_smoke/rl_R33_fullscan275396_smoke512.parquet
+    instruct_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+    actor_sft_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    actor_load_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints
+    actor_ref_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/rl_smoke/r33_component_full_sft_init_512row_3h200/actor_sft_hf_iter_0001291
+    actor_sidecar_source: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-av-sft-r33-component-full/nano-av-r33-component-full-hero-lr1e4-cosine-warmup25-gb192-mb2-seq1152-dyn512/checkpoints/iter_0001291
+    critic_sl_ckpt: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289/hf
+    run_dir: /workspace/interp/outputs/nano30b-nla-pilot/rl_qwen_scale/r33_component_rl_8h100_throughput_t5_mb32_rb64_n8_gb512_rollout1

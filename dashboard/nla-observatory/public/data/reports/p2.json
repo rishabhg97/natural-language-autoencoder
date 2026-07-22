@@ -1,0 +1,164 @@
+{
+  "alternate_telling_cells": 400,
+  "config_sha256": "c7492fecc776f3991ac605a83c1f74c57eeabd5ed9f8cd4838676b164161b259",
+  "passed": true,
+  "phase": "p2_lattice_full",
+  "resolved_cells": 7434,
+  "rows": 50,
+  "schema_version": "nano_viz_model_batches.v1",
+  "shards": [
+    {
+      "cell_ids_sha256": "0178ffbce548cf3d1f1587c65c421349fc5753da12299c767987e96922b73335",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0000.parquet",
+      "rows": 512,
+      "sha256": "56c88ba150050a3b767a52dbc07e8c628657566e3bb0aa67ec141b30b5ed23a3",
+      "shard_index": 0
+    },
+    {
+      "cell_ids_sha256": "06f1cb9632674ee4695514227c86a030df3465ce71f8cf0d1c9dab0e181b337f",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0001.parquet",
+      "rows": 512,
+      "sha256": "6507d71dc0ec0c612a55f780da5a69371c74fcbd79c46241470966d314d3dbc4",
+      "shard_index": 1
+    },
+    {
+      "cell_ids_sha256": "fe41d07642527da6a08daba3509009e133d198cbbe47477fdcc0779ff765d23f",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0002.parquet",
+      "rows": 512,
+      "sha256": "9da0e3c8945bc1e92c10192eeaa9612be45f2aa54311990730bb4e6eaaa65e6f",
+      "shard_index": 2
+    },
+    {
+      "cell_ids_sha256": "d07d53ecba97288f7364ddff886344c813f98295d0448f14ee1e78175d6f90f1",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0003.parquet",
+      "rows": 512,
+      "sha256": "92ed1634ad50026e67074ea08f4395c84b0ba541277541fab25e40a29241967d",
+      "shard_index": 3
+    },
+    {
+      "cell_ids_sha256": "78b5f1110b68a790efbd49eedea6ed430f93936e42f4e1f03a1e7d82763f1cdd",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0004.parquet",
+      "rows": 512,
+      "sha256": "796ec664cfb6c10153cd1275384ccd9e76821b4aa8e65cbee77385baa28347a5",
+      "shard_index": 4
+    },
+    {
+      "cell_ids_sha256": "f36d2e1ea7972843091a6b621152b7a90fd1041235d7fd9c19a2cc16b3f45eb7",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0005.parquet",
+      "rows": 512,
+      "sha256": "ddea11f788e8def497dec0d646f5a165c7159bd977dee4c8906d3e1e4412e1df",
+      "shard_index": 5
+    },
+    {
+      "cell_ids_sha256": "8c4ce7927e0befcecc194c0ba5018dc28591850273bfde0915bc50f8b9fd726a",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0006.parquet",
+      "rows": 512,
+      "sha256": "22ba3b99431b74b10af396444dbd191153315e1a21a84eb7a5b0d8009dae4d60",
+      "shard_index": 6
+    },
+    {
+      "cell_ids_sha256": "b03c36e74725ef33f6c64a525ba8a05de5b5d5c2b11db9808a3ff2c03bdfabd3",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0007.parquet",
+      "rows": 512,
+      "sha256": "6c8ec0d61b0cd5d39ce041a348fa9e57578c3b35c5256fbcf6abdb59ccaffb72",
+      "shard_index": 7
+    },
+    {
+      "cell_ids_sha256": "0d1addec8ff102313a86d5ebcb49f5c4bc8eaa006ad0ca85216dd96e024dda38",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0008.parquet",
+      "rows": 512,
+      "sha256": "d76f6bf512d512cbb2e32b162bd7153de7c601b02fab698c27c8f683698d9ace",
+      "shard_index": 8
+    },
+    {
+      "cell_ids_sha256": "49e05df00b346dbdb6d038bd0d37bc267731cc012fcfb0c28e5282e570a3a4a4",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0009.parquet",
+      "rows": 512,
+      "sha256": "27e6c93bfe09b895f223e5fb17f06fba43bcb98030e835207d42d088e81614d9",
+      "shard_index": 9
+    },
+    {
+      "cell_ids_sha256": "fc2909069e7e1e0db50d7d6b9103bdb7ca82d4339050a42af26baaf13bf9110d",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0010.parquet",
+      "rows": 512,
+      "sha256": "cdf1f242b7e33e9164bbc55bce75ae58c7fe03b73fccfc5c9ffdd176c415d37e",
+      "shard_index": 10
+    },
+    {
+      "cell_ids_sha256": "04eae91e388dbf37115d43be8005711cbacb4c8eae0644fdbd72cc885d55402d",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0011.parquet",
+      "rows": 512,
+      "sha256": "68dd40a0fd919d1f8aefa769cd5d17627b94797448d3df18f09877e2d62457a8",
+      "shard_index": 11
+    },
+    {
+      "cell_ids_sha256": "8f7d7075ee8ea8a3fbcb215c817a2c9977f9f9ac0a8206927ce4041ca05a9810",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0012.parquet",
+      "rows": 512,
+      "sha256": "c28235370b470d58c19c5c4a0b4b444dd562c716149f44e2d5db88aa11715f13",
+      "shard_index": 12
+    },
+    {
+      "cell_ids_sha256": "8a744da2016e4d02e421384771df7e65e9696ac098386dc08ade0bb983305f84",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0013.parquet",
+      "rows": 512,
+      "sha256": "9f7dd89864168d2b43bd241a2fe8564aa83da02ec3739490079787324260a636",
+      "shard_index": 13
+    },
+    {
+      "cell_ids_sha256": "6de261e48b6b9f2d9e203f0dc9e90061574b9bdb176c657d1bc2622c073c1cdf",
+      "critic": "primary",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/primary_0014.parquet",
+      "rows": 266,
+      "sha256": "e87746e6c4e7e8f7b237630c3c35a6bbeb103f2fff779fda12e74d11893e177d",
+      "shard_index": 14
+    },
+    {
+      "cell_ids_sha256": "fb704509b3b1adf74efd6dde02d0b25f3254a42cc71bf8f77d95dde7b2e4763f",
+      "critic": "independent",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/independent_0000.parquet",
+      "rows": 512,
+      "sha256": "a984e9787c9cbe0125c1762d2bc208183c246ed53d00b4385cf64952f769fabd",
+      "shard_index": 0
+    },
+    {
+      "cell_ids_sha256": "5fa516f7e9c36c9a1f3ca7b7b1a6e7ea4c4eef1a50b094156e5b40c7dcf8c5d9",
+      "critic": "independent",
+      "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/model_outputs/p2_lattice_full/prediction_shards/independent_0001.parquet",
+      "rows": 138,
+      "sha256": "40c643a97f741c4e5449e79c82faad0234b0621272d068c22227905cd130c969",
+      "shard_index": 1
+    }
+  ],
+  "split": "validation",
+  "summaries": {
+    "independent": {
+      "cells": 650,
+      "identity_directional_mse": 0.29975627034902574,
+      "mean_cosine": 0.832110839348573,
+      "mean_directional_mse": 0.3357783211309176,
+      "shards": 2
+    },
+    "primary": {
+      "cells": 7434,
+      "identity_directional_mse": 0.29595761865377423,
+      "mean_cosine": 0.8231667252695942,
+      "mean_directional_mse": 0.353666549323506,
+      "shards": 15
+    }
+  }
+}

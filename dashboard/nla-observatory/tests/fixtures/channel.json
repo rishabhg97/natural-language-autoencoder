@@ -1,0 +1,513 @@
+{
+ "aggregates": {
+  "independent.identity.directional_mse": {
+   "bootstrap_samples": 100,
+   "ci_high": 0.34,
+   "ci_low": 0.3,
+   "families": 2,
+   "mean": 0.32,
+   "rows": 2
+  },
+  "primary.corruption.cosine": {
+   "bootstrap_samples": 100,
+   "ci_high": 0.73,
+   "ci_low": 0.69,
+   "families": 2,
+   "mean": 0.71,
+   "rows": 2
+  },
+  "primary.identity.cosine": {
+   "bootstrap_samples": 100,
+   "ci_high": 0.86,
+   "ci_low": 0.82,
+   "families": 2,
+   "mean": 0.84,
+   "rows": 2
+  },
+  "primary.identity.directional_mse": {
+   "bootstrap_samples": 100,
+   "ci_high": 0.33,
+   "ci_low": 0.29,
+   "families": 2,
+   "mean": 0.31,
+   "rows": 2
+  },
+  "primary.paraphrase.directional_mse": {
+   "bootstrap_samples": 100,
+   "ci_high": 0.38,
+   "ci_low": 0.34,
+   "families": 2,
+   "mean": 0.36,
+   "rows": 2
+  }
+ },
+ "capacity_ladder": {
+  "assumptions": {
+   "decoder": "nearest stored target by cosine",
+   "gallery_prior": "uniform by construction"
+  },
+  "distance": "cosine",
+  "ladder": [
+   {
+    "fano_information_lower_bound_bits": 0.92,
+    "gallery_bits": 1.0,
+    "gallery_size": 2,
+    "mean_reciprocal_rank": 0.995,
+    "median_rank": 1.0,
+    "top1_accuracy": 0.99,
+    "top5_accuracy": 1.0
+   },
+   {
+    "fano_information_lower_bound_bits": 1.71,
+    "gallery_bits": 2.0,
+    "gallery_size": 4,
+    "mean_reciprocal_rank": 0.97,
+    "median_rank": 1.0,
+    "top1_accuracy": 0.95,
+    "top5_accuracy": 1.0
+   }
+  ],
+  "source_report": "e0",
+  "top_confusions": [
+   {
+    "count": 1,
+    "retrieved_family": "cf_fixture_2",
+    "source_family": "cf_fixture_1"
+   }
+  ],
+  "variant": "av_real"
+ },
+ "court_thresholds": {
+  "independent": {
+   "balanced_accuracy": 0.94,
+   "negative_recall": 1.0,
+   "positive_recall": 0.88,
+   "threshold": 0.984
+  },
+  "primary": {
+   "balanced_accuracy": 0.95,
+   "negative_recall": 1.0,
+   "positive_recall": 0.9,
+   "threshold": 0.981
+  }
+ },
+ "fit_split": "validation",
+ "identity": [
+  {
+   "cosine": 0.95,
+   "critic": "primary",
+   "dmse": 0.1,
+   "norm_ratio": 1.1,
+   "raw_mse": 4.0,
+   "row_id": "validation-1"
+  },
+  {
+   "cosine": 0.94,
+   "critic": "independent",
+   "dmse": 0.11,
+   "norm_ratio": 1.1,
+   "raw_mse": 4.01,
+   "row_id": "validation-1"
+  },
+  {
+   "cosine": 0.94,
+   "critic": "primary",
+   "dmse": 0.12,
+   "norm_ratio": 1.15,
+   "raw_mse": 4.5,
+   "row_id": "validation-2"
+  },
+  {
+   "cosine": 0.93,
+   "critic": "independent",
+   "dmse": 0.13,
+   "norm_ratio": 1.15,
+   "raw_mse": 4.51,
+   "row_id": "validation-2"
+  }
+ ],
+ "kind": "channel",
+ "matched_online_rl": {
+  "generation_protocol_sha256": "2504621573c5efaebe72d59f0fdcf305ab84a1b2dcbaa49acbb8b29a8b2d025c",
+  "improvement": {
+   "nmse_absolute": 0.1,
+   "nmse_relative": 0.25,
+   "raw_mse_absolute": 2.5,
+   "raw_mse_relative": 0.25,
+   "teacher_win_fraction_gain": 0.5
+  },
+  "independent_family_count": 2,
+  "max_new_tokens": 384,
+  "rl": {
+   "centered_r2": 0.35,
+   "controls": [
+    {
+     "key": "av_shuffled",
+     "label": "shuffled activation",
+     "roundtrip_nmse": 1.0
+    },
+    {
+     "key": "av_zero",
+     "label": "zero activation",
+     "roundtrip_nmse": 0.95
+    },
+    {
+     "key": "av_mean",
+     "label": "mean activation",
+     "roundtrip_nmse": 0.8
+    },
+    {
+     "key": "av_none",
+     "label": "no activation",
+     "roundtrip_nmse": 0.98
+    }
+   ],
+   "cosine": 0.85,
+   "norm_ratio": 1.05,
+   "parse": {
+    "closed_count": 1,
+    "closed_fraction": 0.5,
+    "row_count": 2,
+    "usable_count": 2,
+    "usable_fraction": 1.0
+   },
+   "raw_mse": 7.5,
+   "roundtrip_nmse": 0.3,
+   "teacher_nmse": 0.34,
+   "teacher_win_count": 2,
+   "teacher_win_fraction": 1.0
+  },
+  "row_count": 2,
+  "scope_note": "Synthetic matched validation evidence. Joint AV+AR effect; not a sealed test result.",
+  "sft": {
+   "centered_r2": 0.2,
+   "controls": [],
+   "cosine": 0.8,
+   "norm_ratio": 1.1,
+   "parse": {
+    "closed_count": 2,
+    "closed_fraction": 1.0,
+    "row_count": 2,
+    "usable_count": 2,
+    "usable_fraction": 1.0
+   },
+   "raw_mse": 10.0,
+   "roundtrip_nmse": 0.4,
+   "teacher_nmse": 0.35,
+   "teacher_win_count": 1,
+   "teacher_win_fraction": 0.5
+  },
+  "source_reports": {
+   "rl": "roundtrip_rl_384",
+   "sft": "roundtrip_sft_384"
+  },
+  "status": "validation_only_matched"
+ },
+ "occlusion": {
+  "validation-1": [
+   {
+    "char_end": 9,
+    "char_start": 0,
+    "d_dmse": 0.004,
+    "dmse": 0.15,
+    "word": "Synthetic",
+    "word_index": 0
+   },
+   {
+    "char_end": 17,
+    "char_start": 10,
+    "d_dmse": 0.034,
+    "dmse": 0.18,
+    "word": "fixture",
+    "word_index": 1
+   }
+  ],
+  "validation-2": [
+   {
+    "char_end": 9,
+    "char_start": 0,
+    "d_dmse": 0.004,
+    "dmse": 0.15,
+    "word": "Synthetic",
+    "word_index": 0
+   },
+   {
+    "char_end": 17,
+    "char_start": 10,
+    "d_dmse": 0.034,
+    "dmse": 0.18,
+    "word": "fixture",
+    "word_index": 1
+   }
+  ]
+ },
+ "real_vs_control": {
+  "e1_av": {
+   "losses": {
+    "mean": 1.22,
+    "none": 1.16,
+    "real": 0.74,
+    "shuffled": 1.29,
+    "zero": 1.14
+   },
+   "parse": {
+    "mean": {
+     "closed_fraction": 1.0,
+     "usable_fraction": 1.0
+    },
+    "none": {
+     "closed_fraction": 1.0,
+     "usable_fraction": 1.0
+    },
+    "real": {
+     "closed_fraction": 1.0,
+     "usable_fraction": 1.0
+    },
+    "shuffled": {
+     "closed_fraction": 1.0,
+     "usable_fraction": 1.0
+    },
+    "zero": {
+     "closed_fraction": 1.0,
+     "usable_fraction": 1.0
+    }
+   },
+   "rows": 2,
+   "source_report": "e1_av"
+  },
+  "e2": {
+   "mean_loss": {
+    "mean": 1.25,
+    "none": 1.23,
+    "real": 0.8,
+    "shuffled": 1.3,
+    "zero": 1.18
+   },
+   "paired": {
+    "mean": {
+     "mean_real_minus_control": -0.46,
+     "real_win_fraction": 1.0
+    },
+    "none": {
+     "mean_real_minus_control": -0.44,
+     "real_win_fraction": 1.0
+    },
+    "shuffled": {
+     "mean_real_minus_control": -0.4,
+     "real_win_fraction": 1.0
+    },
+    "zero": {
+     "mean_real_minus_control": -0.42,
+     "real_win_fraction": 1.0
+    }
+   },
+   "records": 8,
+   "rows": 2,
+   "source_report": "e2"
+  }
+ },
+ "retrieval": [
+  {
+   "critic": "primary",
+   "expected_cosine": 0.93,
+   "nearest_row_id": "validation-1",
+   "rank": 1,
+   "row_id": "validation-1"
+  },
+  {
+   "critic": "independent",
+   "expected_cosine": 0.93,
+   "nearest_row_id": "validation-1",
+   "rank": 1,
+   "row_id": "validation-1"
+  },
+  {
+   "critic": "primary",
+   "expected_cosine": 0.92,
+   "nearest_row_id": "validation-2",
+   "rank": 1,
+   "row_id": "validation-2"
+  },
+  {
+   "critic": "independent",
+   "expected_cosine": 0.92,
+   "nearest_row_id": "validation-2",
+   "rank": 1,
+   "row_id": "validation-2"
+  }
+ ],
+ "schema_version": "nla_observatory_dashboard.v2",
+ "shapley": {
+  "validation-1": {
+   "efficiency_error": 1e-09,
+   "sections": {
+    "discourse": 0.21,
+    "final_token": 0.19,
+    "register": 0.05,
+    "syntax": 0.28
+   }
+  },
+  "validation-2": {
+   "efficiency_error": 1e-09,
+   "sections": {
+    "discourse": 0.21,
+    "final_token": 0.19,
+    "register": 0.05,
+    "syntax": 0.28
+   }
+  }
+ },
+ "tellings": {
+  "validation-1": [
+   {
+    "cell_id": "cell-telling-1-0",
+    "cosine": 0.9,
+    "dmse": 0.2,
+    "sample_index": 0,
+    "text": "Synthetic alternate telling 0 for fixture row 1."
+   },
+   {
+    "cell_id": "cell-telling-1-1",
+    "cosine": 0.88,
+    "dmse": 0.23,
+    "sample_index": 1,
+    "text": "Synthetic alternate telling 1 for fixture row 1."
+   }
+  ],
+  "validation-2": [
+   {
+    "cell_id": "cell-telling-2-0",
+    "cosine": 0.9,
+    "dmse": 0.2,
+    "sample_index": 0,
+    "text": "Synthetic alternate telling 0 for fixture row 2."
+   },
+   {
+    "cell_id": "cell-telling-2-1",
+    "cosine": 0.88,
+    "dmse": 0.23,
+    "sample_index": 1,
+    "text": "Synthetic alternate telling 1 for fixture row 2."
+   }
+  ]
+ },
+ "truncation": {
+  "validation-1": [
+   {
+    "cosine": 0.65,
+    "dmse": 0.7,
+    "fraction": 0.25,
+    "words": 4
+   },
+   {
+    "cosine": 0.77,
+    "dmse": 0.45,
+    "fraction": 0.5,
+    "words": 8
+   },
+   {
+    "cosine": 0.93,
+    "dmse": 0.14,
+    "fraction": 1.0,
+    "words": 16
+   }
+  ],
+  "validation-2": [
+   {
+    "cosine": 0.66,
+    "dmse": 0.68,
+    "fraction": 0.25,
+    "words": 4
+   },
+   {
+    "cosine": 0.78,
+    "dmse": 0.43,
+    "fraction": 0.5,
+    "words": 8
+   },
+   {
+    "cosine": 0.94,
+    "dmse": 0.12,
+    "fraction": 1.0,
+    "words": 16
+   }
+  ]
+ },
+ "twin_critics": {
+  "confound": "Synthetic fixture: twin critics share a teacher target and are not semantically independent.",
+  "e3_summaries": {
+   "independent": {
+    "cells": 4,
+    "mean_cosine": 0.82,
+    "mean_directional_mse": 0.36
+   },
+   "primary": {
+    "cells": 4,
+    "mean_cosine": 0.81,
+    "mean_directional_mse": 0.38
+   }
+  },
+  "p2_summaries": {
+   "independent": {
+    "cells": 8,
+    "mean_cosine": 0.83,
+    "mean_directional_mse": 0.34
+   },
+   "primary": {
+    "cells": 8,
+    "mean_cosine": 0.82,
+    "mean_directional_mse": 0.35
+   }
+  },
+  "per_row": [
+   {
+    "independent_cosine": 0.93,
+    "independent_dmse": 0.13,
+    "primary_cosine": 0.94,
+    "primary_dmse": 0.12,
+    "row_id": "validation-1"
+   },
+   {
+    "independent_cosine": 0.92,
+    "independent_dmse": 0.15,
+    "primary_cosine": 0.93,
+    "primary_dmse": 0.14,
+    "row_id": "validation-2"
+   }
+  ]
+ },
+ "waterfall": {
+  "metric": "directional_mse_equals_2_times_one_minus_cosine",
+  "source_report": "e0",
+  "split": "validation",
+  "variants": {
+   "av_real": {
+    "ci_high": 0.81,
+    "ci_low": 0.77,
+    "cosine_mean": 0.79,
+    "dmse": 0.42,
+    "families": 2,
+    "norm_ratio_mean": 1.2,
+    "rows": 2
+   },
+   "av_shuffled": {
+    "ci_high": 0.6,
+    "ci_low": 0.56,
+    "cosine_mean": 0.58,
+    "dmse": 0.83,
+    "families": 2,
+    "norm_ratio_mean": 1.2,
+    "rows": 2
+   },
+   "teacher": {
+    "ci_high": 0.87,
+    "ci_low": 0.83,
+    "cosine_mean": 0.85,
+    "dmse": 0.3,
+    "families": 2,
+    "norm_ratio_mean": 1.2,
+    "rows": 2
+   }
+  }
+ }
+}

@@ -1,0 +1,103 @@
+schema_version: nano_sft_publication_protocol.v1
+study_id: r33-clean-sft-pristine-confirmatory-20260715
+status: in_corpus_boundary_infeasible_external_boundary_required
+
+claim:
+  primary: family-disjoint directional AV-to-AR reconstruction from generated explanations
+  functional: fresh-forward counterfactual reinjection if activation fidelity passes; otherwise stored-snapshot reinjection only
+  excluded:
+    - raw activation-magnitude recovery unless centered raw R2 is positive
+    - R33 superiority over R27 without a protocol-matched row-matched baseline
+    - independent cross-critic generalization
+    - RL improvement
+
+checkpoint_pair:
+  release_id: r33-clean-sft-av-ar-iter1291-20260715
+  release_manifest: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260715_r33_clean_pair/checkpoint_pair_manifest.json
+  av_model_fingerprint: dcp_model_sha256:43346232d2fc043260ee903191e20cce07801903e1e7b7956f16022eb463386a
+  ar_checkpoint_sha256: 5e792120ec1a00ebb4cf4abca50d2a6a962421ac4f45423479ae5061f4d2d760
+  selection_locked: true
+  additional_hpo_allowed: false
+
+confirmatory_boundary:
+  family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v6_selected_pair_exposure/r33_confirmatory_family_manifest.json
+  exposure_report: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v6_selected_pair_exposure/r33_confirmatory_family_split_report.json
+  exposure_inventory: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v6_selected_pair_exposure/r33_prior_exposure_inventory.json
+  joint_family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v6_selected_pair_exposure/r33_joint_exposure_candidate_family_manifest.json
+  exposure_report_sha256: 373e2988b32f2e4e68e2d7644a8b77430829ea7a5d5e2f6b72f870caa89d088b
+  exposure_inventory_sha256: c193f2efb7c8414f4f8a6a12ab2051e633b891107f92c2971535164128f9aabb
+  joint_family_manifest_sha256: 9d68a894e763ed533fba11016ebc8b8f05c0d4a39443585196e7cd24ebffbc20
+  audit_passed: false
+  audited_exposure_sources: 136
+  audited_unique_documents: 28665
+  candidate_family_count: 5009
+  exposed_candidate_family_count: 5009
+  unmapped_prior_documents: 0
+  infeasibility_reason: selected-pair exposure leaves the test split with no families
+  min_rows: 512
+  min_independent_families: 100
+  max_prior_exposure_families: 0
+  max_unmapped_prior_documents: 0
+  selection_strategy: family_stratified
+  selection_seed: 20260715
+  one_shot: true
+  external_boundary_required: true
+
+superseded_validation_test_only_audit:
+  reason: omitted the selected AV and AR checkpoint training splits
+  report_sha256: dc53092a4739b8462dd7a6e9f9cb769a6986031ffc5a3f2e35640ca5178204b8
+  manifest_sha256: 26aec15511f0e9b70263bfe7a879b91e2d18b2c95f207a31c4a160608a535ea3
+  may_be_used_for_confirmatory_scoring: false
+
+roundtrip_endpoint:
+  primary_metric: directional_mse
+  definition: 2 * (1 - cosine)
+  primary_variant: av_real
+  required_controls: [av_shuffled, av_zero, av_mean, av_none, mean]
+  max_primary_directional_mse: 0.35
+  max_primary_gap_to_teacher: 0.05
+  min_control_margin: 0.1344
+  min_rowwise_win_fraction: 0.90
+  min_closed_fraction: 0.95
+  min_usable_fraction: 0.99
+  max_sign_flip_p_value: 0.01
+  require_raw_magnitude_claim: false
+
+functional_endpoint:
+  required_variants: [candidate, teacher, stored_gold, mean, zero, shuffled]
+  candidate_control_variants: [mean, zero, shuffled]
+  primary_metrics: [kl_original_to_patched, js_divergence]
+  secondary_metrics: [logit_pearson, top_10_overlap, top_50_overlap, original_top1_rank]
+  min_family_better_fraction: 0.50
+  require_fresh_forward_activation_fidelity_for_fresh_forward_claim: true
+
+activation_fidelity:
+  max_relative_l2: 0.01
+  max_abs: 0.01
+  max_one_minus_cos: 0.0001
+  repeated_forward_required: true
+  family_stratified_rows: 64
+
+statistics:
+  independent_unit: content_family_id
+  bootstrap_samples: 10000
+  bootstrap_seed: 20260715
+  permutation_samples: 100000
+  permutation_seed: 20260715
+  primary_alpha: 0.01
+  secondary_multiplicity: holm
+  minimum_power: 0.80
+
+reporting:
+  mandatory_metrics:
+    - directional_mse
+    - cosine
+    - raw_mse
+    - centered_raw_r2
+    - norm_ratio_mean
+    - parse_closed_fraction
+    - parse_usable_fraction
+  disclose_historical_test_exposure: true
+  disclose_teacher_lineage: true
+  disclose_kernel_profiles: true
+  disclose_fresh_forward_status: true

@@ -1,0 +1,27 @@
+schema_version: nano_domain_eval.v1
+extends: r33_u342_domain_canary_v1.yaml
+
+# Matched clean-SFT overlay. The manifest and base-model R33 activations are shared
+# with the RL canary; only the AV checkpoint and generated artifacts differ.
+paths:
+  output_root: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft/domain_canary_v1
+  manifest_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/domain_canary_v1/data/paired_manifest.jsonl
+  manifest_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/domain_canary_v1/data/manifest_report.json
+  activations_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/domain_canary_v1/model_outputs/r33_activations.jsonl
+  activation_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/internal_hero/a3e5_u342/domain_canary_v1/model_outputs/activation_report.json
+  descriptions_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft/domain_canary_v1/model_outputs/nla_descriptions.jsonl
+  description_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft/domain_canary_v1/model_outputs/description_report.json
+  behavior_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft/domain_canary_v1/model_outputs/base_behavior.jsonl
+  behavior_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft/domain_canary_v1/model_outputs/behavior_report.json
+  analysis_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft/domain_canary_v1/analysis/domain_canary_report.json
+
+models:
+  av_dcp: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/checkpoints/iter_0001291
+  av_hf: /dev/shm/nano30b-nla-pilot/domain_eval/r33_clean_sft_av
+
+checkpoint_prepare:
+  dcp_checkpoint: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/checkpoints/iter_0001291
+  stage_dcp_checkpoint: /dev/shm/nano30b-nla-pilot/domain_eval/r33_clean_sft_av_dcp
+  output_hf_dir: /dev/shm/nano30b-nla-pilot/domain_eval/r33_clean_sft_av
+  fingerprint_report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft/domain_canary_v1/provenance/sft_av_checkpoint_fingerprints.json
+  convert_log: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft/domain_canary_v1/logs/sft_av_dcp_to_hf.log

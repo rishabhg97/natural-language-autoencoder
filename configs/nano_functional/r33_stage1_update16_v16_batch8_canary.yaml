@@ -1,0 +1,33 @@
+schema_version: nano_functional_eval.v1
+python: /workspace/interp/.venv/bin/python
+paths:
+  code_root: /workspace/interp/code/nano30b-nla-pilot-current
+  generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/roundtrip_v512_t512_generated_enriched.jsonl
+  sft_generated_jsonl: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-sft/roundtrip_v512_t512_generated_enriched.jsonl
+  ar_checkpoint_dir: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/checkpoints/iter_0001289
+  source_base_parquet: /workspace/interp/outputs/nano30b-nla-pilot/r33_prefix_fullscan275396/ar_sft_R33_r33_prefix_fullscan275396.parquet
+  mean_activation_parquet: /workspace/interp/outputs/nano30b-nla-pilot/miles-fsdp2-ar-sft-r33-component-full/nano-ar-r33-component-full-hero-lr5e5-cosine-warmup25-gb192-mb96/splits/train.parquet
+  target_model: /workspace/interp/models/nano-30b-a3b-bf16-hf
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/validity/r33-update16/functional_v16_t16_batch8_canary_report.json
+eval:
+  boundary: 33
+  validation_limit: 16
+  test_limit: 16
+  selection_strategy: longest_prefix
+  batch_size: 8
+  ar_batch_size: 4
+  ar_max_length: 1152
+  ar_torch_dtype: bfloat16
+  ar_device_map: cuda:1
+  target_torch_dtype: bfloat16
+  target_device_map: cuda:0
+  target_local_files_only: true
+  target_trust_remote_code: true
+  source_batch_size: 4096
+  generated_text_fallback: raw
+  control: real
+  identity_relative_l2: 0.01
+  identity_max_abs: 0.01
+  identity_one_minus_cos: 0.0001
+  bootstrap_resamples: 1000
+  seed: 17

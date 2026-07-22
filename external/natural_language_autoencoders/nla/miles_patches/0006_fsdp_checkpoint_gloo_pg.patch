@@ -1,0 +1,93 @@
+diff --git a/miles/backends/fsdp_utils/checkpoint.py b/miles/backends/fsdp_utils/checkpoint.py
+--- a/miles/backends/fsdp_utils/checkpoint.py
++++ b/miles/backends/fsdp_utils/checkpoint.py
+@@ -15,3 +15,27 @@
+ logger = logging.getLogger(__name__)
+
+
++_CHECKPOINT_PROCESS_GROUP = None
++
++
++def _get_checkpoint_process_group():
++    """Use Gloo for DCP metadata collectives when training uses NCCL.
++
++    torch.distributed.checkpoint coordinates save plans with object collectives
++    before it writes shard data. On large Nano30B FSDP saves, the default NCCL
++    group can fail in scatter_object_list before any shard files are written.
++    Keep model/FSDP collectives on the default group, but route DCP metadata
++    collectives through a CPU-friendly Gloo group.
++    """
++    global _CHECKPOINT_PROCESS_GROUP
++
++    if not dist.is_available() or not dist.is_initialized() or dist.get_world_size() == 1:
++        return None
++    if dist.get_backend() != "nccl":
++        return None
++    if _CHECKPOINT_PROCESS_GROUP is None:
++        logger.info("[FSDP] Creating Gloo checkpoint process group for DCP metadata collectives.")
++        _CHECKPOINT_PROCESS_GROUP = dist.new_group(backend="gloo")
++    return _CHECKPOINT_PROCESS_GROUP
++
++
+ class ModelState(Stateful):
+     """Wrapper for model state only."""
+
+@@ -111,8 +135,9 @@
+     # Load model weights (always). No try/except — DCP corruption (EOFError,
+     # shape mismatch, world-size mismatch) must raise. A swallowed exception here
+     # means training continues on random/partial weights.
++    checkpoint_process_group = _get_checkpoint_process_group()
+     model_state = ModelState(actor.model)
+     state_dict = {"model_state": model_state}
+-    dcp.load(state_dict=state_dict, checkpoint_id=str(model_dir))
++    dcp.load(state_dict=state_dict, checkpoint_id=str(model_dir), process_group=checkpoint_process_group)
+     logger.info(f"[FSDP] Loaded model from {model_dir}")
+
+     # Load optimizer state (optional). Same: if the dir exists but load fails,
+@@ -123,7 +148,7 @@
+     if load_optimizer and optimizer_metadata.exists():
+         optimizer_state = OptimizerState(actor.model, actor.optimizer)
+         optim_state_dict = {"optim_state": optimizer_state}
+-        dcp.load(state_dict=optim_state_dict, checkpoint_id=str(optimizer_dir))
++        dcp.load(state_dict=optim_state_dict, checkpoint_id=str(optimizer_dir), process_group=checkpoint_process_group)
+         logger.info(f"[FSDP] Loaded optimizer from {optimizer_dir}")
+     elif load_optimizer:
+         logger.info(f"[FSDP] Optimizer checkpoint not found at {optimizer_dir}, skipping optimizer load.")
+@@ -141,7 +166,7 @@
+     if load_lr_scheduler:
+         lr_scheduler_state = LRSchedulerState(actor.lr_scheduler)
+         lr_scheduler_state_dict = {"lr_scheduler_state": lr_scheduler_state}
+-        dcp.load(state_dict=lr_scheduler_state_dict, checkpoint_id=str(lr_scheduler_dir))
++        dcp.load(state_dict=lr_scheduler_state_dict, checkpoint_id=str(lr_scheduler_dir), process_group=checkpoint_process_group)
+         logger.info(f"[FSDP] Loaded LR scheduler from {lr_scheduler_dir}")
+     elif hasattr(actor, "lr_scheduler"):
+         logger.info(f"[FSDP] LR scheduler checkpoint not found at {lr_scheduler_dir}, skipping LR scheduler load.")
+@@ -214,19 +239,21 @@
+         lr_scheduler_dir.mkdir(parents=True, exist_ok=True)
+     dist.barrier()
+
++    checkpoint_process_group = _get_checkpoint_process_group()
++
+     # Save model weights
+     model_state = ModelState(actor.model)
+     state_dict = {"model_state": model_state}
+-    dcp.save(state_dict, checkpoint_id=str(model_dir))
++    dcp.save(state_dict, checkpoint_id=str(model_dir), process_group=checkpoint_process_group)
+
+     # Save optimizer state (skip if --no-save-optim is set)
+     save_optimizer_state = not getattr(actor.args, "no_save_optim", False)
+     if save_optimizer_state and hasattr(actor, "optimizer") and actor.optimizer is not None:
+         optimizer_state = OptimizerState(actor.model, actor.optimizer)
+         optim_state_dict = {"optim_state": optimizer_state}
+-        dcp.save(optim_state_dict, checkpoint_id=str(optimizer_dir))
++        dcp.save(optim_state_dict, checkpoint_id=str(optimizer_dir), process_group=checkpoint_process_group)
+
+     # Save LR scheduler state (skip if --no-save-optim is set)
+     if save_optimizer_state and hasattr(actor, "lr_scheduler") and actor.lr_scheduler is not None:
+         lr_scheduler_state = LRSchedulerState(actor.lr_scheduler)
+         lr_scheduler_state_dict = {"lr_scheduler_state": lr_scheduler_state}
+-        dcp.save(lr_scheduler_state_dict, checkpoint_id=str(lr_scheduler_dir))
++        dcp.save(lr_scheduler_state_dict, checkpoint_id=str(lr_scheduler_dir), process_group=checkpoint_process_group)
+
+     if dist.get_rank() == 0:
+         rng_state = {"torch": torch.get_rng_state()}

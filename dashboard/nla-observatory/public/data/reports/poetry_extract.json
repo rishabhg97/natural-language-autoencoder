@@ -1,0 +1,17 @@
+{
+  "boundary": 33,
+  "cases": 8,
+  "config_sha256": "87191f785c1f183edcc8d12317155ec0d1569848c7a9c637e2b4060fe44a41aa",
+  "continuations": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/poetry_extract/continuations.jsonl",
+    "sha256": "415865cbb904596d774ebc2934f8ac8103b7319db858a20a23dc3aad535a0c0d"
+  },
+  "passed": true,
+  "phase": "poetry_extract",
+  "positions": 104,
+  "schema_version": "nano_viz_poetry_planning_report.v1",
+  "trajectories": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/poetry_extract/trajectories.parquet",
+    "sha256": "5ce41331dc212d8aa09448f7676db72e19f03568eba124bae500336b7780db35"
+  }
+}

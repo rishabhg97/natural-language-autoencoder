@@ -1,0 +1,87 @@
+schema_version: nano_nla_checkpoint_pair_release.v1
+release_id: r33-clean-sft-av-ar-iter1291-20260715
+output_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260715_r33_clean_pair/checkpoint_pair_manifest.json
+claim_scope: family-disjoint directional AV-to-AR reconstruction and stored-snapshot functional recovery
+
+limitations:
+  - Raw activation magnitude is not recovered; centered raw R2 is negative on validation and test.
+  - Functional evidence is stored-snapshot counterfactual reinjection because fresh-forward activation replay exceeds the preregistered tolerance.
+  - The heldout test is family-disjoint from clean SFT training, but it is not guaranteed to be untouched by every historical project run.
+  - AV and AR use the same Nano30B architecture family and teacher-summary lineage; no cross-critic generalization claim is made.
+  - This release qualifies supervised AV+AR checkpoints only; it does not include or validate RL.
+
+checkpoints:
+  av:
+    path: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/checkpoints/iter_0001291
+    fingerprint_report: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/final_test_av_checkpoint_fingerprints.json
+    fingerprint_field: av_model_fingerprint
+    expected_fingerprint: dcp_model_sha256:43346232d2fc043260ee903191e20cce07801903e1e7b7956f16022eb463386a
+  ar:
+    path: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean/nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/checkpoints/iter_0001291/hf
+    fingerprint_report: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260715_r33_clean_ar/ar_hf_fingerprint.json
+    fingerprint_field: sha256
+    expected_fingerprint: 5e792120ec1a00ebb4cf4abca50d2a6a962421ac4f45423479ae5061f4d2d760
+
+evidence:
+  ar_component_validation:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260715_r33_clean_ar/eval_verifier.json
+  av_component_validation:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260715_r33_clean_av/eval_verifier.json
+  roundtrip_validation:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/validation_roundtrip_verifier.json
+  roundtrip_test:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/final_test_roundtrip_verifier.json
+  functional_validation:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/validation_functional_verifier.json
+  functional_test:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/final_test_functional_verifier.json
+
+artifacts:
+  ar_component_report:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260715_r33_clean_ar/eval_iter_0001291_v512_t512_winrates_report.json
+  av_component_report:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260715_r33_clean_av/eval_iter_0001291_v512_t512_gen8_report.json
+  family_manifest:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_exact_prefix_refined_base_manifest.json
+  family_coverage:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_clean_sft_family_coverage.json
+  validation_generation_report:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/validation_generation_report.json
+  validation_generated_cache:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/validation_generated.jsonl
+  validation_roundtrip_report:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/validation_roundtrip_report.json
+  validation_functional_report:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/validation_functional_report.json
+  test_generation_report:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/final_test_generation_report.json
+  test_generated_cache:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/final_test_generated.jsonl
+  test_roundtrip_report:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/final_test_roundtrip_report.json
+  test_functional_report:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_clean_sft_roundtrip/final_test_functional_report.json
+  av_s3_attestation:
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260715_r33_clean_av/s3_attestation.json
+  evaluation_source_archive:
+    path: /workspace/interp/code/nano30b-nla-pilot-publication-qualification-20260715T194950Z/source.tgz
+  verifier_source_archive:
+    path: /workspace/interp/code/nano30b-nla-pilot-publication-qualification-20260715T212826Z/source.tgz
+
+metadata:
+  activation_boundary: 33
+  dataset_rows: 275396
+  content_family_count: 5009
+  clean_train_family_count: 4504
+  validation_family_count: 250
+  test_family_count: 255
+  statistical_unit: content_family_id
+  validation_rows: 512
+  test_rows: 512
+  rl_included: false
+  av_s3_prefix: s3://team-ipp-trustworthy-ai/nano30b-nla-pilot/publication/checkpoints/r33_deterministic_family_clean_av_sft/iter_0001291/
+  ar_s3_prefix: s3://team-ipp-trustworthy-ai/nano30b-nla-pilot/publication/checkpoints/r33_deterministic_family_clean_ar_sft/iter_0001291/
+  evaluation_source_s3: s3://team-ipp-trustworthy-ai/nano30b-nla-pilot/source-sync/publication-qualification/20260715T194950Z/nano30b-nla-pilot-source.tgz
+  evaluation_source_sha256: 3782fd11550a607156c1af21a9e48d481235974bb29683e18532698ca1b82fd3
+  verifier_source_s3: s3://team-ipp-trustworthy-ai/nano30b-nla-pilot/source-sync/publication-qualification/20260715T212826Z/nano30b-nla-pilot-source.tgz
+  verifier_source_sha256: 0db79a5dbb2c4fc1cbabf97931a39587f222c33af76e57038f14ef6acc06dc9f

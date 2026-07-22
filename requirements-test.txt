@@ -1,0 +1,8 @@
+anthropic
+httpx
+numpy
+pyarrow
+pytest
+PyYAML
+safetensors
+transformers

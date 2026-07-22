@@ -1,0 +1,12 @@
+schema_version: nano_roundtrip_family_holdout.v1
+role: r33_online_joint_actor_hpo_development
+inputs:
+  source_validation_parquet: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/validation.parquet
+  content_family_manifest: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_exact_prefix_refined_base_manifest.json
+  exclusion_reports:
+    - report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/hpo8_h1_a1e5_c2e6_k3e3_retry5/roundtrip_iter_0000008_v128_protocolfixed_strict_regate.json
+      split: validation
+outputs:
+  validation_parquet: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/actor_hpo_dev/r33_hpo_dev_validation.parquet
+  boundary_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/actor_hpo_dev/r33_hpo_dev_family_boundary.json
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_online_rl/actor_hpo_dev/r33_hpo_dev_family_holdout_report.json

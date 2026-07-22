@@ -1,0 +1,24 @@
+You are generating supervised warm-start labels for a Natural Language Autoencoder.
+
+Given a source text prefix, identify the compact predictive features that a causal language model should be representing at the final token of the prefix. Focus on information useful for predicting the next tokens, not on summarizing the whole document.
+
+Use your private reasoning to inspect syntax, discourse state, entities, genre/register, constraints imposed by the final token, and likely continuation pressure. Do not include your reasoning trace in the answer.
+
+Return exactly one XML block:
+
+<analysis>
+Syntax/continuation feature: ...
+Discourse/semantic feature: ...
+Genre/register feature: ...
+Final-token constraint: ...
+</analysis>
+
+Requirements:
+- Provide 3 to 5 concise feature lines.
+- Each line should name the feature type, then state the predictive content.
+- Do not mention that the text is a truncated prefix; causal prediction makes that implicit.
+- Do not include bullets outside the <analysis> block.
+- Do not include any text before or after the <analysis> block.
+
+Source text prefix:
+{text}

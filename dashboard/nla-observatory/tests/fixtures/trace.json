@@ -1,0 +1,145 @@
+{
+ "boundary": 3,
+ "claim_scope": "fresh_forward_exploratory",
+ "docs": [
+  {
+   "content_family_id": "cf_fixture_1",
+   "doc_id": "synthetic:corpus:1",
+   "drift": {
+    "max_abs": 0.9,
+    "one_minus_cos": 0.002,
+    "relative_l2": 0.05,
+    "rms_ratio": 1.004
+   },
+   "positions": [
+    {
+     "description": "Synthetic learned description of the stored activation at position 3 of fixture doc 1.",
+     "n_context_tokens": 4,
+     "parse_state": "usable_closed",
+     "position": 3,
+     "source_after": " with later text shown only for orientation.",
+     "source_alignment": "exact",
+     "source_before": "Synthetic source context before position 3",
+     "source_char_end": 72,
+     "source_char_start": 67,
+     "source_prefix_omitted": false,
+     "source_suffix_omitted": true,
+     "source_token": " tok3",
+     "token_id": 103,
+     "token_text": " tok3",
+     "usable": true
+    },
+    {
+     "description": "Synthetic learned description of the stored activation at position 4 of fixture doc 1.",
+     "n_context_tokens": 5,
+     "parse_state": "usable_closed",
+     "position": 4,
+     "source_after": " with later text shown only for orientation.",
+     "source_alignment": "exact",
+     "source_before": "Synthetic source context before position 4",
+     "source_char_end": 77,
+     "source_char_start": 72,
+     "source_prefix_omitted": true,
+     "source_suffix_omitted": true,
+     "source_token": " tok4",
+     "token_id": 104,
+     "token_text": " tok4",
+     "usable": true
+    },
+    {
+     "description": "Synthetic learned description of the stored activation at position 5 of fixture doc 1.",
+     "n_context_tokens": 6,
+     "parse_state": "usable_closed",
+     "position": 5,
+     "source_after": " with later text shown only for orientation.",
+     "source_alignment": "exact",
+     "source_before": "Synthetic source context before position 5",
+     "source_char_end": 82,
+     "source_char_start": 77,
+     "source_prefix_omitted": true,
+     "source_suffix_omitted": true,
+     "source_token": " tok5",
+     "token_id": 105,
+     "token_text": " tok5",
+     "usable": true
+    }
+   ],
+   "row_id": "validation-1"
+  },
+  {
+   "content_family_id": "cf_fixture_2",
+   "doc_id": "synthetic:corpus:2",
+   "drift": {
+    "max_abs": 0.9,
+    "one_minus_cos": 0.003,
+    "relative_l2": 0.06,
+    "rms_ratio": 1.004
+   },
+   "positions": [
+    {
+     "description": "Synthetic learned description of the stored activation at position 3 of fixture doc 2.",
+     "n_context_tokens": 4,
+     "parse_state": "usable_closed",
+     "position": 3,
+     "source_after": " with later text shown only for orientation.",
+     "source_alignment": "exact",
+     "source_before": "Synthetic source context before position 3",
+     "source_char_end": 72,
+     "source_char_start": 67,
+     "source_prefix_omitted": false,
+     "source_suffix_omitted": true,
+     "source_token": " tok3",
+     "token_id": 103,
+     "token_text": " tok3",
+     "usable": true
+    },
+    {
+     "description": "Synthetic learned description of the stored activation at position 4 of fixture doc 2.",
+     "n_context_tokens": 5,
+     "parse_state": "usable_closed",
+     "position": 4,
+     "source_after": " with later text shown only for orientation.",
+     "source_alignment": "exact",
+     "source_before": "Synthetic source context before position 4",
+     "source_char_end": 77,
+     "source_char_start": 72,
+     "source_prefix_omitted": true,
+     "source_suffix_omitted": true,
+     "source_token": " tok4",
+     "token_id": 104,
+     "token_text": " tok4",
+     "usable": true
+    },
+    {
+     "description": "Synthetic learned description of the stored activation at position 5 of fixture doc 2.",
+     "n_context_tokens": 6,
+     "parse_state": "usable_closed",
+     "position": 5,
+     "source_after": " with later text shown only for orientation.",
+     "source_alignment": "exact",
+     "source_before": "Synthetic source context before position 5",
+     "source_char_end": 82,
+     "source_char_start": 77,
+     "source_prefix_omitted": true,
+     "source_suffix_omitted": true,
+     "source_token": " tok5",
+     "token_id": 105,
+     "token_text": " tok5",
+     "usable": true
+    }
+   ],
+   "row_id": "validation-2"
+  }
+ ],
+ "kind": "trace",
+ "schema_version": "nla_observatory_dashboard.v2",
+ "shuffled_control": {
+  "available": false,
+  "note": "Synthetic fixture: no shuffled-position trace control ships in this bundle."
+ },
+ "source_alignment": {
+  "exact_positions": 6,
+  "note": "Synthetic fixture contexts align exactly.",
+  "unavailable_positions": 0
+ }
+}

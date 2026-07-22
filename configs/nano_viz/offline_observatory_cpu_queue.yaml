@@ -1,0 +1,18 @@
+schema_version: nano_viz_queue.v1
+
+defaults:
+  code_root: /workspace/nla-viz/nano30b-nla-pilot
+  config: /workspace/nla-viz/nano30b-nla-pilot/configs/nano_viz/offline_observatory_bundle.yaml
+  python: /workspace/nla-viz/.venv/bin/python
+  state_json: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/logs/cpu_queue_state.json
+  log_dir: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/logs/cpu_queue
+
+items:
+  - name: p4_geometry
+    module: observatory.compute_geometry
+  - name: p4_interventions
+    module: observatory.compute_interventions
+  - name: p5_build_bundle
+    module: observatory.build_bundle
+  - name: p5_verify_bundle
+    module: observatory.verify_bundle

@@ -1,0 +1,17 @@
+schema_version: nano_content_family_build.v1
+batch_size: 8192
+
+family_sources:
+  - name: r33_deterministic_snapshot
+    path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/base_R33_r33_deterministic_full275396.parquet
+    text_field: detokenized_text_truncated
+
+algorithm:
+  shingle_width: 5
+  similarity_threshold: 0.80
+  signature_size: 32
+  candidate_min_shared: 4
+  max_signature_bucket_size: 256
+
+outputs:
+  manifest_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_content_family_base_manifest.json

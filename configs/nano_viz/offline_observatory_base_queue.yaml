@@ -1,0 +1,18 @@
+schema_version: nano_viz_queue.v1
+
+defaults:
+  code_root: /workspace/nla-viz/nano30b-nla-pilot
+  config: /workspace/nla-viz/nano30b-nla-pilot/configs/nano_viz/offline_observatory.yaml
+  python: /workspace/nla-viz/.venv/bin/python
+  state_json: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/logs/base_queue_state.json
+  log_dir: /workspace/models/nano30b-nla-pilot/observatory/r33_offline_v1/logs/base_queue
+
+items:
+  - name: e4_functional_pilot
+    phase: functional-pilot
+  - name: p3_functional_full
+    phase: functional-full
+  - name: e5_trace_extract
+    phase: trace-extract
+  - name: p1_trace_descriptions
+    phase: trace-describe

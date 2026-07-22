@@ -1,0 +1,12 @@
+{
+  "config_sha256": "87191f785c1f183edcc8d12317155ec0d1569848c7a9c637e2b4060fe44a41aa",
+  "descriptions": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/poetry_describe/descriptions.jsonl",
+    "sha256": "72b392347c1eb5856a642d1ef9fd41600c59e18c4ece6603fd118eef30a0966b"
+  },
+  "passed": true,
+  "phase": "poetry_describe",
+  "records": 624,
+  "schema_version": "nano_viz_poetry_planning_report.v1",
+  "usable_fraction": 0.9967948717948718
+}

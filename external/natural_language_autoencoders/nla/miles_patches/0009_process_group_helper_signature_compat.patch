@@ -1,0 +1,37 @@
+diff --git a/miles/utils/distributed_utils.py b/miles/utils/distributed_utils.py
+--- a/miles/utils/distributed_utils.py
++++ b/miles/utils/distributed_utils.py
+@@ -1,5 +1,6 @@
++import inspect
+ from datetime import timedelta
+ from typing import Any
+ 
+ import torch
+ import torch.distributed as dist
+@@ -74,16 +75,23 @@ def init_process_group(
+ 
+     # NOTE: The pg_options parameter was renamed into backend_options in PyTorch 2.6.0
+     # https://github.com/pytorch/pytorch/commit/a0c7029a75628cd5fa8df83c0de0ea98ee7fd844
+-    # We need to determine the appropriate parameter name based on PyTorch version
+-    pg_options_param_name = "backend_options" if str(torch.__version__) >= "2.6" else "pg_options"
++    # Inspect the helper signature instead of comparing version strings: e.g.
++    # "2.12.0" is lexicographically less than "2.6" even though it is newer.
++    helper_params = inspect.signature(_new_process_group_helper).parameters
++    if "backend_options" in helper_params:
++        process_group_kwargs = {"backend_options": pg_options}
++    elif "pg_options" in helper_params:
++        process_group_kwargs = {"pg_options": pg_options}
++    else:
++        process_group_kwargs = {}
+     pg, _ = _new_process_group_helper(
+         world_size,
+         rank,
+         [],
+         backend,
+         store,
+         group_name=group_name,
+-        **{pg_options_param_name: pg_options},
++        **process_group_kwargs,
+         timeout=timeout,
+     )
+ 

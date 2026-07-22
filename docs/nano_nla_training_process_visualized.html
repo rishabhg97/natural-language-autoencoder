@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nano30B NLA Training — AV &amp; AR (Visualized)</title>
+<style>
+  :root{
+    --bg:#0b0f0c; --panel:#11161300; --card:#141a16; --card2:#0f1411;
+    --ink:#e8f0ea; --muted:#9fb3a6; --line:#26332b;
+    --green:#76b900; --green-dim:#4d7a06; --av:#76b900; --ar:#36a3ff;
+    --warn:#ffb454; --chip:#1c241e; --code:#0c100d;
+    --shadow:0 1px 0 #ffffff0a, 0 10px 30px #00000055;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:radial-gradient(1200px 700px at 70% -10%, #13201310, #0b0f0c 60%) fixed, var(--bg);color:var(--ink);
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--green)}
+  .wrap{max-width:1120px;margin:0 auto;padding:32px 22px 80px}
+  header.top{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
+  .kicker{color:var(--green);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
+  h1{font-size:30px;margin:0;font-weight:800;letter-spacing:-.01em}
+  .sub{color:var(--muted);max-width:820px}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .chip{background:var(--chip);border:1px solid var(--line);color:var(--muted);
+    padding:3px 10px;border-radius:999px;font-size:12px}
+  .chip.av{color:var(--av);border-color:#3a5208}
+  .chip.ar{color:var(--ar);border-color:#1d4a6e}
+
+  nav.tabs{position:sticky;top:0;z-index:30;display:flex;gap:6px;flex-wrap:wrap;
+    padding:12px 0;margin:18px 0 6px;background:linear-gradient(var(--bg),var(--bg) 70%,#0b0f0c00);
+    border-bottom:1px solid var(--line)}
+  .tab{cursor:pointer;border:1px solid var(--line);background:var(--card2);color:var(--muted);
+    padding:7px 13px;border-radius:9px;font-size:13px;font-weight:600;white-space:nowrap}
+  .tab:hover{color:var(--ink);border-color:#34453a}
+  .tab.active{color:#0b0f0c;background:var(--green);border-color:var(--green)}
+
+  section{display:none;animation:fade .25s ease}
+  section.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  h2{font-size:21px;margin:22px 0 4px;font-weight:750}
+  h3{font-size:15px;margin:18px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+  p{color:#d3e0d7}
+  .lead{color:var(--muted)}
+
+  .panel{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);
+    border-radius:16px;padding:18px;box-shadow:var(--shadow);margin:14px 0}
+
+  /* pipeline */
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+  .stage{flex:1 1 150px;min-width:150px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:12px 12px;position:relative}
+  .stage .t{font-weight:750;font-size:13.5px;margin-bottom:4px}
+  .stage .d{color:var(--muted);font-size:12.3px}
+  .stage code{font-size:11.4px}
+  .arrow{display:flex;align-items:center;justify-content:center;color:var(--muted);
+    font-size:22px;padding:0 6px;flex:0 0 auto}
+  .arrow.down{display:none}
+  .lane{margin:6px 0 2px;font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .accent-av{border-top:3px solid var(--av)}
+  .accent-ar{border-top:3px solid var(--ar)}
+  .accent-data{border-top:3px solid #cf6}
+  .accent-key{border-top:3px solid var(--warn)}
+
+  ul.notes{margin:8px 0 0;padding-left:18px}
+  ul.notes li{margin:6px 0;color:#d3e0d7}
+  ul.notes code,p code,td code,.stage code{background:var(--code);border:1px solid var(--line);
+    border-radius:5px;padding:1px 5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12.5px;color:#cfe8b6}
+  .ref{color:var(--green-dim);font-family:ui-monospace,Menlo,monospace;font-size:11.6px}
+
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.2px;overflow:hidden;border-radius:12px}
+  th,td{border:1px solid var(--line);padding:9px 11px;vertical-align:top;text-align:left}
+  thead th{background:#16201a;color:var(--ink);position:sticky}
+  th.dim{width:18%;color:var(--muted);font-weight:700}
+  td.av{color:#dff0c4}
+  td.ar{color:#cfe6ff}
+  tbody tr:nth-child(even){background:#0f140f}
+  .col-av{background:#101a08 !important;color:var(--av);font-weight:800}
+  .col-ar{background:#0c1722 !important;color:var(--ar);font-weight:800}
+
+  /* sharding */
+  .gpus{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .gpu{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .gpu h4{margin:0 0 8px;font-size:14px}
+  .bar{display:flex;align-items:center;gap:8px;background:#0e130f;border:1px solid var(--line);
+    border-radius:8px;padding:7px 9px;margin:6px 0;font-size:12.6px}
+  .bar .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:12.5px;margin-top:8px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .nccl{text-align:center;color:var(--muted);font-size:12.5px;margin:10px 0;
+    border:1px dashed var(--line);border-radius:10px;padding:8px}
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .mini{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .mini .t{font-weight:750;margin-bottom:6px}
+
+  .warnbox{border:1px solid #4a3a16;background:#1b1607;border-radius:12px;padding:14px}
+  .warnbox h3{color:var(--warn)}
+  .badge{display:inline-block;background:#2a2207;border:1px solid #4a3a16;color:var(--warn);
+    border-radius:6px;font-size:11px;padding:1px 7px;margin-right:6px;font-weight:700}
+
+  footer{color:var(--muted);font-size:12.5px;margin-top:26px;border-top:1px solid var(--line);padding-top:14px}
+  .pill{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+
+  @media (max-width:820px){
+    .flow{flex-direction:column}
+    .arrow{display:none}
+    .arrow.down{display:flex;transform:rotate(90deg);height:18px}
+    .stage{flex:1 1 auto}
+    .gpus,.twocol{grid-template-columns:1fr}
+    h1{font-size:24px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kicker">Nano30B NLA Pilot · source-grounded</div>
+    <h1>How NLA Training Works — AV &amp; AR</h1>
+    <div class="sub lead">Both paths fine-tune the same Nano30B base through the same Miles FSDP2 spine
+      (<code>miles/train.py --train-backend fsdp</code> + <code>nla.train_actor.NLAFSDPActor</code>).
+      The objective flag is what splits them. Architecture claims below are grounded in the code/configs;
+      run results are context only.</div>
+    <div class="meta">
+      <span class="chip av">AV-SFT: activation h → explanation z</span>
+      <span class="chip ar">AR-SFT: explanation z → reconstructed activation ĥ</span>
+      <span class="chip">FSDP2 · 2 GPUs · cp=1 · tp=1</span>
+      <span class="chip">W&amp;B offline · debug-train-only (no RL)</span>
+      <span class="chip">d_model = 2688</span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <div class="tab active" data-t="av">AV flow</div>
+    <div class="tab" data-t="ar">AR flow</div>
+    <div class="tab" data-t="data">Data → MILES</div>
+    <div class="tab" data-t="launch">Queue → Run</div>
+    <div class="tab" data-t="compare">AV vs AR</div>
+    <div class="tab" data-t="fsdp">FSDP2 sharding</div>
+    <div class="tab" data-t="refs">Code refs &amp; caveats</div>
+  </nav>
+
+  <!-- ================= AV ================= -->
+  <section id="av" class="show">
+    <h2 style="color:var(--av)">AV-SFT — activation <em>h</em> → explanation <em>z</em></h2>
+    <p class="lead">Trains the <strong>full</strong> Nano text model to generate an explanation from an injected activation.
+      No small adapter — the whole actor is fine-tuned.</p>
+
+    <div class="panel">
+      <div class="lane">Data prep (once, CPU)</div>
+      <div class="flow">
+        <div class="stage accent-data"><div class="t">av_sft.parquet</div><div class="d">prompt (list-of-dict), response, <code>activation_vector</code>, doc_id, n_raw_tokens …</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-data"><div class="t">.nla_meta.yaml sidecar</div><div class="d">d_model, injection token ids, prompt templates</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-data"><div class="t">NLADataSource</div><div class="d">numpy-read activation; <code>&lt;INJECT&gt;</code> → injection_char <span class="ref">data_source.py:33-129</span></div></div>
+      </div>
+
+      <div class="lane" style="margin-top:14px">Per-rollout — <code>sft_actor.generate_rollout</code> (no generation)</div>
+      <div class="flow">
+        <div class="stage accent-av"><div class="t">get_samples</div><div class="d">Sample.prompt = messages list-of-dict</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-av"><div class="t">append response</div><div class="d">assistant turn = <code>&lt;explanation&gt;…&lt;/explanation&gt;</code> <span class="ref">sft_actor.py:86-87</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-av"><div class="t">tokenize + loss mask</div><div class="d">MultiTurnLossMaskGenerator <span class="ref">sft_actor.py:89-98</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-av"><div class="t">stash activation</div><div class="d">1×d into <code>multimodal_train_inputs</code> <span class="ref">sft_actor.py:117-120</span></div></div>
+      </div>
+
+      <div class="lane" style="margin-top:14px">NLAFSDPActor forward/backward (per microbatch, FSDP2-sharded)</div>
+      <div class="flow">
+        <div class="stage accent-key"><div class="t">normalize + arm hook</div><div class="d"><code>normalize_activation(h, injection_scale)</code> → <code>_nla_vectors</code>; <code>use_cache=False</code> <span class="ref">train_actor.py:592-625</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-key"><div class="t">embedding hook</div><div class="d"><code>inject_at_marked_positions</code>: overwrite embed rows at the marker token (neighbor-checked) <span class="ref">injection.py:11-93</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-av"><div class="t">full LM forward</div><div class="d">Nano text model, all params trained</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-av"><div class="t">sft_loss</div><div class="d">next-token loss on response tokens (<code>loss_type=sft_loss</code>)</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-av"><div class="t">backward + step</div><div class="d"><code>torch.cuda.synchronize()</code> between microbatches <span class="ref">train_actor.py:702-727</span></div></div>
+      </div>
+
+      <div class="lane" style="margin-top:14px">Persist &amp; evaluate</div>
+      <div class="flow">
+        <div class="stage accent-av"><div class="t">save_model → DCP</div><div class="d"><code>model/</code> + <code>optimizer/</code>, <code>iter_{id+1}</code>, actor sidecar (stage=sl) <span class="ref">train_actor.py:838-888</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-av"><div class="t">out-of-process eval</div><div class="d">convert DCP→HF, then <code>eval_nano_av_miles_checkpoint.py</code></div></div>
+      </div>
+    </div>
+
+    <h3>Key mechanics</h3>
+    <ul class="notes">
+      <li><strong>Injection hook</strong> is registered <em>only</em> for SFT/policy actors <span class="ref">train_actor.py:503-506</span>. It clones the embedding output and overwrites rows where the token is the injection marker <em>and</em> the left/right neighbors match — site count must equal vector count or it aborts <span class="ref">injection.py:79-92</span>.</li>
+      <li><strong>Scale</strong>: the raw activation is L2-normalized to <code>injection_scale</code> (REQUIRED for AV; <code>75</code> in the layer-probe config) <span class="ref">train_actor.py:441-449, 600</span>.</li>
+      <li><strong>Loss</strong>: Miles stock <code>sft_loss</code>; the actor's <code>_compute_log_prob</code> no-ops under SFT <span class="ref">train_actor.py:661-662</span>.</li>
+      <li><strong>Checkpoint</strong>: DCP only. To reload: <code>--hf-checkpoint</code> = base model, <code>--load</code> = iter dir <span class="ref">train_actor.py:871-877</span>.</li>
+    </ul>
+  </section>
+
+  <!-- ================= AR ================= -->
+  <section id="ar">
+    <h2 style="color:var(--ar)">AR-SFT — explanation <em>z</em> → reconstructed activation <em>ĥ</em></h2>
+    <p class="lead">Trains a <strong>critic</strong> (depth-truncated backbone + value head) to reconstruct the activation from text.</p>
+
+    <div class="panel">
+      <div class="lane">Data prep (once, CPU)</div>
+      <div class="flow">
+        <div class="stage accent-data"><div class="t">ar_sft.parquet</div><div class="d">prompt (<strong>string</strong>), <code>activation_vector</code>; optional api_explanation, doc_id</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-data"><div class="t">.nla_meta.yaml sidecar</div><div class="d">d_model, layer_index K, <code>critic_suffix_ids</code>, critic template</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-data"><div class="t">NLADataSource</div><div class="d">string prompt kept verbatim <span class="ref">data_source.py:96-120</span></div></div>
+      </div>
+
+      <div class="lane" style="margin-top:14px">Critic-init checkpoint (one-time preprocessing)</div>
+      <div class="flow">
+        <div class="stage accent-ar"><div class="t">prepare_critic_checkpoint.py</div><div class="d">keep blocks 0..K (K+1 layers), <code>lm_head→Identity</code>, final-LN→Identity, add <code>Linear(d,d)</code> value head <span class="ref">models.py:153-241</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-ar"><div class="t">paths.critic_init_model_id</div><div class="d">standalone HF dir, <code>num_hidden_layers = K+1</code>; AR config points <code>--hf-checkpoint</code> here</div></div>
+      </div>
+
+      <div class="lane" style="margin-top:14px">Per-rollout — <code>sft_critic.generate_rollout</code></div>
+      <div class="flow">
+        <div class="stage accent-ar"><div class="t">get_samples</div><div class="d">Sample.prompt = formatted critic string</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-ar"><div class="t">tokenize</div><div class="d"><code>add_special_tokens=True</code> <span class="ref">sft_critic.py:57</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-ar"><div class="t">verify suffix (once)</div><div class="d">last token = extraction point <span class="ref">sft_critic.py:61-63</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-ar"><div class="t">stash gold h</div><div class="d"><code>MM_ACTIVATION_KEY</code>; response_length=0, loss_mask=[]</div></div>
+      </div>
+
+      <div class="lane" style="margin-top:14px">NLAFSDPActor critic path — <code>_train_step</code> (no injection hook)</div>
+      <div class="flow">
+        <div class="stage accent-key"><div class="t">stash gold + mse_scale</div><div class="d"><code>batch[MM_ACTIVATION_KEY]</code> <span class="ref">train_actor.py:594-598</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-ar"><div class="t">NLACriticModel.forward</div><div class="d">truncated backbone → last_hidden h → <code>value_head(h)</code> = values <span class="ref">models.py:243-253</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-key"><div class="t">extract last token</div><div class="d">suffix-pinned: values at <code>offset+len-1</code> <span class="ref">loss.py:69-74</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-ar"><div class="t">nla_critic_loss</div><div class="d">MSE(normalize(pred), normalize(gold)), per-sample sum <span class="ref">loss.py:44-111</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-ar"><div class="t">backward + step</div><div class="d">explicit forward → loss → backward <span class="ref">train_actor.py:702-712</span></div></div>
+      </div>
+
+      <div class="lane" style="margin-top:14px">Persist &amp; evaluate</div>
+      <div class="flow">
+        <div class="stage accent-ar"><div class="t">save_model → HF</div><div class="d"><code>iter_N/hf/</code> backbone + <code>value_head.safetensors</code> + critic sidecar (stores K) <span class="ref">train_actor.py:848-870, 951-957</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-ar"><div class="t">out-of-process eval</div><div class="d"><code>eval_nano_ar_miles_checkpoint.py</code></div></div>
+      </div>
+    </div>
+
+    <h3>Key mechanics</h3>
+    <ul class="notes">
+      <li><strong>No hook</strong> — the critic consumes explanation tokens directly; the hook is AV-only <span class="ref">train_actor.py:503-506</span>.</li>
+      <li><strong>Critic model</strong>: backbone truncated to K+1 blocks; <code>lm_head</code> &amp; final layernorm → <code>Identity</code>; bias-free <code>Linear(d,d)</code> value head <span class="ref">models.py:137-274</span>.</li>
+      <li><strong>Extraction</strong>: the template ends in a fixed suffix (e.g. <code>&lt;/text&gt; &lt;summary&gt;</code>), so the last real token is the extraction point — no scanning.</li>
+      <li><strong>Loss / scale</strong>: direction-only MSE; <code>mse_scale</code> defaults to <code>sqrt(d_model)</code> <span class="ref">config.py:182-183</span>. Logs <code>fve_nrm</code>, pred/gold norms.</li>
+    </ul>
+  </section>
+
+  <!-- ================= DATA ================= -->
+  <section id="data">
+    <h2>Data flow — parquet → MILES / FSDP2</h2>
+    <div class="panel">
+      <div class="flow">
+        <div class="stage accent-data"><div class="t">objective parquet</div><div class="d">av_sft / ar_sft + <code>.nla_meta.yaml</code></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-data"><div class="t">materialize_splits</div><div class="d">doc-level 0.9/0.05/0.05; <code>train_padded.parquet</code> padded to global_batch <span class="ref">nano_av_materialize_splits.py</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-data"><div class="t">verify dataset</div><div class="d">d_model, finite, marker/suffix, doc-overlap = 0 <span class="ref">verify_nano_miles_*_dataset.py</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-data"><div class="t">NLADataSource</div><div class="d">numpy activation read, <code>&lt;INJECT&gt;→char</code>, <code>gc.freeze()</code></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-key"><div class="t">RolloutManager</div><div class="d"><code>get_samples(rollout_batch_size)</code></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-key"><div class="t">rollout fn</div><div class="d">sft_actor / sft_critic: tokenize + stash activation (debug-train-only, no gen)</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-key"><div class="t">NLAFSDPActor</div><div class="d"><code>_train_core / _train_step</code>, FSDP2 fully_shard</div></div>
+      </div>
+    </div>
+    <ul class="notes">
+      <li>Splits are at the <strong>document</strong> level; train is padded to a multiple of <code>global_batch_size</code> so one epoch yields an integer number of optimizer steps <span class="ref">nano_av_runner.py:367-419</span>.</li>
+      <li><code>activation_vector</code> is read via pure numpy (flatten→reshape) to avoid materializing billions of Python floats; other columns via <code>to_pylist</code> <span class="ref">data_source.py:88-94</span>.</li>
+      <li>Both rollout fns assert <code>evaluation=False</code>, so Miles in-process eval can't drive them — eval is a <strong>separate</strong> script <span class="ref">sft_actor.py:66, sft_critic.py:26</span>.</li>
+    </ul>
+  </section>
+
+  <!-- ================= LAUNCH ================= -->
+  <section id="launch">
+    <h2>Queue → runner → train.py → checkpoint/eval</h2>
+    <div class="panel">
+      <div class="flow">
+        <div class="stage accent-key"><div class="t">1 · Queue driver</div><div class="d">nano_av_probe_queue / nano_ar_hpo_queue: pick pending item, load spec</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-key"><div class="t">2 · prepare_run</div><div class="d"><code>validate_spec</code> → materialize splits → <code>num_rollout = train_rows // global_batch</code> → render command <span class="ref">nano_av_runner.py:71-453</span></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-key"><div class="t">3 · run_plan.json</div><div class="d">command + env (<code>NLA_KEEP_LOCAL</code>, token caps, alloc conf) + run_dir</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-key"><div class="t">4 · miles/train.py</div><div class="d"><code>--train-backend fsdp</code>, <code>--custom-actor-cls-path nla.train_actor.NLAFSDPActor</code></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-key"><div class="t">5 · NLAFSDPActor</div><div class="d">init: resolve config/sidecar, (AV) register hook / (AR) rewire to critic, <code>apply_fsdp2</code></div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-key"><div class="t">6 · train loop</div><div class="d">per rollout: rollout fn → _train_core → _train_step → save at interval, prune to keep_last</div></div>
+        <div class="arrow">→</div><div class="arrow down">→</div>
+        <div class="stage accent-key"><div class="t">7 · eval</div><div class="d">(AV) DCP→HF then eval / (AR) eval HF; report JSON of controls + metrics</div></div>
+      </div>
+    </div>
+    <ul class="notes">
+      <li><strong>Validation is strict</strong>: offline W&amp;B, <code>backend=miles_fsdp2</code>, <code>split_mode=doc</code>, <code>rollout_batch_size == global_batch_size</code>; AV requires <code>injection_scale</code>, AR requires <code>critic_init_model_id</code>; <code>complete-performance</code> forces 0.9/0.05/0.05, full optimizer-state saves and <code>clip</code> grad-norm <span class="ref">nano_av_runner.py:71-200</span>.</li>
+      <li>Shared flags both objectives render: <code>--train-backend fsdp</code>, <code>--custom-actor-cls-path nla.train_actor.NLAFSDPActor</code>, <code>--data-source-path nla.data_source.NLADataSource</code>, <code>--debug-train-only</code>, <code>--disable-compute-advantages-and-returns</code>, <code>--actor-num-gpus-per-node 2</code> <span class="ref">nano_av_runner.py:224-344</span>.</li>
+      <li>The AR HPO queue records each trial to a study JSONL and passes the per-item <code>controls</code> list to eval.</li>
+    </ul>
+  </section>
+
+  <!-- ================= COMPARE ================= -->
+  <section id="compare">
+    <h2>AV vs AR — side by side</h2>
+    <div class="panel">
+      <div class="twocol">
+        <div class="mini" style="border-top:3px solid var(--av)">
+          <div class="t" style="color:var(--av)">AV-SFT (actor)</div>
+          <div class="flow" style="margin-top:6px">
+            <div class="stage"><div class="t">h</div><div class="d">activation</div></div>
+            <div class="arrow">→</div><div class="arrow down">→</div>
+            <div class="stage"><div class="t">full Nano LM</div><div class="d">+ injection hook</div></div>
+            <div class="arrow">→</div><div class="arrow down">→</div>
+            <div class="stage"><div class="t">z</div><div class="d">explanation text</div></div>
+          </div>
+        </div>
+        <div class="mini" style="border-top:3px solid var(--ar)">
+          <div class="t" style="color:var(--ar)">AR-SFT (critic)</div>
+          <div class="flow" style="margin-top:6px">
+            <div class="stage"><div class="t">z</div><div class="d">explanation text</div></div>
+            <div class="arrow">→</div><div class="arrow down">→</div>
+            <div class="stage"><div class="t">truncated critic</div><div class="d">K+1 blocks + value head</div></div>
+            <div class="arrow">→</div><div class="arrow down">→</div>
+            <div class="stage"><div class="t">ĥ</div><div class="d">reconstructed activation</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:6px">
+    <table>
+      <thead><tr><th class="dim">Dimension</th><th class="col-av">AV-SFT</th><th class="col-ar">AR-SFT</th></tr></thead>
+      <tbody>
+        <tr><th class="dim">Direction</th><td class="av">h → z (generate explanation)</td><td class="ar">z → ĥ (reconstruct activation)</td></tr>
+        <tr><th class="dim">Parquet columns</th><td class="av"><code>prompt</code> (list-of-dict), <code>response</code>, <code>activation_vector</code>, n_raw_tokens, activation_layer, doc_id, detokenized_text_truncated</td><td class="ar"><code>prompt</code> (<strong>string</strong>), <code>activation_vector</code>; optional api_explanation, doc_id, detokenized_text_truncated, token_ids_prefix</td></tr>
+        <tr><th class="dim">Prompt format</th><td class="av">chat messages; user content has <code>&lt;INJECT&gt;</code>; assistant = <code>&lt;explanation&gt;…&lt;/explanation&gt;</code></td><td class="ar">single string <code>"Summary of the following text: &lt;text&gt;{explanation}&lt;/text&gt; &lt;summary&gt;"</code> (suffix-pinned)</td></tr>
+        <tr><th class="dim">Rollout fn</th><td class="av"><code>nla.rollout.sft_actor.generate_rollout</code></td><td class="ar"><code>nla.rollout.sft_critic.generate_rollout</code></td></tr>
+        <tr><th class="dim">Model role</th><td class="av">full text LM (<code>NLATextOnlyCausalLM</code>); all params trained</td><td class="ar"><code>NLACriticModel</code> = truncated backbone + <code>Linear(d,d)</code> value head</td></tr>
+        <tr><th class="dim">--hf-checkpoint</th><td class="av">base model (<code>paths.model_id</code>)</td><td class="ar">critic-init dir (<code>paths.critic_init_model_id</code>)</td></tr>
+        <tr><th class="dim">Hook / loss path</th><td class="av">embedding hook injects h; <code>sft_loss</code> on response tokens</td><td class="ar">no hook; <code>custom_loss = nla.loss.nla_critic_loss</code> (normalized MSE at last token)</td></tr>
+        <tr><th class="dim">Key scale knob</th><td class="av"><code>injection_scale</code> (e.g. 75) — REQUIRED</td><td class="ar"><code>mse_scale</code> (default <code>sqrt(d_model)</code>) — direction-only MSE</td></tr>
+        <tr><th class="dim">Output checkpoint</th><td class="av">DCP <code>model/</code> + <code>optimizer/</code> + actor sidecar (stage=sl)</td><td class="ar">HF <code>iter_N/hf/</code> (backbone + <code>value_head.safetensors</code>) + critic sidecar (stores K)</td></tr>
+        <tr><th class="dim">Eval script</th><td class="av"><code>eval_nano_av_miles_checkpoint.py</code></td><td class="ar"><code>eval_nano_ar_miles_checkpoint.py</code></td></tr>
+        <tr><th class="dim">Eval controls</th><td class="av">real, shuffled, zero, mean, none</td><td class="ar">teacher, teacher_shuffled, blank, generic, mean, source_context, source_raw</td></tr>
+        <tr><th class="dim">Eval metrics</th><td class="av">teacher-forced NLL + loss_gap vs shuffled/zero/mean/none; generation text-overlap</td><td class="ar">normalized MSE, cosine_mean, FVE vs mean (<code>fve_nrm</code>), rowwise teacher-win rates, optional bootstrap CIs</td></tr>
+        <tr><th class="dim">Distinct flags</th><td class="av"><code>--loss-type sft_loss</code>, <code>--nla-injection-scale</code>, <code>--rollout-function-path …sft_actor…</code></td><td class="ar"><code>--loss-type custom_loss</code>, <code>--custom-loss-function-path nla.loss.nla_critic_loss</code>, <code>--nla-model-is-critic</code>, <code>--rollout-function-path …sft_critic…</code></td></tr>
+        <tr><th class="dim">Shared spine</th><td colspan="2" style="color:var(--muted)"><code>--train-backend fsdp</code> · <code>nla.train_actor.NLAFSDPActor</code> · <code>nla.data_source.NLADataSource</code> · <code>--debug-train-only</code> · <code>--disable-compute-advantages-and-returns</code> · offline W&amp;B</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ================= FSDP ================= -->
+  <section id="fsdp">
+    <h2>FSDP2 / sharding</h2>
+    <p class="lead">Current runs are pure DP/FSDP over <strong>2 GPUs</strong>, <code>cp_size=1</code>, <code>tp_size=1</code>
+      (asserted <span class="ref">train_actor.py:373-377</span>; <code>--actor-num-gpus-per-node</code> defaults to 2 <span class="ref">nano_av_runner.py:252-254</span>).</p>
+
+    <div class="panel">
+      <div style="text-align:center;color:var(--muted);font-size:12.5px;margin-bottom:8px">
+        Ray actor group (1 node) · mesh = <code>parallel_state.dp_mesh</code> · <code>apply_fsdp2 / fully_shard</code> over transformer blocks + top-level model
+      </div>
+      <div class="gpus">
+        <div class="gpu">
+          <h4 style="color:var(--green)">GPU 0 — Ray actor (rank 0)</h4>
+          <div class="bar"><span class="dot" style="background:var(--green)"></span> model shard 0 — bf16 params (compute)</div>
+          <div class="bar"><span class="dot" style="background:#36a3ff"></span> fp32 master weights — shard 0</div>
+          <div class="bar"><span class="dot" style="background:var(--warn)"></span> Adam optimizer state — shard 0 (~½ of ~118 GiB)</div>
+        </div>
+        <div class="gpu">
+          <h4 style="color:var(--green)">GPU 1 — Ray actor (rank 1)</h4>
+          <div class="bar"><span class="dot" style="background:var(--green)"></span> model shard 1 — bf16 params (compute)</div>
+          <div class="bar"><span class="dot" style="background:#36a3ff"></span> fp32 master weights — shard 1</div>
+          <div class="bar"><span class="dot" style="background:var(--warn)"></span> Adam optimizer state — shard 1 (~½ of ~118 GiB)</div>
+        </div>
+      </div>
+      <div class="nccl">⇄ NCCL: forward <strong>all-gather</strong> params per block · backward <strong>reduce-scatter</strong> grads (fp32 reduce) · <code>torch.cuda.synchronize()</code> bounds the overlap peak <span class="ref">train_actor.py:714-726</span></div>
+      <div class="legend">
+        <span><span class="dot" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--green)"></span> bf16 params (compute)</span>
+        <span><span class="dot" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#36a3ff"></span> fp32 master</span>
+        <span><span class="dot" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--warn)"></span> Adam state (sharded)</span>
+      </div>
+    </div>
+
+    <ul class="notes">
+      <li><strong>Ray actor per GPU</strong>: one <code>NLAFSDPActor</code> (a <code>FSDPTrainRayActor</code>) per GPU; collectives like <code>critic_fwd</code> and the cross-rank MIN truncation are "all ranks must call" <span class="ref">train_actor.py:729-756, 156-180</span>.</li>
+      <li><strong>bf16 / fp32</strong>: MixedPrecision is compute-only; model stored fp32, cast fp32→bf16 on save for smaller checkpoints <span class="ref">train_actor.py:843-856</span>.</li>
+      <li><strong>Optimizer state on sharded params</strong>: a 2-rank Adam checkpoint is ~177 GiB (~59 GiB model + ~118 GiB optimizer); <code>NLA_KEEP_LOCAL=1</code> keeps only the latest exact-resume checkpoint.</li>
+      <li><strong>Stability fixes</strong>: non-reentrant gradient checkpointing (<code>use_reentrant=False</code>) <span class="ref">train_actor.py:492-496</span>; DCP object/metadata collectives routed through a Gloo PG while training stays on NCCL (Miles patch 0006).</li>
+    </ul>
+  </section>
+
+  <!-- ================= REFS ================= -->
+  <section id="refs">
+    <h2>Code references &amp; caveats</h2>
+
+    <div class="warnbox panel" style="background:#1b1607">
+      <h3>Uncertainties — needs verification</h3>
+      <ul class="notes">
+        <li><span class="badge">verify</span><strong>R27 layer counts.</strong> Code grounds <code>critic num_hidden_layers = K+1</code> (K = extraction layer index) <span class="ref">models.py:185-192; train_actor.py:426-431, 951-957</span>, but docs disagree on the concrete R27 numbers and the base <code>config.json</code> was not mountable this session.</li>
+        <li><span class="badge">verify</span><strong>apply_fsdp2 wrapping policy</strong> (exact modules wrapped, reshard-after-forward, MixedPrecision dtypes) lives in the external pinned Miles checkout, not this repo.</li>
+        <li><span class="badge">verify</span><strong>mse_scale</strong> default = <code>sqrt(d_model)</code> <span class="ref">config.py:182-183</span> unless a sidecar carries a concrete value — confirm per run via its <code>run_spec.yaml</code>/sidecar.</li>
+        <li><span class="badge">verify</span><strong>Exact AR eval arithmetic</strong> (normalized_mse / fve_nrm aggregation) was summarized from the eval script, not line-verified here.</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>Primary source index</h3>
+      <ul class="notes">
+        <li><code>nla/train_actor.py</code> — NLAFSDPActor: init/role dispatch 318-509, hook 573-590, inputs/use_cache 592-625, _train_step 702-727, critic_fwd 729-756, _train_core 775-836, save_model 838-888, sidecar 951-972.</li>
+        <li><code>nla/injection.py</code> — inject_at_marked_positions 11-93.</li>
+        <li><code>nla/models.py</code> — NLACriticModel 137-274; from_pretrained 153-241; forward 243-253.</li>
+        <li><code>nla/loss.py</code> — nla_critic_loss 44-111.</li>
+        <li><code>nla/data_source.py</code> — NLADataSource 33-129.</li>
+        <li><code>nla/rollout/sft_actor.py</code> 65-122 · <code>nla/rollout/sft_critic.py</code> 25-75 · <code>nla/scripts/prepare_critic_checkpoint.py</code>.</li>
+        <li><code>nla/config.py</code> — scale/sidecar resolution 97-203.</li>
+        <li><code>scripts/nano_av_runner.py</code> — validation 71-200, rendering 224-344, prepare_run 347-453; plus <code>nano_av_materialize_splits.py</code>, <code>verify_nano_miles_{av,ar}_dataset.py</code>, <code>eval_nano_{av,ar}_miles_checkpoint.py</code>, queues.</li>
+        <li>Configs: <code>configs/nano_av/hpo/r33_20k_lr_smoke_queue.yaml</code>, <code>configs/nano_av/layer_probe/r33_av_probe_20k_lr1e5_128steps_seq1152.yaml</code>, <code>configs/nano_ar/hpo/r33_mini_probe_20k_lr2e5_cosine_128steps.yaml</code>.</li>
+      </ul>
+      <p style="color:var(--muted);font-size:12.5px">Docs used as context only (not architecture proof): <code>runai_miles_fsdp2_integration.md</code>, <code>nano_av_run_history.md</code>, <code>nano_av_job_tracker.md</code>, <code>experiment_logbook.md</code>, AR geometry-staging spec &amp; revised-diagnostics plan.</p>
+    </div>
+  </section>
+
+  <footer>
+    Companion to <span class="pill">docs/nano_nla_training_process_visualized.md</span> · generated 2026-06-10 · architecture grounded in code/configs; run results are context only.
+  </footer>
+</div>
+
+<script>
+  const tabs=document.getElementById('tabs');
+  const secs=[...document.querySelectorAll('section')];
+  tabs.addEventListener('click',e=>{
+    const b=e.target.closest('.tab'); if(!b)return;
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===b));
+    const id=b.dataset.t;
+    secs.forEach(s=>s.classList.toggle('show',s.id===id));
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+</script>
+</body>
+</html>

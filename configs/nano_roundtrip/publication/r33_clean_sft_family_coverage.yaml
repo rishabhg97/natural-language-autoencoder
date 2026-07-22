@@ -1,0 +1,44 @@
+schema_version: nano_content_family_build.v1
+batch_size: 8192
+
+family_sources:
+  - name: r33_clean_av_train
+    path: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/train.parquet
+    split: train
+    text_field: detokenized_text_truncated
+  - name: r33_clean_av_validation
+    path: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/validation.parquet
+    split: validation
+    text_field: detokenized_text_truncated
+  - name: r33_clean_av_test
+    path: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/test.parquet
+    split: test
+    text_field: detokenized_text_truncated
+
+exposure_sources:
+  - name: r33_clean_av_train
+    path: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/train.parquet
+  - name: r33_clean_ar_train
+    path: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean/nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/splits/train.parquet
+
+candidate_sources:
+  - name: r33_clean_av_validation
+    split: validation
+    path: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/validation.parquet
+  - name: r33_clean_av_test
+    split: test
+    path: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-av-sft-r33-deterministic-family-clean/nano-av-r33-publication-deterministic-family-clean-8gpu-pospass-lr1e4-warmup25-gb192-mb2-dyn4096/splits/test.parquet
+
+algorithm:
+  shingle_width: 5
+  similarity_threshold: 0.80
+  signature_size: 32
+  candidate_min_shared: 4
+  max_signature_bucket_size: 256
+
+holdout:
+  minimum_rows_per_split: 512
+
+outputs:
+  manifest_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_confirmatory_families_exact_prefix/r33_confirmatory_family_manifest.json
+  coverage_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_confirmatory_families_exact_prefix/r33_clean_sft_family_coverage.json

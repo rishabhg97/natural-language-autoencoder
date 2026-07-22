@@ -1,0 +1,42 @@
+{
+ "kind": "rows",
+ "rows": [
+  {
+   "activation_norm": 100.0,
+   "av_text": "Synthetic learned description 1 of a stored activation.",
+   "claim_scope": "stored_snapshot",
+   "content_family_id": "cf_fixture_1",
+   "doc_id": "synthetic:corpus:1",
+   "n_raw_tokens": 32,
+   "release_status": "synthetic_fixture",
+   "row_id": "validation-1",
+   "row_index": 1,
+   "source_text": "Synthetic source text 1: a fixture sentence about weather patterns. tok3 tok4 tok5",
+   "stratum": {
+    "bucket": "fixture",
+    "index": 1
+   },
+   "teacher_text": "Synthetic teacher encoding 1 of a stored activation.",
+   "token_position": 8
+  },
+  {
+   "activation_norm": 101.0,
+   "av_text": "Synthetic learned description 2 of a stored activation.",
+   "claim_scope": "stored_snapshot",
+   "content_family_id": "cf_fixture_2",
+   "doc_id": "synthetic:corpus:2",
+   "n_raw_tokens": 33,
+   "release_status": "synthetic_fixture",
+   "row_id": "validation-2",
+   "row_index": 2,
+   "source_text": "Synthetic source text 2: a fixture sentence about weather patterns. tok3 tok4 tok5",
+   "stratum": {
+    "bucket": "fixture",
+    "index": 2
+   },
+   "teacher_text": "Synthetic teacher encoding 2 of a stored activation.",
+   "token_position": 9
+  }
+ ],
+ "schema_version": "nla_observatory_dashboard.v2"
+}

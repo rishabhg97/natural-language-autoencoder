@@ -1,0 +1,58 @@
+diff --git a/miles/backends/fsdp_utils/actor.py b/miles/backends/fsdp_utils/actor.py
+index 77f3c4d..8f54ad2 100644
+--- a/miles/backends/fsdp_utils/actor.py
++++ b/miles/backends/fsdp_utils/actor.py
+@@ -7,6 +7,7 @@ import ray
+ import torch
+ import torch.distributed as dist
+ from nla.audit_runtime import aggregate_train_losses_by_key, clip_grad_norm_local_shards
++from nla.lr_policy import apply_fsdp_live_lr_policy
+ try:
+     from ring_flash_attn import update_ring_flash_attn_params
+ except Exception:
+@@ -182,27 +183,22 @@ class FSDPTrainRayActor(TrainRayActor):
+         checkpoint_payload = checkpoint.load(self)
+ 
+-        # Checkpoint-loaded scheduler state can carry stale bounds that drive
+-        # lr→0 on resume. Refresh those bounds, but preserve requested decay
+-        # for fresh SFT/finetune runs. Use NLA_FORCE_CONSTANT_LR=1 only when a
+-        # stale optimizer+scheduler resume really needs the old safety valve.
+-        force_constant_lr = os.environ.get("NLA_FORCE_CONSTANT_LR", "").strip().lower() in {"1", "true", "yes", "on"}
+-        requested_style = str(getattr(args, "lr_decay_style", "constant") or "constant")
+-        fresh_sft = bool(getattr(args, "finetune", False) or getattr(args, "no_load_optim", False))
+-        stale_resume = bool(getattr(args, "load", None)) and not fresh_sft
+-        if requested_style.lower() in {"", "constant", "none"} or force_constant_lr or stale_resume:
+-            min_lr = float(args.lr)
+-            style = "constant"
+-        else:
+-            min_lr = float(getattr(args, "min_lr", 0.0) or 0.0)
+-            style = requested_style
+-
+-        self.lr_scheduler.max_lr = float(args.lr)
+-        self.lr_scheduler.min_lr = min_lr
+-        self.lr_scheduler.lr_decay_style = style
+-        for pg in self.optimizer.param_groups:
+-            pg["lr"] = float(args.lr)
+-            pg["max_lr"] = float(args.lr)
+-            pg["min_lr"] = min_lr
+-        logger.info(f"[FSDP] scheduler live: lr={args.lr}, decay={style}, min_lr={min_lr}")
++        # Refresh config bounds after checkpoint loading, then recompute the
++        # live optimizer LR at the restored scheduler epoch. A resume alone
++        # must never flatten a requested decay schedule.
++        lr_policy = apply_fsdp_live_lr_policy(
++            self.lr_scheduler,
++            self.optimizer,
++            args,
++        )
++        logger.info(
++            "[FSDP] scheduler live: lr=%s, decay=%s, min_lr=%s, "
++            "last_epoch=%s, live_lrs=%s, resumed_optimizer=%s",
++            args.lr,
++            lr_policy["style"],
++            lr_policy["min_lr"],
++            lr_policy["last_epoch"],
++            lr_policy["live_lrs"],
++            lr_policy["resumed_optimizer"],
++        )
+ 
+         # Create separate ref model if needed (kept in CPU until needed)

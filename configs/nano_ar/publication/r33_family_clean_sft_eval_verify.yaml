@@ -1,0 +1,23 @@
+schema_version: nano_ar_eval_verifier.v1
+report_json: /workspace/models/nano30b-nla-pilot/publication/miles-fsdp2-ar-sft-r33-deterministic-family-clean/nano-ar-r33-publication-deterministic-family-clean-4gpu-unfusedtorchconv-expertscan-cudablock-lr5e5-warmup25-gb192-mb48/eval_iter_0001291_v512_t512_winrates_report.json
+output_json: /workspace/interp/outputs/nano30b-nla-pilot/publication/evidence/20260715_r33_clean_ar/eval_verifier.json
+
+expected:
+  eval_splits: [validation]
+  counts:
+    validation: 512
+  required_controls: [teacher, teacher_shuffled, blank, generic, mean, source_context, source_raw]
+  teacher_must_beat: [teacher_shuffled, blank, generic, mean, source_context]
+  max_teacher_normalized_mse: 0.30
+  min_teacher_cosine: 0.85
+  min_teacher_fve_nrm: 0.55
+  min_teacher_control_nmse_gap: 0.0
+  min_teacher_rowwise_win_fraction:
+    teacher_shuffled: 0.99
+    blank: 0.98
+    generic: 0.98
+    mean: 0.98
+    source_context: 0.55
+  min_centered_raw_r2_for_magnitude_claim: 0.0
+  require_raw_magnitude_claim: false
+  forbid_unrequested_rows: true

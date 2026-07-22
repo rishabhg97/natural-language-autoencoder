@@ -1,0 +1,38 @@
+schema_version: nano_publication_family_split.v1
+base_manifest: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v2/r33_exact_prefix_refined_base_manifest.json
+prior_evaluation_globs:
+  - /workspace/interp/outputs/nano30b-nla-pilot/**/splits/validation.parquet
+  - /workspace/interp/outputs/nano30b-nla-pilot/**/splits/test.parquet
+
+# Cluster prior evaluation documents jointly with the canonical R33 snapshot.
+# This distinguishes actual R33 family exposure from historical documents that
+# are outside the candidate universe, while leaving missing text fail-closed.
+joint_family_resolution:
+  enabled: true
+  require_exact_base_document_coverage: true
+  base_content_sources:
+    - path: /workspace/interp/outputs/nano30b-nla-pilot/publication/r33_deterministic_full275396/base_R33_r33_deterministic_full275396.parquet
+      doc_id_column: doc_id
+      text_column: detokenized_text_truncated
+  algorithm:
+    shingle_width: 5
+    similarity_threshold: 0.80
+    signature_size: 32
+    candidate_min_shared: 4
+    max_signature_bucket_size: 256
+
+split_assignment:
+  seed: 20260715
+  weights:
+    train: 0.90
+    validation: 0.05
+    test: 0.05
+requirements:
+  min_test_rows: 512
+  min_test_families: 100
+  max_unmapped_prior_documents: 0
+outputs:
+  manifest_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v4_joint_audit/r33_confirmatory_family_manifest.json
+  report_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v4_joint_audit/r33_confirmatory_family_split_report.json
+  exposure_inventory_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v4_joint_audit/r33_prior_evaluation_exposure_inventory.json
+  joint_family_manifest_json: /workspace/interp/outputs/nano30b-nla-pilot/confirmatory/r33_content_families_v4_joint_audit/r33_joint_historical_candidate_family_manifest.json

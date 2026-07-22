@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NLA Round-Trip — Qwen reference vs Nano30B (Visualized)</title>
+<style>
+  :root{
+    --bg:#0b0f0c; --card:#141a16; --card2:#0f1411; --card3:#10160f;
+    --ink:#e8f0ea; --muted:#9fb3a6; --faint:#6f8377; --line:#26332b; --line2:#34453a;
+    --green:#76b900; --green-dim:#4d7a06;
+    --av:#9bd313; --ar:#36a3ff; --warn:#ffb454; --bad:#ff7a8a;
+    --qwen:#e0a14a; --nano:#76b900;
+    --mamba:#36a3ff; --moe:#a78bfa; --attn:#ff7a8a; --tfm:#7fae3a;
+    --chip:#1c241e; --code:#0c100d;
+    --shadow:0 1px 0 #ffffff0a, 0 14px 34px #00000060;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:radial-gradient(1200px 700px at 72% -10%, #13201312, #0b0f0c 60%) fixed, var(--bg);color:var(--ink);
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--green);text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:1180px;margin:0 auto;padding:30px 22px 90px}
+  code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  code{background:var(--code);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.86em;color:#cfe6c0}
+
+  /* header */
+  .kicker{color:var(--green);font-weight:700;letter-spacing:.13em;text-transform:uppercase;font-size:12px}
+  h1{font-size:29px;margin:6px 0 2px;font-weight:800;letter-spacing:-.01em}
+  .sub{color:var(--muted);max-width:880px;margin:4px 0 0}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:14px;color:var(--muted);font-size:12.5px}
+  .legend b{color:var(--ink)}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+  /* model toggle */
+  .toggleRow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:18px 0 4px}
+  .seg{display:inline-flex;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+  .seg button{cursor:pointer;border:0;background:transparent;color:var(--muted);font-weight:700;font-size:13.5px;
+    padding:9px 16px;border-radius:9px;transition:.16s;font-family:inherit;display:flex;flex-direction:column;gap:1px;align-items:flex-start}
+  .seg button small{font-weight:600;font-size:10.5px;opacity:.7;letter-spacing:.02em}
+  .seg button:hover{color:var(--ink)}
+  .seg button.on[data-m="qwen"]{background:linear-gradient(180deg,#3a2c12,#2a2009);color:var(--qwen);box-shadow:inset 0 0 0 1px #6b4e1f}
+  .seg button.on[data-m="nano"]{background:linear-gradient(180deg,#21300d,#172307);color:var(--nano);box-shadow:inset 0 0 0 1px #3f5a0c}
+  .toggleHint{color:var(--faint);font-size:12.5px}
+
+  /* tabs */
+  nav.tabs{position:sticky;top:0;z-index:30;display:flex;gap:6px;flex-wrap:wrap;
+    padding:12px 0;margin:14px 0 8px;background:linear-gradient(var(--bg),var(--bg) 72%,#0b0f0c00);
+    border-bottom:1px solid var(--line)}
+  .tab{cursor:pointer;border:1px solid var(--line);background:var(--card2);color:var(--muted);
+    padding:8px 14px;border-radius:10px;font-size:13px;font-weight:650;white-space:nowrap;transition:.14s}
+  .tab:hover{color:var(--ink);border-color:var(--line2)}
+  .tab.active{color:#0b0f0c;background:var(--green);border-color:var(--green)}
+
+  section{display:none;animation:fade .28s ease}
+  section.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+  h2{font-size:20px;margin:20px 0 2px;font-weight:760}
+  h2 .modeTag{font-size:13px;font-weight:700;padding:2px 9px;border-radius:999px;margin-left:8px;vertical-align:2px}
+  h3{font-size:12.5px;margin:16px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;font-weight:700}
+  p{color:#d3e0d7}.lead{color:var(--muted);margin-top:2px}
+
+  .panel{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);
+    border-radius:16px;padding:18px;box-shadow:var(--shadow);margin:14px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr}}
+
+  .chip{display:inline-block;background:var(--chip);border:1px solid var(--line);color:var(--muted);
+    padding:3px 10px;border-radius:999px;font-size:12px;margin:2px 4px 2px 0}
+  .chip.k{color:var(--ink)} .chip.warn{color:var(--warn);border-color:#5e451c}
+  .chip.av{color:var(--av);border-color:#3f5e0c} .chip.ar{color:var(--ar);border-color:#1d4a6e}
+  .qtag{background:#3a2c12;color:var(--qwen);border:1px solid #6b4e1f}
+  .ntag{background:#21300d;color:var(--nano);border:1px solid #3f5a0c}
+
+  /* value flash on model switch */
+  .val{transition:background .2s,color .2s}
+  .flash{animation:flash 1.1s ease}
+  @keyframes flash{0%{background:#76b90033;border-radius:5px}100%{background:transparent}}
+
+  /* round-trip pipeline strip */
+  .pipe{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:6px 0 4px}
+  .node{flex:1 1 130px;min-width:120px;cursor:pointer;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:11px 12px;position:relative;transition:.16s}
+  .node:hover{border-color:var(--line2)}
+  .node .ln{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;margin-bottom:3px}
+  .node .nt{font-weight:760;font-size:14px}
+  .node .ns{color:var(--muted);font-size:11.5px;margin-top:2px}
+  .node.active{border-color:var(--green);background:linear-gradient(180deg,#1a2412,#121a0e);box-shadow:0 0 0 1px var(--green-dim),0 10px 24px #0007}
+  .node.done{opacity:.92}
+  .node .num{position:absolute;top:8px;right:10px;font-size:10px;color:var(--faint);font-weight:700}
+  .lane-extract .ln{color:#8fd0ff}.lane-encode .ln{color:var(--av)}.lane-decode .ln{color:var(--ar)}.lane-measure .ln{color:var(--warn)}
+  .arrow{display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:20px;padding:0 4px;flex:0 0 auto}
+  @media(max-width:760px){.arrow{display:none}.pipe{flex-direction:column}}
+
+  .controls{display:flex;align-items:center;gap:10px;margin:14px 0 2px;flex-wrap:wrap}
+  .btn{cursor:pointer;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font-weight:700;
+    padding:8px 14px;border-radius:10px;font-size:13px;font-family:inherit;transition:.14s}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.primary{background:var(--green);color:#0b0f0c;border-color:var(--green)}
+  .btn:disabled{opacity:.4;cursor:default}
+  .prog{color:var(--muted);font-size:13px;margin-left:4px}
+  .prog b{color:var(--ink)}
+
+  .stage{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start}
+  @media(max-width:820px){.stage{grid-template-columns:1fr}}
+  .stageViz{background:var(--card3);border:1px solid var(--line);border-radius:14px;padding:14px;min-height:230px;display:flex;align-items:center;justify-content:center}
+  .stageViz svg{width:100%;height:auto;max-height:280px}
+  .stageText .lab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--green)}
+  .stageText h4{margin:4px 0 6px;font-size:18px;font-weight:780}
+  .kv{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+  .note{background:var(--code);border-left:3px solid var(--line2);border-radius:0 8px 8px 0;padding:9px 12px;color:var(--muted);font-size:12.7px;margin-top:10px}
+  .note.warn{border-left-color:var(--warn)} .note.av{border-left-color:var(--av)} .note.ar{border-left-color:var(--ar)}
+  .expl{font-family:ui-monospace,monospace;font-size:12.5px;color:#cfe6c0;background:var(--code);border:1px dashed var(--line2);
+    border-radius:10px;padding:11px 12px;margin-top:8px;line-height:1.5}
+  .expl .tag{color:var(--av)}
+
+  /* anatomy */
+  .anatomyWrap{overflow-x:auto;padding:8px 2px 2px}
+  .blkLegend{display:flex;gap:16px;flex-wrap:wrap;margin:6px 0 2px;font-size:12.5px;color:var(--muted)}
+
+  /* internals cards */
+  .stk{display:flex;flex-direction:column;gap:3px;margin:8px 0}
+  .blk{border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:12.5px;background:var(--card3);display:flex;justify-content:space-between;gap:8px}
+  .blk.muted{opacity:.4;border-style:dashed} .blk.hot{border-color:var(--green);color:#dff3c6}
+  .blk.head{border-color:var(--line2);font-weight:700;background:var(--card)}
+  .blk small{color:var(--faint)}
+
+  /* RL diagram */
+  .rl{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
+  .rlnode{flex:1 1 150px;min-width:140px;border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--card3)}
+  .rlnode .rt{font-weight:740;font-size:13.5px}.rlnode .rd{color:var(--muted);font-size:11.8px;margin-top:3px}
+  .rlnode.av{border-color:#3f5e0c}.rlnode.ar{border-color:#1d4a6e}.rlnode.roll{border-color:#5e451c}
+
+  /* compare table */
+  table{width:100%;border-collapse:collapse;font-size:13.2px;margin-top:6px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+  td.axis{color:var(--muted);font-weight:600;width:21%}
+  td.qwen{color:#f0c48f} td.nano{color:#bfe88a}
+  tr.diff td.axis::after{content:"≠";color:var(--warn);float:right;font-weight:800}
+  tr.same td.axis::after{content:"=";color:var(--green-dim);float:right;font-weight:800}
+  tr:hover td{background:#ffffff05}
+  .cellnote{display:block;color:var(--faint);font-size:11.4px;margin-top:2px;font-weight:400}
+
+  /* current numbers */
+  .cnCard{margin:12px 0}
+  .cnScale{font-size:10px;font-weight:600;color:var(--faint);text-transform:none;letter-spacing:0;margin-left:8px;background:var(--code);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+  .cnHead{background:var(--code);border:1px solid #3f5a0c;border-radius:10px;padding:9px 12px;font-size:13px;color:#dff3c6;margin:8px 0}
+  .cnWin{color:var(--green)}
+  .cnRow{display:flex;align-items:center;gap:10px;margin:3px 0}
+  .cnRow.hot .cnLab{color:var(--ink);font-weight:700}
+  .cnLab{flex:0 0 172px;font-size:12px;color:var(--muted)}
+  .cnTrack{flex:1;position:relative;height:16px;background:var(--card3);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+  .cnFill{height:100%;border-radius:4px 0 0 4px;transition:width .4s ease}
+  .cnTick{position:absolute;top:-2px;width:2px;height:20px;background:var(--ink);opacity:.6}
+  .cnNum{flex:0 0 130px;text-align:right;font-family:ui-monospace,monospace;font-size:11.5px;color:var(--ink)}
+  .cnT{color:var(--faint)}
+  .cnGroup{margin:6px 0}
+  .cnGrpRow{display:flex;align-items:center;gap:10px;margin:6px 0}
+  .cnGrpBars{flex:1;display:flex;flex-direction:column;gap:3px}
+  .cnMini{display:flex;align-items:center;gap:8px}
+  .cnMiniTag{flex:0 0 34px;font-size:10px;font-weight:700;color:var(--muted)}
+  .cnMiniTrack{flex:1;height:12px;background:var(--card3);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .cnMiniNum{flex:0 0 72px;text-align:right;font-family:ui-monospace,monospace;font-size:10.5px;color:var(--muted)}
+  footer{margin-top:30px;color:var(--faint);font-size:12.3px;border-top:1px solid var(--line);padding-top:16px}
+  footer b{color:var(--muted)} footer code{font-size:11px}
+  .caveat{background:#1a1408;border:1px solid #5e451c;border-radius:10px;padding:10px 13px;color:#e9c890;font-size:12.5px;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Natural Language Autoencoders · interpretability</div>
+    <h1>NLA Round-Trip — Qwen reference vs Nano30B</h1>
+    <p class="sub">Watch one activation vector make the round trip <code>h → text → ĥ</code> through the
+      <b style="color:var(--av)">AV</b> (Activation Verbalizer, vector→text) and <b style="color:var(--ar)">AR</b>
+      (Activation Reconstructor, text→vector). Flip the model toggle to morph the geometry, the slice point, and the
+      architecture between the reference Qwen NLA and our Nemotron-Nano-30B pilot — differences flash as you switch.</p>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--av)"></span><b>AV</b> actor · vector→text</span>
+      <span><span class="dot" style="background:var(--ar)"></span><b>AR</b> critic · text→vector</span>
+      <span><span class="dot" style="background:var(--mamba)"></span>Mamba-2</span>
+      <span><span class="dot" style="background:var(--moe)"></span>MoE</span>
+      <span><span class="dot" style="background:var(--attn)"></span>Attention (GQA)</span>
+      <span><span class="dot" style="background:var(--tfm)"></span>Transformer block</span>
+    </div>
+  </header>
+
+  <div class="toggleRow">
+    <div class="seg" id="modelToggle">
+      <button data-m="qwen">Qwen2.5-7B<small>reference (paper)</small></button>
+      <button data-m="nano" class="on">Nemotron-Nano-30B<small>our pilot · R33</small></button>
+    </div>
+    <span class="toggleHint">↳ toggle morphs every panel · <span id="curModel" style="font-weight:700"></span></span>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <div class="tab active" data-tab="roundtrip">① Round-trip</div>
+    <div class="tab" data-tab="anatomy">② Model anatomy (sliced open)</div>
+    <div class="tab" data-tab="internals">③ AV &amp; AR internals</div>
+    <div class="tab" data-tab="rl">④ RL training loop</div>
+    <div class="tab" data-tab="compare">⑤ Compare</div>
+    <div class="tab" data-tab="current">⑥ Current numbers</div>
+  </nav>
+
+  <!-- ROUND TRIP -->
+  <section id="tab-roundtrip" class="show">
+    <h2>The round trip <span class="modeTag" id="rtModeTag"></span></h2>
+    <p class="lead">Step through the five stages. The pipeline is identical in <i>shape</i> for both models — only the numbers, the slice point, and the backbone change.</p>
+    <div class="panel">
+      <div class="pipe" id="rtPipeline"></div>
+      <div class="controls">
+        <button class="btn" id="btnPrev">‹ Prev</button>
+        <button class="btn primary" id="btnPlay">▶ Play</button>
+        <button class="btn" id="btnNext">Next ›</button>
+        <span class="prog" id="rtProgress"></span>
+      </div>
+      <div style="border-top:1px solid var(--line);margin:14px 0 4px"></div>
+      <div class="stage" id="rtDetail"></div>
+    </div>
+  </section>
+
+  <!-- ANATOMY -->
+  <section id="tab-anatomy">
+    <h2>Model anatomy — where we slice it open <span class="modeTag" id="anModeTag"></span></h2>
+    <p class="lead" id="anLead"></p>
+    <div class="panel">
+      <div class="blkLegend" id="anLegend"></div>
+      <div class="anatomyWrap" id="anatomySvg"></div>
+      <div id="anatomyNotes"></div>
+    </div>
+  </section>
+
+  <!-- INTERNALS -->
+  <section id="tab-internals">
+    <h2>AV &amp; AR internals <span class="modeTag" id="inModeTag"></span></h2>
+    <p class="lead">Same recipe for both models: the <b style="color:var(--av)">AV</b> is the <i>full parent</i> with an
+      injection hook; the <b style="color:var(--ar)">AR</b> is the parent <i>truncated</i> to the boundary, final LayerNorm swapped for Identity, plus a linear value head.</p>
+    <div class="grid2">
+      <div class="panel" id="avCard"></div>
+      <div class="panel" id="arCard"></div>
+    </div>
+  </section>
+
+  <!-- RL -->
+  <section id="tab-rl">
+    <h2>RL training loop <span class="modeTag" id="rlModeTag"></span></h2>
+    <p class="lead">After AV-SFT and AR-SFT, both are refined together: the AV is a GRPO <b>actor</b>; the AR is the live <b>reward model / critic</b>. The reward is just the reconstruction quality of what the AV said.</p>
+    <div class="panel">
+      <div class="rl" id="rlDiagram"></div>
+      <div id="rlNotes"></div>
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section id="tab-compare">
+    <h2>Qwen reference vs Nano30B — every axis</h2>
+    <p class="lead"><span style="color:var(--green-dim);font-weight:700">=</span> shared / commonality &nbsp;·&nbsp; <span style="color:var(--warn);font-weight:700">≠</span> differs. The whole NLA <i>recipe</i> is shared; what changes is the backbone family, the geometry, and the slice point.</p>
+    <div class="panel"><table id="compareTable"></table></div>
+  </section>
+
+  <!-- CURRENT NUMBERS -->
+  <section id="tab-current">
+    <h2>Current numbers — R33 component-full hero <span class="chip ntag" style="vertical-align:3px">Nano · 2026-06-21 eval</span></h2>
+    <p class="lead" id="cnLead"></p>
+    <div id="cnBody"></div>
+  </section>
+
+  <footer id="footer"></footer>
+</div>
+
+<script>
+/* ============================ DATA ============================ */
+const NANO_PATTERN = "MEMEM*EMEMEM*EMEMEM*EMEMEM*EMEMEM*EMEMEMEM*EMEMEMEME"; // 52 blocks
+const nanoBlocks = NANO_PATTERN.split(""); // 'M' | 'E' | '*'
+const qwenBlocks = Array.from({length:28}, ()=>'T');
+
+const MODELS = {
+  qwen: {
+    key:"qwen", short:"Qwen", color:"var(--qwen)", tagClass:"qtag",
+    name:"Qwen2.5-7B-Instruct",
+    family:"Dense transformer — homogeneous stack",
+    blocks:28, blockTypes:qwenBlocks,
+    dModel:3584,
+    tapName:"L20", tapBlockIdx:20, tapDepthPct:71,
+    boundary:"residual after layer 20 (hidden_states[21]) — post-attention",
+    boundaryShort:"post-attention residual",
+    injScale:"√d_model ≈ 59.9", injScaleVal:59.9,
+    avParams:"7.6B (full parent)",
+    arParams:"5.44B · truncated to 21 of 28 layers (≈0.71×)",
+    arTrunc:"21 of 28 layers",
+    marker:"rare marker token (e.g. ㊗), from sidecar",
+    pipeline:"AR-SFT → AV-SFT → joint GRPO RL — all run (paper)",
+    status:"Reference implementation, fully trained through RL",
+    explHTML:"Mentions of scheduled events and calendar dates — appointments, deadlines, and time-bound commitments.",
+    explReal:false, explMeta:"",
+    scoreScale:{max:2.0, teacher:null, oracle:null, anchors:[[0.72,"variance"],[0.94,"mean-norm"],[2,"random"]]},
+    teacherNMSE:null, oracleNMSE:null,
+    roundtrip:"Paper reports strong round-trip reconstruction across layers.",
+    extra:"Clean homogeneous stack: the tapped residual at L20 is the same object type the embedding feeds into 20 attention+MLP blocks later."
+  },
+  nano: {
+    key:"nano", short:"Nano", color:"var(--nano)", tagClass:"ntag",
+    name:"NVIDIA-Nemotron-3-Nano-30B-A3B",
+    family:"Hybrid — Mamba-2 / MoE / GQA-attention (NemotronHBlock)",
+    blocks:52, blockTypes:nanoBlocks,
+    dModel:2688,
+    tapName:"R33", tapBlockIdx:33, tapDepthPct:63,
+    boundary:"enters block 33 (attention), reads out block 32 (Mamba) — post-Mamba / pre-attention",
+    boundaryShort:"post-Mamba / pre-attention",
+    injScale:"75 — inherited from R27, never re-derived ⚠", injScaleVal:75,
+    avParams:"31.6B (full parent)",
+    arParams:"truncated critic to the R33 region (parent truncated, like Qwen's AR)",
+    arTrunc:"truncated to the boundary",
+    marker:"rare marker token, from nla_meta.yaml sidecar",
+    pipeline:"AR-SFT ✓ → AV-SFT ✓ → RL GATED (not yet run)",
+    status:"Pilot · R33 AV+AR hero gate passed 2026-06-21 · RL blocked until R33 round-trip beats R27",
+    explHTML:`<b>Syntax/continuation feature:</b> The prefix ends with the coordinating conjunction "and", predicting a following clause or phrase to complete the coordination.<br><b>Discourse/semantic feature:</b> The speaker is describing a problem with a user's account not being auto-registered and having to manually add them, setting up expectation for a solution or consequence.<br><b>Genre/register feature:</b> Informal, first-person narrative typical of a forum or support-ticket post, with casual diction and contractions.<br><b>Final-token constraint:</b> The token "and" requires a syntactic complement (e.g., a verb phrase or noun phrase) to satisfy the coordination.`,
+    explReal:true, explMeta:"split=validation · row 247872 · doc HuggingFaceFW/fineweb:train:13983 · parsed closed+usable · roundtrip_iter_0001291_v256_t256_report_generated.jsonl",
+    scoreScale:{max:1.0, teacher:0.305, oracle:0.088, anchors:[[0.677,"predict-mean"],[0.952,"shuffled"]]},
+    teacherNMSE:0.305, oracleNMSE:0.088,
+    roundtrip:"R33 gate PASSED (2026-06-21): AV-generated text reconstructs ≈ as well as teacher text; parse 1.0; beats mean/zero/shuffled/none controls.",
+    extra:"Mathematically odd (Track A): an R33 (block-32) residual is injected at the embedding and must traverse 33 heterogeneous blocks (Mamba→MoE→GQA) — not a homogeneous stack. Kept as the paper-faithful baseline."
+  }
+};
+
+/* ---- real current numbers (user-provided; 2026-06-21 evals, shown 2026-06-23) ---- */
+const CN = {
+  src:{
+    reports:"tmp/visualizer_metrics/20260621T155000Z_r33_component_full_hero/reports/",
+    archive:"artifacts/runai_sync/20260621T155000Z_r33_component_full_hero/…_compact.tgz",
+    r27:"…/roundtrip/r27_baseline/r27_roundtrip_v256_t256_full_controls_prefix256_report.json"
+  },
+  ar_nmse_512:{
+    validation:{teacher:0.320616454,shuffled:0.972236335,blank:0.775743842,generic:0.786867797,mean:0.697342694,source_context:0.326974571,source_raw:0.09508387},
+    test:{teacher:0.292730153,shuffled:0.931849957,blank:0.73820889,generic:0.744550049,mean:0.656471729,source_context:0.319841951,source_raw:0.080078185}
+  },
+  av_nll_512:{
+    validation:{real:0.798672001,shuffled:1.33109504,zero:1.167483431,mean:1.241661591,none:1.224771878},
+    test:{real:0.81999349,shuffled:1.361868225,zero:1.196864693,mean:1.287035466,none:1.259838899}
+  },
+  rt_r33_256:{
+    validation:{av_real:0.00010968,teacher:0.00010681,mean:0.000257484,av_mean:0.000333387,av_none:0.000333587,av_zero:0.000335282,av_shuffled:0.000370759,parse_closed:1.0,parse_usable:1.0},
+    test:{av_real:0.000121664,teacher:0.00011237,mean:0.000247273,av_mean:0.000320302,av_none:0.000322564,av_zero:0.000324993,av_shuffled:0.000361917,parse_closed:1.0,parse_usable:1.0}
+  },
+  rt_r27_256:{
+    validation:{av_real:0.000180003,teacher:0.000157706,mean:0.000309378,av_mean:0.000396184,av_none:0.000418513,av_zero:0.000434214,av_shuffled:0.000425144,parse_closed:1.0,parse_usable:1.0},
+    test:{av_real:0.000175571,teacher:0.000155285,mean:0.000310003,av_mean:0.000398068,av_none:0.000416538,av_zero:0.000434194,av_shuffled:0.000426457,parse_closed:1.0,parse_usable:1.0}
+  }
+};
+
+/* attention positions for nano (the '*' blocks) and the pre/post-attention boundaries */
+const nanoAttnPos = nanoBlocks.map((b,i)=>b==='*'?i:-1).filter(i=>i>=0); // [5,12,19,26,33,42]
+// boundary R_b = residual entering block b (= output of block b-1)
+const nanoSiblings = nanoAttnPos.map(p=>p);           // pre-attention boundaries (R = enters an attn block): 5,12,19,26,33,42
+const nanoPostAttn = nanoAttnPos.map(p=>p+1);         // post-attention boundaries: 6,13,20,27,34,43
+
+/* ============================ STATE ============================ */
+const state = { model:"nano", tab:"roundtrip", step:0 };
+let playTimer = null;
+
+/* ============================ STAGES ============================ */
+const STAGES = [
+  {key:"tap", lane:"extract", ln:"Extract", nt:"Tap", ns:"read residual hₐ",
+    title:"Tap the frozen base model",
+    body:(m)=>`A prompt runs through the <b>frozen</b> ${tag(m)} base model. At boundary <code class="val">${m.tapName}</code>
+      we read out the residual-stream vector <code>h ∈ ℝ<sup><span class="val">${m.dModel}</span></sup></code> — no weights change here.`,
+    kv:(m)=>[["boundary",m.boundaryShort],["d_model",m.dModel],["depth","≈"+m.tapDepthPct+"%"]],
+    note:(m)=>m.key==="nano"
+      ? {c:"warn",t:"<b>R33</b> sits between block 32 (Mamba) and block 33 (attention). Pre-attention boundaries reconstruct better than post-attention (R33 ≈0.30 NMSE vs R34 ≈0.49)."}
+      : {c:"",t:"Layer 20 of 28 (~71% depth) — deep enough for rich semantics, not yet collapsed toward the unembedding."},
+    viz:(m)=>vizTap(m)},
+  {key:"inject", lane:"encode", ln:"Encode", nt:"Inject", ns:"h → embedding slot",
+    title:"Inject h as a single token embedding",
+    body:(m)=>`<code>h</code> is L2-normalized to the <b>injection scale</b> (<code class="val">${m.injScale}</code>), then a forward
+      hook overwrites the embedding row of a ${m.marker.includes('sidecar')?'special':''} <b>marker token</b> with it.
+      Marker: <span class="val">${m.marker}</span>. This is the "Track A" paper-faithful path.`,
+    kv:(m)=>[["inject scale",m.injScaleVal],["mechanism","embedding hook"],["track","A (paper-faithful)"]],
+    note:(m)=>m.key==="nano"
+      ? {c:"warn",t:"Scale <b>75</b> was inherited from R27 and never re-derived from R33 norm stats — an open gap (NT-4)."}
+      : {c:"",t:"injection_scale and mse_scale are independent and loaded from the nla_meta.yaml sidecar — never hardcoded."},
+    viz:(m)=>vizInject(m)},
+  {key:"av", lane:"encode", ln:"Encode · AV", nt:"Verbalize", ns:"AV autoregresses",
+    title:"AV writes a natural-language explanation",
+    body:(m)=>`The <b style="color:var(--av)">AV</b> — the <b>full</b> ${tag(m)} (<code class="val">${m.avParams}</code>) — autoregresses
+      a description of what that direction means, wrapped in <code>&lt;explanation&gt;…&lt;/explanation&gt;</code>.`,
+    kv:(m)=>[["AV = actor",""],["params",m.avParams],["output","&lt;explanation&gt;"]],
+    note:(m)=>({c:"av",t:`Trained: SFT on teacher explanations${m.key==='qwen'?' then GRPO RL.':' (RL not yet run for Nano).'}`}),
+    expl:(m)=>m.explHTML,
+    viz:(m)=>vizAV(m)},
+  {key:"ar", lane:"decode", ln:"Decode · AR", nt:"Reconstruct", ns:"text → ĥ",
+    title:"AR reads the text back into a vector",
+    body:(m)=>`The explanation (+ fixed suffix <code>&lt;/text&gt; &lt;summary&gt;</code>) is fed to the <b style="color:var(--ar)">AR</b> —
+      the parent <b>truncated</b> (<code class="val">${m.arTrunc}</code>), final LayerNorm → <code>Identity</code>, plus a
+      <code>Linear(${m.dModel},${m.dModel})</code> value head. The <b>last-token</b> output is the reconstruction <code>ĥ</code>.`,
+    kv:(m)=>[["AR = critic",""],["truncation",m.arTrunc],["head","Linear(d,d), no bias"]],
+    note:(m)=>({c:"ar",t:`Reads the residual at the last token (no scanning) — the prompt is suffix-anchored.`}),
+    viz:(m)=>vizAR(m)},
+  {key:"score", lane:"measure", ln:"Measure", nt:"Score", ns:"NMSE(ĥ, h)",
+    title:"Score the reconstruction",
+    body:(m)=>`Both vectors are L2-normalized, then <code>NMSE = ‖ĥ−h‖² = 2(1−cos)</code> — pure <b>direction</b> agreement.
+      0 = perfect, ≈2 = random. In RL this same number (negated) is the reward.`,
+    kv:(m)=>[["metric","NMSE = 2(1−cos)"],["perfect","0"],["random","≈2.0"]],
+    note:(m)=>({c:"",t:m.roundtrip}),
+    viz:(m)=>vizScore(m)}
+];
+
+/* ============================ SVG HELPERS ============================ */
+function tag(m){return `<span class="chip ${m.tagClass}" style="padding:1px 8px">${m.short}</span>`;}
+const C={av:"#9bd313",ar:"#36a3ff",ink:"#e8f0ea",mut:"#9fb3a6",line:"#34453a",card:"#10160f",
+  mamba:"#36a3ff",moe:"#a78bfa",attn:"#ff7a8a",tfm:"#7fae3a",warn:"#ffb454",green:"#76b900",faint:"#6f8377"};
+function modelColor(m){return m.key==="nano"?C.green:C.warn;}
+
+function vizFrame(inner,vb="0 0 360 240"){return `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;}
+function txt(x,y,s,o={}){return `<text x="${x}" y="${y}" fill="${o.fill||C.mut}" font-size="${o.fs||11}" font-family="ui-monospace,monospace" text-anchor="${o.anc||'start'}" font-weight="${o.fw||400}">${s}</text>`;}
+function rrect(x,y,w,h,o={}){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${o.r||6}" fill="${o.fill||'none'}" stroke="${o.stroke||C.line}" stroke-width="${o.sw||1}" ${o.dash?`stroke-dasharray="${o.dash}"`:''}/>`;}
+
+function vizTap(m){
+  const cy=120, n=8, x0=30, gap=34, col=modelColor(m);
+  let s=txt(180,22,"frozen base model",{anc:"middle",fill:C.faint,fs:11});
+  for(let i=0;i<n;i++){const x=x0+i*gap;const tapped=(i===5);
+    s+=rrect(x,cy-26,26,52,{fill:tapped?"#1a2412":C.card,stroke:tapped?C.green:C.line,sw:tapped?2:1});
+    if(tapped)s+=txt(x+13,cy+44,m.tapName,{anc:"middle",fill:C.green,fs:11,fw:800});
+  }
+  // residual line
+  s+=`<line x1="${x0-12}" y1="${cy}" x2="${x0+n*gap-2}" y2="${cy}" stroke="${C.faint}" stroke-width="1" stroke-dasharray="2 3"/>`;
+  // read-out arrow
+  const tx=x0+5*gap+13;
+  s+=`<line x1="${tx}" y1="${cy-26}" x2="${tx}" y2="40" stroke="${C.green}" stroke-width="2"/>`;
+  s+=`<polygon points="${tx-4},46 ${tx+4},46 ${tx},38" fill="${C.green}"/>`;
+  s+=txt(tx+8,40,"read h",{fill:C.green,fs:11,fw:700});
+  s+=rrect(250,150,90,40,{fill:C.card,stroke:C.green});
+  s+=txt(295,168,"h ∈ ℝ",{anc:"middle",fill:C.ink,fs:13,fw:700})+txt(322,164,m.dModel,{fill:C.green,fs:9,fw:700});
+  s+=txt(295,182,"raw residual",{anc:"middle",fill:C.faint,fs:9});
+  return vizFrame(s);
+}
+function vizInject(m){
+  const col=modelColor(m);
+  let s=txt(180,20,"AV input embeddings",{anc:"middle",fill:C.faint,fs:11});
+  const x0=24,y=70,w=30,h=34,gap=4,n=9,inj=4;
+  for(let i=0;i<n;i++){const x=x0+i*(w+gap);const isI=(i===inj);
+    s+=rrect(x,y,w,h,{fill:isI?"#1a2412":C.card,stroke:isI?C.green:C.line,sw:isI?2:1});
+    s+=txt(x+w/2,y+h+14,isI?"⟨mark⟩":"tok",{anc:"middle",fill:isI?C.green:C.faint,fs:9,fw:isI?700:400});
+  }
+  // h vector dropping in
+  const ix=x0+inj*(w+gap)+w/2;
+  s+=rrect(ix-30,150,60,30,{fill:C.card,stroke:C.green});
+  s+=txt(ix,170,"‖h‖="+m.injScaleVal,{anc:"middle",fill:C.green,fs:11,fw:700});
+  s+=`<line x1="${ix}" y1="148" x2="${ix}" y2="${y+h+2}" stroke="${C.green}" stroke-width="2"/>`;
+  s+=`<polygon points="${ix-4},${y+h+2} ${ix+4},${y+h+2} ${ix},${y+h-6}" fill="${C.green}"/>`;
+  s+=txt(180,210,"forward hook overwrites the marker's embedding row",{anc:"middle",fill:C.faint,fs:10});
+  return vizFrame(s);
+}
+function vizAV(m){
+  const col=modelColor(m);
+  let s=rrect(20,40,80,160,{fill:"#16210e",stroke:C.av,sw:1.5});
+  s+=txt(60,30,"AV (full LM)",{anc:"middle",fill:C.av,fs:11,fw:800});
+  for(let i=0;i<6;i++)s+=rrect(30,52+i*24,60,18,{fill:C.card,stroke:"#3f5e0c"});
+  s+=txt(60,196,m.avParams.split(' ')[0],{anc:"middle",fill:C.av,fs:10,fw:700});
+  // arrow to text
+  s+=`<line x1="104" y1="120" x2="150" y2="120" stroke="${C.av}" stroke-width="2"/>`;
+  s+=`<polygon points="150,116 150,124 158,120" fill="${C.av}"/>`;
+  // text tokens streaming
+  s+=txt(168,60,"autoregress →",{fill:C.faint,fs:10});
+  const words=["This","fires","on","…","text"];
+  for(let i=0;i<words.length;i++){const x=168+i*36;
+    s+=rrect(x,80,32,22,{fill:C.card,stroke:C.line,r:5});
+    s+=txt(x+16,95,words[i],{anc:"middle",fill:C.ink,fs:9});}
+  s+=rrect(168,130,176,56,{fill:C.code,stroke:"#3f5e0c",dash:"3 3",r:8});
+  s+=txt(176,148,"<explanation>",{fill:C.av,fs:9.5});
+  s+=txt(176,178,"</explanation>",{fill:C.av,fs:9.5});
+  return vizFrame(s);
+}
+function vizAR(m){
+  let s=txt(60,28,"AR (truncated)",{anc:"middle",fill:C.ar,fs:11,fw:800});
+  // kept layers
+  for(let i=0;i<4;i++)s+=rrect(30,42+i*22,60,16,{fill:C.card,stroke:"#1d4a6e"});
+  // dropped layers
+  for(let i=0;i<3;i++)s+=rrect(30,42+(4+i)*22,60,16,{fill:C.card,stroke:C.line,dash:"3 3"});
+  s+=txt(120,52,"kept",{fill:C.ar,fs:9});
+  s+=txt(120,140,"dropped",{fill:C.faint,fs:9});
+  s+=txt(60,210,m.arTrunc.length>18?"truncated":m.arTrunc,{anc:"middle",fill:C.ar,fs:9.5,fw:700});
+  // LN->Identity + head
+  s+=`<line x1="94" y1="70" x2="150" y2="70" stroke="${C.ar}" stroke-width="2"/>`;
+  s+=`<polygon points="150,66 150,74 158,70" fill="${C.ar}"/>`;
+  s+=rrect(162,40,150,30,{fill:C.card,stroke:C.line});
+  s+=txt(237,59,"LayerNorm → Identity",{anc:"middle",fill:C.mut,fs:10});
+  s+=rrect(162,86,150,34,{fill:"#0e1a26",stroke:C.ar});
+  s+=txt(237,108,`Linear(${m.dModel},${m.dModel})`,{anc:"middle",fill:C.ar,fs:10.5,fw:700});
+  s+=`<line x1="237" y1="122" x2="237" y2="150" stroke="${C.ar}" stroke-width="2"/>`;
+  s+=`<polygon points="233,150 241,150 237,158" fill="${C.ar}"/>`;
+  s+=rrect(197,160,80,32,{fill:C.card,stroke:C.ar});
+  s+=txt(237,180,"ĥ (last tok)",{anc:"middle",fill:C.ink,fs:11,fw:700});
+  return vizFrame(s);
+}
+function vizScore(m){
+  const sc=m.scoreScale, x0=40,x1=330,y=120,W=x1-x0;
+  const X=v=>x0+Math.min(v,sc.max)/sc.max*W;
+  let s=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${C.line}" stroke-width="6" stroke-linecap="round"/>`;
+  s+=`<line x1="${X(0)}" y1="${y-9}" x2="${X(0)}" y2="${y+9}" stroke="${C.green}" stroke-width="2"/>`+txt(X(0),y+24,"0 perfect",{anc:"middle",fill:C.faint,fs:9});
+  (sc.anchors||[]).forEach(([v,l])=>{const x=X(v);
+    s+=`<line x1="${x}" y1="${y-9}" x2="${x}" y2="${y+9}" stroke="${C.faint}" stroke-width="2"/>`;
+    l.split("\n").forEach((ln,i)=>{s+=txt(x,y+24+i*11,ln,{anc:"middle",fill:C.faint,fs:9});});
+  });
+  if(sc.oracle!=null){const x=X(sc.oracle);
+    s+=`<line x1="${x}" y1="${y-9}" x2="${x}" y2="${y+9}" stroke="#5fd0ff" stroke-width="2"/>`;
+    s+=txt(x,y-26,"oracle",{anc:"middle",fill:"#5fd0ff",fs:9})+txt(x,y-15,sc.oracle.toFixed(2),{anc:"middle",fill:"#5fd0ff",fs:9,fw:700});}
+  if(sc.teacher!=null){const x=X(sc.teacher);
+    s+=`<circle cx="${x}" cy="${y}" r="7" fill="${C.green}" stroke="#0b0f0c" stroke-width="1.5"/>`;
+    s+=txt(x,y-44,"AR teacher-text",{anc:"middle",fill:C.green,fs:9.5,fw:700})+txt(x,y-32,"≈"+sc.teacher.toFixed(2)+" NMSE",{anc:"middle",fill:C.green,fs:9.5,fw:700});}
+  else{
+    s+=txt(185,y-34,"Qwen reconstruction: paper-level",{anc:"middle",fill:C.warn,fs:10,fw:700});
+    s+=txt(185,y-21,"(exact NMSE not in this repo)",{anc:"middle",fill:C.faint,fs:9});}
+  s+=txt(185,30,"NMSE — lower is better",{anc:"middle",fill:C.ink,fs:12,fw:700});
+  s+=txt(40,200,"0",{fill:C.faint,fs:10})+txt(x1-2,200,sc.max.toFixed(1),{anc:"end",fill:C.faint,fs:10});
+  if(m.key==="nano")s+=txt(185,214,"full ladder → tab ⑥ Current numbers",{anc:"middle",fill:C.faint,fs:8.5});
+  return vizFrame(s);
+}
+
+/* ============================ ANATOMY ============================ */
+function blkColor(t){return t==='M'?C.mamba:t==='E'?C.moe:t==='*'?C.attn:C.tfm;}
+function renderAnatomy(){
+  const m=MODELS[state.model];
+  document.getElementById("anModeTag").innerHTML=`<span class="chip ${m.tagClass}">${m.name}</span>`;
+  document.getElementById("anLead").innerHTML = m.key==="nano"
+    ? `52 <code>NemotronHBlock</code> layers in a hybrid <b>MEMEM</b> pattern: <b style="color:var(--mamba)">23 Mamba-2</b> + <b style="color:var(--moe)">23 MoE</b> + <b style="color:var(--attn)">6 attention</b>. The tap <code>R33</code> sits right before the 5th attention block.`
+    : `28 identical transformer blocks (attention + MLP). The tap is the residual after layer 20 — a clean, homogeneous slice.`;
+  document.getElementById("anLegend").innerHTML = m.key==="nano"
+    ? `<span><span class="dot" style="background:${C.mamba}"></span>M = Mamba-2</span><span><span class="dot" style="background:${C.moe}"></span>E = MoE</span><span><span class="dot" style="background:${C.attn}"></span>* = GQA attention</span><span style="color:var(--green)">▸ R33 tap</span><span style="color:var(--faint)">◦ siblings R26/R42 (pre-attn) · post-attn R27/R34 reconstruct worse</span>`
+    : `<span><span class="dot" style="background:${C.tfm}"></span>transformer block (attn+MLP)</span><span style="color:var(--green)">▸ L20 tap</span>`;
+
+  const blocks=m.blockTypes, n=blocks.length;
+  const bw = n>40?15:26, gap=3, x0=46, top=70, bh=46;
+  const W = x0 + n*(bw+gap) + 30, H=190;
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="min-width:${Math.min(W,1900)}px">`;
+  s+=txt(x0,40,"embeddings",{fill:C.faint,fs:10})+txt(x0+n*(bw+gap),40,"→ output / unembed",{anc:"end",fill:C.faint,fs:10});
+  // residual spine
+  s+=`<line x1="${x0-16}" y1="${top+bh/2}" x2="${x0+n*(bw+gap)}" y2="${top+bh/2}" stroke="${C.faint}" stroke-width="1" stroke-dasharray="2 3"/>`;
+  // inject arrow at embeddings
+  s+=`<polygon points="${x0-22},${top+bh/2-5} ${x0-22},${top+bh/2+5} ${x0-12},${top+bh/2}" fill="${C.green}"/>`;
+  s+=txt(x0-30,top+bh/2-10,"inject",{anc:"middle",fill:C.green,fs:9,fw:700});
+  for(let i=0;i<n;i++){
+    const t=blocks[i], x=x0+i*(bw+gap), c=blkColor(t);
+    const isAttn=(t==='*');
+    s+=rrect(x,top+(isAttn?-6:0),bw,bh+(isAttn?12:0),{fill:c+"22",stroke:c,sw:isAttn?1.5:1,r:4});
+    if(n<=28||i%4===0||isAttn) s+=txt(x+bw/2,top+bh+(isAttn?22:16),i,{anc:"middle",fill:C.faint,fs:8});
+  }
+  // tap marker
+  const tapX = x0 + m.tapBlockIdx*(bw+gap) - gap/2;
+  s+=`<line x1="${tapX}" y1="${top-22}" x2="${tapX}" y2="${top+bh+14}" stroke="${C.green}" stroke-width="2.5"/>`;
+  s+=`<polygon points="${tapX-6},${top-22} ${tapX+6},${top-22} ${tapX},${top-12}" fill="${C.green}"/>`;
+  s+=txt(tapX,top-26,m.tapName,{anc:"middle",fill:C.green,fs:12,fw:800});
+  // nano siblings + post-attn markers
+  if(m.key==="nano"){
+    [26,42].forEach(b=>{const x=x0+b*(bw+gap)-gap/2;
+      s+=`<line x1="${x}" y1="${top-10}" x2="${x}" y2="${top+bh+10}" stroke="${C.faint}" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+      s+=txt(x,top+bh+34,"R"+b,{anc:"middle",fill:C.faint,fs:9});});
+    [27,34].forEach(b=>{const x=x0+b*(bw+gap)-gap/2;
+      s+=`<line x1="${x}" y1="${top+8}" x2="${x}" y2="${top+bh+10}" stroke="${C.warn}" stroke-width="1.2" stroke-dasharray="2 4"/>`;
+      s+=txt(x,top+bh+44,"R"+b+"↓",{anc:"middle",fill:C.warn,fs:8.5});});
+  }
+  s+=`</svg>`;
+  document.getElementById("anatomySvg").innerHTML=s;
+
+  document.getElementById("anatomyNotes").innerHTML = m.key==="nano"
+    ? `<div class="note warn" style="margin-top:14px">${m.extra}</div>
+       <div class="note" style="margin-top:8px"><b>Why R33?</b> The 6 attention blocks are at positions ${nanoAttnPos.join(", ")}. Boundaries that read out a <b>Mamba</b> block just before attention (R26, <b style="color:var(--green)">R33</b>, R42) reconstruct better than the post-attention ones (R27↓, R34↓). HF module paths differ too: <code>.backbone.layers[i]</code>, <code>.backbone.norm_f</code>, <code>.backbone.embeddings</code>.</div>`
+    : `<div class="note" style="margin-top:14px">${m.extra}</div>`;
+}
+
+/* ============================ INTERNALS ============================ */
+function renderInternals(){
+  const m=MODELS[state.model];
+  document.getElementById("inModeTag").innerHTML=`<span class="chip ${m.tagClass}">${m.name}</span>`;
+  // AV
+  let av=`<h3 style="color:var(--av)">AV · Activation Verbalizer <span class="chip av">actor</span></h3>
+    <div class="stk">
+      <div class="blk hot"><span>⟨marker⟩ embedding ← h &nbsp;<small>injection hook</small></span><span style="color:var(--av)">●</span></div>`;
+  for(let i=0;i<4;i++)av+=`<div class="blk"><span>transformer block ${i}</span><small>full stack</small></div>`;
+  av+=`<div class="blk"><span>… all ${m.blocks} blocks (full parent) …</span><small></small></div>
+      <div class="blk head"><span>autoregressive LM head → tokens</span><small>&lt;explanation&gt;</small></div></div>
+    <div class="kv"><span class="chip k val">${m.avParams}</span><span class="chip">vector → text</span><span class="chip av">SFT → ${m.key==='qwen'?'GRPO RL':'RL gated'}</span></div>
+    <div class="note av">Identical in size to the parent — nothing is truncated. The only structural change is the embedding-injection hook at the marker token.</div>`;
+  document.getElementById("avCard").innerHTML=av;
+  // AR
+  let ar=`<h3 style="color:var(--ar)">AR · Activation Reconstructor <span class="chip ar">critic</span></h3>
+    <div class="stk">
+      <div class="blk head"><span>explanation + suffix <code>&lt;/text&gt; &lt;summary&gt;</code></span><small>input</small></div>`;
+  for(let i=0;i<3;i++)ar+=`<div class="blk"><span>kept layer ${i}</span><small style="color:var(--ar)">kept</small></div>`;
+  ar+=`<div class="blk muted"><span>dropped upper layers</span><small>truncated</small></div>
+      <div class="blk"><span>final LayerNorm → <code>Identity</code></span><small>raw residual</small></div>
+      <div class="blk hot"><span>value head <code>Linear(${m.dModel},${m.dModel})</code></span><small>no bias</small></div>
+      <div class="blk head"><span>read <b>last token</b> → ĥ</span><small>suffix-anchored</small></div></div>
+    <div class="kv"><span class="chip k val">${m.arParams}</span><span class="chip">text → vector</span><span class="chip ar">SFT (MSE) → supervised in RL</span></div>
+    <div class="note ar">Encoder-style: a truncated copy of the backbone whose last-token output is projected to ℝ<sup>${m.dModel}</sup> and compared to the gold activation.</div>`;
+  document.getElementById("arCard").innerHTML=ar;
+}
+
+/* ============================ RL ============================ */
+function renderRL(){
+  const m=MODELS[state.model];
+  document.getElementById("rlModeTag").innerHTML=`<span class="chip ${m.tagClass}">${m.short}</span>`;
+  const nodes=[
+    {c:"roll",t:"Rollout (SGLang)",d:"input_embeds with injected h · radix-cache OFF · external engine"},
+    {c:"av",t:"AV generates",d:"batch of explanations per activation (GRPO group)"},
+    {c:"",t:"Extract <explanation>",d:"parse tags · failed parse → reward −2.0"},
+    {c:"ar",t:"AR scores (live critic)",d:"Ray remote · forward truncated AR on the text"},
+    {c:"",t:"Reward = −NMSE",d:"reconstruction quality of what AV said"},
+    {c:"av",t:"GRPO update AV",d:"group-normalized advantage (no value net)"},
+    {c:"ar",t:"Supervised update AR",d:"MSE on the same rollout text"},
+    {c:"roll",t:"Weight sync → rollout",d:"broadcast new AV weights back to SGLang"}
+  ];
+  document.getElementById("rlDiagram").innerHTML = nodes.map((n,i)=>
+    `<div class="rlnode ${n.c}"><div class="rt">${i+1}. ${n.t}</div><div class="rd">${n.d}</div></div>`).join("");
+  document.getElementById("rlNotes").innerHTML = m.key==="nano"
+    ? `<div class="caveat" style="margin-top:14px"><b>RL is GATED for Nano.</b> No GRPO until the R33 round trip beats a row-matched R27 baseline. The intended entry point is <b>RAFT-style self-distillation</b> (best-of-k rejection sampling scored by AR), not full GRPO — cheaper and safer for the cluster.</div>
+       <div class="note" style="margin-top:8px"><b>Hybrid + external-rollout plumbing (Miles patches 0007–0012):</b> 0007 preserve LR schedule on resume · 0008 register external SGLang router · 0009 process-group signature compat · 0010 weight-update logging · 0011 skip rollout weight-sync (pre-loaded engine) · 0012 external SGLang abort addrs.</div>`
+    : `<div class="note" style="margin-top:14px">In the reference, AV (GRPO actor) and AR (supervised critic) train <b>simultaneously</b> on the same rollout data on separate GPU pools, orchestrated by Miles/Ray. The critic is the reward model and is always live (never a frozen checkpoint).</div>`;
+}
+
+/* ============================ COMPARE ============================ */
+function renderCompare(){
+  const q=MODELS.qwen, n=MODELS.nano;
+  const rows=[
+    ["Base model",q.name,n.name,false],
+    ["Architecture family",q.family,n.family,false],
+    ["Blocks",q.blocks+" transformer",n.blocks+" hybrid (23 M / 23 E / 6 attn)",false],
+    ["d_model",q.dModel,n.dModel,false],
+    ["Tap / boundary",q.tapName+" — "+q.boundaryShort,n.tapName+" — "+n.boundaryShort,false],
+    ["Depth of tap","≈"+q.tapDepthPct+"%","≈"+n.tapDepthPct+"%",false],
+    ["Injection scale",q.injScale,n.injScale,false],
+    ["Injection mechanism","embedding hook · marker token · Track A","embedding hook · marker token · Track A",true],
+    ["AV (actor)",q.avParams,n.avParams,false],
+    ["AR (critic)",q.arParams,n.arParams,false],
+    ["Reconstruction metric","NMSE = 2(1−cos), L2-normalized","NMSE = 2(1−cos), L2-normalized",true],
+    ["Training stack","Miles (Ray) + SGLang + GRPO","Miles (Ray) + SGLang + GRPO",true],
+    ["Pipeline","AR-SFT → AV-SFT → joint RL","AR-SFT → AV-SFT → RL",true],
+    ["Status",q.pipeline,n.pipeline,false]
+  ];
+  let h=`<thead><tr><th>Axis</th><th>Qwen2.5-7B (reference)</th><th>Nano30B (pilot)</th></tr></thead><tbody>`;
+  h+=rows.map(([a,qv,nv,same])=>`<tr class="${same?'same':'diff'}"><td class="axis">${a}</td><td class="qwen">${qv}</td><td class="nano">${nv}</td></tr>`).join("");
+  h+=`</tbody>`;
+  document.getElementById("compareTable").innerHTML=h;
+}
+
+/* ============================ CURRENT NUMBERS ============================ */
+function bar(label,val,test,max,color,opts){
+  opts=opts||{};
+  const w=Math.max(1.5,Math.min(100,val/max*100));
+  const tw=Math.max(0,Math.min(100,test/max*100));
+  const fmt=opts.fmt||(x=>x.toFixed(3));
+  return `<div class="cnRow${opts.hot?' hot':''}"><div class="cnLab">${label}</div>`+
+    `<div class="cnTrack"><div class="cnFill" style="width:${w}%;background:${color}"></div><div class="cnTick" style="left:${tw}%"></div></div>`+
+    `<div class="cnNum">${fmt(val)}<span class="cnT"> / ${fmt(test)}</span></div></div>`;
+}
+function miniBar(tg,val,max,color){
+  const w=Math.max(2,Math.min(100,val/max*100));
+  return `<div class="cnMini"><span class="cnMiniTag">${tg}</span><div class="cnMiniTrack"><div style="width:${w}%;background:${color};height:100%;border-radius:3px"></div></div><span class="cnMiniNum">${val.toExponential(2)}</span></div>`;
+}
+function renderCurrentNumbers(){
+  const isNano=state.model==="nano";
+  const fmtRT=v=>v.toExponential(2), fmtN=v=>v.toFixed(3);
+  document.getElementById("cnLead").innerHTML = `Real evals from the selected R33 AV+AR hero pair (validation / test · white tick = test). ${isNano?"":"<b style='color:var(--warn)'>Shown data is the Nano R33 pilot — the Qwen reference figures are not in this repo.</b> "}<span style="color:var(--faint)">Source: <code>${CN.src.reports}</code></span>`;
+
+  const a=CN.rt_r33_256, b=CN.rt_r27_256;
+  const aMax=Math.max(...Object.values(a.validation).filter(x=>x<1), ...Object.values(b.validation).filter(x=>x<1));
+  let cardA=`<div class="panel cnCard"><h3 style="color:var(--green)">① Round-trip NMSE · 256 rows<span class="cnScale">round-trip normalization · ~1e-4</span></h3>`+
+    `<div class="cnHead">R33 av_real <b class="cnWin">${fmtRT(a.validation.av_real)} / ${fmtRT(a.test.av_real)}</b> beats R27 nearest-valid <b>${fmtRT(b.validation.av_real)} / ${fmtRT(b.test.av_real)}</b> · parse closed/usable <b>1.0 / 1.0</b></div>`+
+    `<h3>R33 vs R27 (validation)</h3><div class="cnGroup">`;
+  [["av_real","av_real (real text)"],["teacher","teacher (oracle text)"]].forEach(([k,lab])=>{
+    cardA+=`<div class="cnGrpRow"><span class="cnLab">${lab}</span><div class="cnGrpBars">${miniBar("R33",a.validation[k],aMax,"var(--nano)")}${miniBar("R27",b.validation[k],aMax,"var(--qwen)")}</div></div>`;
+  });
+  cardA+=`</div><h3 style="margin-top:14px">R33 control ladder (val / test)</h3>`;
+  [["av_real (real text)","av_real",true],["teacher (oracle text)","teacher",false],["mean baseline","mean",false],["av_mean control","av_mean",false],["av_none control","av_none",false],["av_zero control","av_zero",false],["av_shuffled control","av_shuffled",false]].forEach(([lab,k,hot])=>{
+    cardA+=bar(lab,a.validation[k],a.test[k],aMax,hot?"var(--green)":(k==="teacher"?"#5fd0ff":"#4a5a4e"),{hot,fmt:fmtRT});
+  });
+  cardA+=`<div class="note warn" style="margin-top:10px">R27 here is the <b>nearest-valid</b> baseline (not yet row-matched) — strong evidence R33 wins, not the final external claim.</div></div>`;
+
+  const ar=CN.ar_nmse_512;
+  let cardB=`<div class="panel cnCard"><h3 style="color:var(--green)">② AR reconstruction NMSE · 512 rows<span class="cnScale">2(1−cos) · 0 = perfect</span></h3>`;
+  [["source_raw (oracle floor)","source_raw","oracle"],["teacher","teacher","hot"],["source_context","source_context",""],["mean","mean",""],["blank","blank",""],["generic","generic",""],["shuffled","shuffled",""]].forEach(([lab,k,kind])=>{
+    cardB+=bar(lab,ar.validation[k],ar.test[k],1.0,kind==="hot"?"var(--green)":kind==="oracle"?"#5fd0ff":"#4a5a4e",{hot:kind==="hot",fmt:fmtN});
+  });
+  cardB+=`<div class="note" style="margin-top:8px">Teacher 0.32 / 0.29 sits far below the mean baseline (0.70) and shuffled (~0.95); oracle floor ~0.09.</div></div>`;
+
+  const nll=CN.av_nll_512;
+  let cardC=`<div class="panel cnCard"><h3 style="color:var(--green)">③ AV explanation NLL · 512 rows<span class="cnScale">nats/token · lower = better</span></h3>`;
+  [["real (injected)","real","hot"],["none (no inject)","none",""],["zero","zero",""],["mean","mean",""],["shuffled","shuffled",""]].forEach(([lab,k,kind])=>{
+    cardC+=bar(lab,nll.validation[k],nll.test[k],1.45,kind==="hot"?"var(--green)":"#4a5a4e",{hot:kind==="hot",fmt:fmtN});
+  });
+  cardC+=`<div class="note" style="margin-top:8px">Real injection 0.80 / 0.82 beats no-injection (1.22 / 1.26) and all controls — the AV genuinely uses the activation.</div></div>`;
+
+  document.getElementById("cnBody").innerHTML = cardA + `<div class="grid2">`+cardB+cardC+`</div>`+
+    `<div class="caveat" style="margin-top:8px"><b>Two different NMSE scales — do not compare across them.</b> Card ① (round-trip) is ~1e-4; Card ② (AR reconstruction) is the 0–~1 direction-NMSE 2(1−cos) — different normalizations. Selected <b>internal</b> milestone (2026-06-21); RL stays gated until a row-matched clean R27 baseline confirms R33 wins. Archive <code>${CN.src.archive}</code> · R27 <code>${CN.src.r27}</code></div>`;
+}
+
+/* ============================ ROUND-TRIP RENDER ============================ */
+function renderPipeline(){
+  const m=MODELS[state.model];
+  document.getElementById("rtModeTag").innerHTML=`<span class="chip ${m.tagClass}">${m.name}</span>`;
+  const strip=STAGES.map((st,i)=>{
+    const cls = i===state.step?"active":(i<state.step?"done":"");
+    return `<div class="node lane-${st.lane} ${cls}" data-step="${i}">
+      <div class="num">${i+1}/5</div><div class="ln">${st.ln}</div>
+      <div class="nt">${st.nt}</div><div class="ns">${st.ns}</div></div>`;
+  });
+  document.getElementById("rtPipeline").innerHTML = strip.join('<div class="arrow">→</div>');
+  document.querySelectorAll("#rtPipeline .node").forEach(el=>el.onclick=()=>{stopPlay();state.step=+el.dataset.step;renderPipeline();});
+
+  const st=STAGES[state.step];
+  const kvs=(st.kv?st.kv(m):[]).map(([k,v])=>`<span class="chip"><span style="color:var(--faint)">${k}</span> <b class="val">${v}</b></span>`).join("");
+  const note=st.note?st.note(m):null;
+  let expl="";
+  if(st.expl){
+    const cap = m.explReal ? ("▸ real AV-generated text · "+m.explMeta) : "▸ illustrative — not a real sample";
+    const capCol = m.explReal ? "var(--av)" : "var(--faint)";
+    expl=`<div class="expl"><span class="tag">&lt;explanation&gt;</span><br>${st.expl(m)}<br><span class="tag">&lt;/explanation&gt;</span><div style="color:${capCol};margin-top:8px;font-family:inherit;font-size:11px;line-height:1.4">${cap}</div></div>`;
+  }
+  document.getElementById("rtDetail").innerHTML=`
+    <div class="stageText">
+      <div class="lab">Stage ${state.step+1} · ${st.ln}</div>
+      <h4>${st.title}</h4>
+      <p>${st.body(m)}</p>
+      <div class="kv">${kvs}</div>
+      ${expl}
+      ${note?`<div class="note ${note.c}">${note.t}</div>`:""}
+    </div>
+    <div class="stageViz">${st.viz(m)}</div>`;
+  document.getElementById("rtProgress").innerHTML=`Stage <b>${state.step+1}</b> of 5 — <b>${st.nt}</b>`;
+  document.getElementById("btnPrev").disabled=state.step===0;
+  document.getElementById("btnNext").disabled=state.step===4;
+  flashVals();
+}
+
+/* ============================ FLASH / SWITCH ============================ */
+function flashVals(){document.querySelectorAll(".val").forEach(e=>{e.classList.remove("flash");void e.offsetWidth;e.classList.add("flash");});}
+
+function renderActive(){
+  if(state.tab==="roundtrip")renderPipeline();
+  else if(state.tab==="anatomy")renderAnatomy();
+  else if(state.tab==="internals")renderInternals();
+  else if(state.tab==="rl")renderRL();
+  else if(state.tab==="compare")renderCompare();
+  else if(state.tab==="current")renderCurrentNumbers();
+}
+function renderAll(){
+  document.getElementById("curModel").textContent="viewing: "+MODELS[state.model].name;
+  document.getElementById("curModel").style.color=MODELS[state.model].color;
+  renderActive();
+}
+
+/* ============================ PLAY ============================ */
+function stopPlay(){if(playTimer){clearInterval(playTimer);playTimer=null;document.getElementById("btnPlay").innerHTML="▶ Play";}}
+function togglePlay(){
+  if(playTimer){stopPlay();return;}
+  document.getElementById("btnPlay").innerHTML="⏸ Pause";
+  if(state.step>=4)state.step=0;
+  playTimer=setInterval(()=>{ if(state.step>=4){stopPlay();} else {state.step++;renderPipeline();} },1900);
+  renderPipeline();
+}
+
+/* ============================ WIRING ============================ */
+document.getElementById("modelToggle").querySelectorAll("button").forEach(b=>{
+  b.onclick=()=>{
+    state.model=b.dataset.m;
+    document.querySelectorAll("#modelToggle button").forEach(x=>x.classList.toggle("on",x.dataset.m===state.model));
+    renderAll();
+  };
+});
+document.getElementById("tabs").querySelectorAll(".tab").forEach(t=>{
+  t.onclick=()=>{
+    stopPlay();
+    state.tab=t.dataset.tab;
+    document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===t));
+    document.querySelectorAll("section").forEach(s=>s.classList.toggle("show",s.id==="tab-"+state.tab));
+    renderActive();
+  };
+});
+document.getElementById("btnPrev").onclick=()=>{stopPlay();if(state.step>0){state.step--;renderPipeline();}};
+document.getElementById("btnNext").onclick=()=>{stopPlay();if(state.step<4){state.step++;renderPipeline();}};
+document.getElementById("btnPlay").onclick=togglePlay;
+document.addEventListener("keydown",e=>{
+  if(state.tab!=="roundtrip")return;
+  if(e.key==="ArrowRight"){stopPlay();if(state.step<4){state.step++;renderPipeline();}}
+  if(e.key==="ArrowLeft"){stopPlay();if(state.step>0){state.step--;renderPipeline();}}
+  if(e.key===" "){e.preventDefault();togglePlay();}
+});
+
+/* ============================ FOOTER ============================ */
+document.getElementById("footer").innerHTML=`
+  <p><b>What this is.</b> A companion to <code>docs/nano_nla_training_process_visualized.html</code> — that one explains the Nano training process; this one compares the <b>Qwen reference</b> and our <b>Nano30B pilot</b> through the round trip. Same NLA recipe (Fraser-Taliente, Kantamneni, Ong et al., <a href="https://transformer-circuits.pub/2026/nla/index.html">Transformer Circuits 2026</a>); different backbone, geometry, and slice point.</p>
+  <p><b>Honesty notes (verify against <code>docs/current_state.md</code>, dated 2026-06-21):</b></p>
+  <div class="caveat">• The R33 round-trip <b>gate passed</b> (2026-06-21) — superseding older notes that said it had never run. • The gate's reported NMSE (~1e-4) is on a <b>different normalization</b> than the AR-eval teacher NMSE (~0.29–0.32 shown in Stage 5); they are not directly comparable, so this viz uses the AR-eval numbers and states the gate result qualitatively. • Nano injection scale <b>75</b> was inherited from R27 and not re-derived for R33. • Qwen's exact achieved NMSE isn't in this repo, so Stage 5 marks it qualitatively. • Example explanations are illustrative, not real samples.</div>
+  <p style="color:var(--faint)">Generated 2026-06-23 · self-contained, no external dependencies · keyboard: ← → step, space = play/pause.</p>`;
+
+/* init */
+renderAll();
+</script>
+</body>
+</html>

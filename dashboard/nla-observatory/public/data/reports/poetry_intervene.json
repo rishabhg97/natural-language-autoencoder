@@ -1,0 +1,19 @@
+{
+  "cases": 5,
+  "config_sha256": "87191f785c1f183edcc8d12317155ec0d1569848c7a9c637e2b4060fe44a41aa",
+  "edited_alternate_hit_rate": 0.0,
+  "interventions": {
+    "path": "/workspace/models/nano30b-nla-pilot/observatory/r33_poetry_planning_v1/poetry_intervene/interventions.jsonl",
+    "sha256": "8d5ad990368b9a5d4f1cd2c287b55879d5f9724c01fe2f05db7f8ee0625b77f6"
+  },
+  "passed": true,
+  "phase": "poetry_intervene",
+  "random_alternate_hit_rate": 0.0,
+  "records": 30,
+  "schema_version": "nano_viz_poetry_planning_report.v1",
+  "steering_doses": [
+    0.0,
+    0.5,
+    1.0
+  ]
+}
